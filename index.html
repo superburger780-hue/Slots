@@ -92,19 +92,31 @@ th{color:var(--g)}
 .admin-input{width:68px;padding:4px;margin:0;font-size:13px;text-align:center}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:15px;z-index:150}
 .modal-box{max-width:400px;width:100%;text-align:center;animation:modalPop .25s ease-out}
-@keyframes modalPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 .hidden{display:none!important}
 </style>
 </head>
 <body>
 
 <div id="setup-screen" class="card">
-  <h1 id="secret-title" class="gold-text" style="margin-bottom:6px;font-size:26px;">ROYAL GOLD 6×5</h1>
+  <h1 id="secret-title" class="gold-text" style="margin-bottom:6px;font-size:26px;" onclick="tapSecret()">ROYAL GOLD 6×5</h1>
   <p style="font-size:13px;color:#bfa87a;margin-bottom:12px;">EXPANDING WILD EDITION • Выберите аватар и имя</p>
-  <div class="avatar-grid" id="avatar-grid"></div>
+  <div class="avatar-grid" id="avatar-grid">
+    <div class="avatar-opt selected" onclick="pickAv(this,'👑')">👑</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🦁')">🦁</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🐺')">🐺</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🐉')">🐉</div>
+    <div class="avatar-opt" onclick="pickAv(this,'💎')">💎</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🎩')">🎩</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🦊')">🦊</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🐯')">🐯</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🦅')">🦅</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🔥')">🔥</div>
+    <div class="avatar-opt" onclick="pickAv(this,'🃏')">🃏</div>
+    <div class="avatar-opt" onclick="pickAv(this,'💰')">💰</div>
+  </div>
   <input id="player-name-input" type="text" placeholder="Ваше имя" maxlength="16">
   <input id="admin-pass-input" type="password" placeholder="Секретный пароль админа">
-  <button id="start-btn" class="btn" style="width:100%;padding:13px;font-size:15px;">ВОЙТИ В ИГРУ</button>
+  <button id="start-btn" class="btn" style="width:100%;padding:13px;font-size:15px;" onclick="enterGame()">ВОЙТИ В ИГРУ</button>
 </div>
 
 <div id="game-screen" class="card hidden">
@@ -118,8 +130,8 @@ th{color:var(--g)}
     </div>
     <div class="balance-box" id="balance-box">Баланс: <span id="balance-val" class="gold-text">1000</span> 💰</div>
     <div style="display:flex;align-items:center;gap:6px;">
-      <button id="sound-toggle-btn" class="btn btn-secondary active-toggle">🔊</button>
-      <button id="profile-btn" class="btn btn-secondary">✏️ ПРОФИЛЬ</button>
+      <button id="sound-toggle-btn" class="btn btn-secondary active-toggle" onclick="toggleSnd(this)">🔊</button>
+      <button id="profile-btn" class="btn btn-secondary" onclick="openProfile()">✏️ ПРОФИЛЬ</button>
     </div>
   </div>
 
@@ -134,23 +146,23 @@ th{color:var(--g)}
   <div class="controls">
     <div class="bet-group">
       <span style="font-size:13px;color:#bfa87a;">Ставка:</span>
-      <button class="btn btn-secondary" id="bet-down">−</button>
+      <button class="btn btn-secondary" id="bet-down" onclick="chgBet(-1)">−</button>
       <span style="font-weight:900;font-size:15px;min-width:44px;text-align:center;" id="bet-val">50</span>
-      <button class="btn btn-secondary" id="bet-up">+</button>
-      <button class="btn btn-secondary" id="bet-max">MAX</button>
-      <button class="btn btn-secondary" id="turbo-btn">⚡</button>
+      <button class="btn btn-secondary" id="bet-up" onclick="chgBet(1)">+</button>
+      <button class="btn btn-secondary" id="bet-max" onclick="maxBet()">MAX</button>
+      <button class="btn btn-secondary" id="turbo-btn" onclick="toggleTurbo(this)">⚡</button>
     </div>
     <div class="action-group">
-      <button class="btn btn-buy" id="buy-bonus-btn">BUY BONUS (<span id="buy-cost">5000</span>)</button>
-      <button class="btn btn-secondary" id="auto-btn">🔄 АВТО</button>
-      <button class="btn btn-spin-main" id="spin-btn">SPIN</button>
+      <button class="btn btn-buy" id="buy-bonus-btn" onclick="buyBonus()">BUY BONUS (<span id="buy-cost">5000</span>)</button>
+      <button class="btn btn-secondary" id="auto-btn" onclick="clickAuto()">🔄 АВТО</button>
+      <button class="btn btn-spin-main" id="spin-btn" onclick="startSpin(false)">SPIN</button>
     </div>
   </div>
 
   <div id="admin-panel" class="hidden">
     <div class="admin-header">
       <div style="font-weight:900;color:var(--g);font-size:14px;">👑 Панель Администратора (Игроки в сети)</div>
-      <button class="btn btn-secondary" id="clear-old-btn" style="padding:5px 10px;font-size:11px;">🗑️ ОЧИСТИТЬ СТАРЫХ</button>
+      <button class="btn btn-secondary" onclick="clearOld()" style="padding:5px 10px;font-size:11px;">🗑️ ОЧИСТИТЬ СТАРЫХ</button>
     </div>
     <div style="overflow-x:auto;">
       <table>
@@ -171,459 +183,435 @@ th{color:var(--g)}
     <h3 class="gold-text" style="margin-bottom:8px;">АВТОИГРА</h3>
     <p style="font-size:13px;color:#bfa87a;">Выберите количество спинов</p>
     <div class="auto-grid">
-      <button class="btn btn-secondary auto-opt" data-spins="10">10</button>
-      <button class="btn btn-secondary auto-opt" data-spins="25">25</button>
-      <button class="btn btn-secondary auto-opt" data-spins="50">50</button>
-      <button class="btn btn-secondary auto-opt" data-spins="100">100</button>
-      <button class="btn btn-secondary auto-opt" data-spins="250">250</button>
-      <button class="btn btn-secondary auto-opt" data-spins="999">∞</button>
+      <button class="btn btn-secondary" onclick="runAuto(10)">10</button>
+      <button class="btn btn-secondary" onclick="runAuto(25)">25</button>
+      <button class="btn btn-secondary" onclick="runAuto(50)">50</button>
+      <button class="btn btn-secondary" onclick="runAuto(100)">100</button>
+      <button class="btn btn-secondary" onclick="runAuto(250)">250</button>
+      <button class="btn btn-secondary" onclick="runAuto(999)">∞</button>
     </div>
-    <button class="btn btn-secondary" id="close-auto-modal" style="width:100%;">ОТМЕНА</button>
+    <button class="btn btn-secondary" onclick="closeAuto()" style="width:100%;">ОТМЕНА</button>
   </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const FIREBASE_URL = "https://firebaseio.com";
-  const elById = id => document.getElementById(id);
-  const fmt = n => Math.round(n).toString();
+const FB_URL = "https://firebaseio.com";
+const elById = id => document.getElementById(id);
+const fmt = n => Math.round(n).toString();
 
-  const SoundFX = (() => {
-    let ctx = null, enabled = true;
-    function init() {
-      try {
-        if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) ctx = new AC(); }
-        if (ctx && ctx.state === 'suspended') ctx.resume();
-      } catch (e) {}
-    }
-    function toggle() { enabled = !enabled; init(); return enabled; }
-    function playTick(c = 0) {
-      if (!enabled) return; init(); if (!ctx) return;
-      const now = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'triangle'; o.frequency.setValueAtTime(170 + c * 25, now); o.frequency.exponentialRampToValueAtTime(55, now + 0.06);
-      g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
-      o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.07);
-    }
-    function playCascade(combo = 1) {
-      if (!enabled) return; init(); if (!ctx) return;
-      const now = ctx.currentTime, shift = Math.pow(1.07, Math.min(combo, 10));
-      new Array(523.25, 659.25, 783.99, 1046.50).forEach((f, i) => {
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'sine'; o.frequency.setValueAtTime(f * shift, now + i * 0.045);
-        g.gain.setValueAtTime(0.001, now + i * 0.045); g.gain.linearRampToValueAtTime(0.16, now + i * 0.045 + 0.015);
-        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.24);
-        o.connect(g); g.connect(ctx.destination); o.start(now + i * 0.045); o.stop(now + i * 0.045 + 0.25);
-      });
-    }
-    function playPhonkWild() {
-      if (!enabled) return; init(); if (!ctx) return;
-      const now = ctx.currentTime, shaper = ctx.createWaveShaper(), curve = new Float32Array(256);
-      for (let i = 0; i < 256; i++) curve[i] = Math.tanh(((i * 2) / 256 - 1) * 5.0);
-      shaper.curve = curve; shaper.connect(ctx.destination);
-      const melody = new Array(
-        { t: 0.00, f: 587.33, d: 0.13 }, { t: 0.14, f: 587.33, d: 0.13 }, { t: 0.28, f: 698.46, d: 0.13 },
-        { t: 0.42, f: 587.33, d: 0.13 }, { t: 0.56, f: 880.00, d: 0.15 }, { t: 0.72, f: 783.99, d: 0.15 },
-        { t: 0.88, f: 698.46, d: 0.22 }, { t: 1.12, f: 587.33, d: 0.13 }, { t: 1.26, f: 698.46, d: 0.13 },
-        { t: 1.40, f: 880.00, d: 0.15 }, { t: 1.56, f: 1046.50, d: 0.28 }
-      );
-      new Array(1.0, 1.48).forEach(ratio => {
-        melody.forEach(n => {
-          const st = now + n.t, o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
-          o.type = 'square'; o.frequency.setValueAtTime(n.f * ratio, st);
-          flt.type = 'bandpass'; flt.frequency.setValueAtTime(1200, st); flt.Q.setValueAtTime(2.8, st);
-          g.gain.setValueAtTime(0.24, st); g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
-          o.connect(flt); flt.connect(g); g.connect(shaper); o.start(st); o.stop(st + n.d + 0.02);
-        });
-      });
-      new Array(0.00, 0.42, 0.56, 1.12, 1.40).forEach(off => {
-        const b = ctx.createOscillator(), bg = ctx.createGain();
-        b.type = 'sine'; b.frequency.setValueAtTime(155, now + off); b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
-        bg.gain.setValueAtTime(0.75, now + off); bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
-        b.connect(bg); bg.connect(shaper); b.start(now + off); b.stop(now + off + 0.4);
-      });
-      const noiseLen = Math.floor(ctx.sampleRate * 1.9), noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate), data = noiseBuf.getChannelData(0);
-      for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
-      for (let h = 0; h < 24; h++) {
-        const t = now + h * 0.075, src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), hg = ctx.createGain();
-        src.buffer = noiseBuf; hp.type = 'highpass'; hp.frequency.setValueAtTime(7500, t);
-        const isClap = (h === 4 || h === 12 || h === 20);
-        hg.gain.setValueAtTime(isClap ? 0.32 : 0.09, t); hg.gain.exponentialRampToValueAtTime(0.001, t + (isClap ? 0.14 : 0.035));
-        src.connect(hp); hp.connect(hg); hg.connect(ctx.destination); src.start(t); src.stop(t + 0.15);
-      }
-    }
-    function playBigWin() {
-      if (!enabled) return; init(); if (!ctx) return;
-      const now = ctx.currentTime;
-      new Array(261.63, 329.63, 392.00, 523.25, 659.25, 783.99).forEach((f, i) => {
-        const o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
-        o.type = 'sawtooth'; o.frequency.setValueAtTime(f, now + i * 0.08);
-        flt.type = 'lowpass'; flt.frequency.setValueAtTime(2400, now + i * 0.08);
-        g.gain.setValueAtTime(0.001, now + i * 0.08); g.gain.linearRampToValueAtTime(0.14, now + i * 0.08 + 0.05);
-        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 1.1);
-        o.connect(flt); flt.connect(g); g.connect(ctx.destination); o.start(now + i * 0.08); o.stop(now + i * 0.08 + 1.15);
-      });
-    }
-    return { init, toggle, playTick, playCascade, playPhonkWild, playBigWin };
-  })();
-
-  document.body.addEventListener('touchstart', () => SoundFX.init(), { once: true });
-  document.body.addEventListener('click', () => SoundFX.init(), { once: true });
-
-  const AVATARS = new Array('👑','🦁','🐺','🐉','💎','🎩','🦊','🐯','🦅','🔥','🃏','💰');
-  const BETS = new Array(10, 25, 50, 100, 250, 500, 1000, 2500);
-  const COLS = 6, ROWS = 5, ADMIN_PASS = '7777';
-  const SYMBOLS = new Array(
-    { id: 'crown', icon: '👑', mult: 3.5, weight: 7 },
-    { id: 'cup', icon: '🏆', mult: 2.2, weight: 10 },
-    { id: 'bell', icon: '🔔', mult: 1.6, weight: 12 },
-    { id: 'clover', icon: '🍀', mult: 1.2, weight: 15 },
-    { id: 'cherry', icon: '🍒', mult: 0.8, weight: 18 }
-  );
-  const WILD_MULTS = new Array(2, 3, 5, 10, 15, 20, 25, 50, 100);
-  const ORB_MULTS = new Array(2, 3, 5, 10, 15, 25, 50, 100);
-
-  let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
-  try { savedId = localStorage.getItem('rg_player_id') || savedId; localStorage.setItem('rg_player_id', savedId); } catch (e) {}
-
-  let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 35, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
-  let playersCache = {};
-  let appState = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: new Array() };
-  const sleep = ms => new Promise(r => setTimeout(r, appState.turbo ? ms * 0.45 : ms));
-
-  async function fbRequest(path, method = 'GET', body = null) {
-    try {
-      const opts = { method, headers: { 'Content-Type': 'application/json' } };
-      if (body !== null) opts.body = JSON.stringify(body);
-      const res = await fetch(FIREBASE_URL + path + '.json', opts);
-      if (!res.ok) throw new Error(res.status);
-      elById('net-status').innerHTML = '<span class="dot online"></span>В сети (Firebase)';
-      return await res.json();
-    } catch (err) {
-      elById('net-status').innerHTML = '<span class="dot offline"></span>Локальный режим';
-      return null;
-    }
-  }
-
-  function pushMyState() {
-    me.lastSeen = Date.now(); playersCache[me.id] = Object.assign({}, me); updateHUD();
-    if (me.isAdmin) renderAdminTable();
-    fbRequest('/players/' + me.id, 'PUT', me);
-  }
-
-  async function pollServer() {
-    if (elById('game-screen').classList.contains('hidden')) return;
-    const db = await fbRequest('/players', 'GET');
-    if (db && typeof db === 'object') {
-      playersCache = db;
-      const remoteMe = db[me.id];
-      if (remoteMe) {
-        let needAck = false;
-        if (typeof remoteMe.balance === 'number' && remoteMe.balance !== me.balance && !appState.isSpinning) { me.balance = remoteMe.balance; updateHUD(); }
-        if (typeof remoteMe.chance === 'number') me.chance = remoteMe.chance;
-        if (remoteMe.forceWild) { me.forceWild = true; needAck = true; }
-        if (remoteMe.force500k) { me.force500k = true; needAck = true; }
-        if (needAck) fbRequest('/players/' + me.id, 'PATCH', { forceWild: false, force500k: false });
-      }
-    }
-    me.lastSeen = Date.now(); playersCache[me.id] = Object.assign({}, me);
-    fbRequest('/players/' + me.id, 'PATCH', { lastSeen: me.lastSeen, name: me.name, avatar: me.avatar, isAdmin: me.isAdmin });
-    if (me.isAdmin) renderAdminTable();
-  }
-
-  AVATARS.forEach((av, idx) => {
-    const el = document.createElement('div');
-    el.className = 'avatar-opt' + (idx === 0 ? ' selected' : ''); el.textContent = av;
-    el.onclick = () => { document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected')); el.classList.add('selected'); me.avatar = av; };
-    elById('avatar-grid').appendChild(el);
+let audioCtx = null, sndOn = true;
+function initAudio() {
+  try {
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) {}
+}
+function toggleSnd(btn) { sndOn = !sndOn; initAudio(); btn.textContent = sndOn ? '🔊' : '🔇'; btn.classList.toggle('active-toggle', sndOn); }
+function playTick(c) {
+  if (!sndOn) return; initAudio(); if (!audioCtx) return;
+  const now = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'triangle'; o.frequency.setValueAtTime(170 + c * 25, now); o.frequency.exponentialRampToValueAtTime(55, now + 0.06);
+  g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+  o.connect(g); g.connect(audioCtx.destination); o.start(now); o.stop(now + 0.07);
+}
+function playCascade(combo) {
+  if (!sndOn) return; initAudio(); if (!audioCtx) return;
+  const now = audioCtx.currentTime, shift = Math.pow(1.07, Math.min(combo, 10));
+  [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(f * shift, now + i * 0.045);
+    g.gain.setValueAtTime(0.001, now + i * 0.045); g.gain.linearRampToValueAtTime(0.16, now + i * 0.045 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.24);
+    o.connect(g); g.connect(audioCtx.destination); o.start(now + i * 0.045); o.stop(now + i * 0.045 + 0.25);
   });
-
-  let secretClicks = 0;
-  elById('secret-title').onclick = () => {
-    if (++secretClicks >= 5) { me.isAdmin = !me.isAdmin; secretClicks = 0; alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен'); }
-  };
-
-  elById('start-btn').onclick = () => {
-    SoundFX.init();
-    const nameVal = elById('player-name-input').value.trim(), passVal = elById('admin-pass-input').value.trim();
-    if (nameVal) me.name = nameVal;
-    if (passVal === ADMIN_PASS || me.name.toLowerCase() === 'admin') me.isAdmin = true;
-    elById('hud-name').textContent = me.name; elById('hud-avatar').textContent = me.avatar;
-    elById('admin-badge').classList.toggle('hidden', !me.isAdmin);
-    elById('admin-panel').classList.toggle('hidden', !me.isAdmin);
-    elById('setup-screen').classList.add('hidden'); elById('game-screen').classList.remove('hidden');
-    appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-    renderGrid(true); pushMyState(); pollServer();
-  };
-
-  elById('profile-btn').onclick = () => { elById('game-screen').classList.add('hidden'); elById('setup-screen').classList.remove('hidden'); };
-  setInterval(pollServer, 2500);
-
-  function pickCell(allowSpecial = true) {
-    if (allowSpecial) {
-      const r = Math.random();
-      if (r < 0.035) return { type: 'scatter', icon: '🏛️' };
-      if (r < 0.075) return { type: 'orb', icon: '🌕', mult: ORB_MULTS[Math.floor(Math.random() * ORB_MULTS.length)] };
-    }
-    const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
-    let rnd = Math.random() * totalW;
-    for (const sym of SYMBOLS) {
-      if (rnd < sym.weight) return { type: 'normal', id: sym.id, icon: sym.icon, mult: sym.mult };
-      rnd -= sym.weight;
-    }
-    return { type: 'normal', id: SYMBOLS.id, icon: SYMBOLS.icon, mult: SYMBOLS.mult };
+}
+function playPhonkWild() {
+  if (!sndOn) return; initAudio(); if (!audioCtx) return;
+  const now = audioCtx.currentTime, shaper = audioCtx.createWaveShaper(), curve = new Float32Array(256);
+  for (let i = 0; i < 256; i++) curve[i] = Math.tanh(((i * 2) / 256 - 1) * 5.0);
+  shaper.curve = curve; shaper.connect(audioCtx.destination);
+  const melody = [
+    { t: 0.00, f: 587.33, d: 0.13 }, { t: 0.14, f: 587.33, d: 0.13 }, { t: 0.28, f: 698.46, d: 0.13 },
+    { t: 0.42, f: 587.33, d: 0.13 }, { t: 0.56, f: 880.00, d: 0.15 }, { t: 0.72, f: 783.99, d: 0.15 },
+    { t: 0.88, f: 698.46, d: 0.22 }, { t: 1.12, f: 587.33, d: 0.13 }, { t: 1.26, f: 698.46, d: 0.13 },
+    { t: 1.40, f: 880.00, d: 0.15 }, { t: 1.56, f: 1046.50, d: 0.28 }
+  ];
+  [1.0, 1.48].forEach(ratio => {
+    melody.forEach(n => {
+      const st = now + n.t, o = audioCtx.createOscillator(), flt = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
+      o.type = 'square'; o.frequency.setValueAtTime(n.f * ratio, st);
+      flt.type = 'bandpass'; flt.frequency.setValueAtTime(1200, st); flt.Q.setValueAtTime(2.8, st);
+      g.gain.setValueAtTime(0.24, st); g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
+      o.connect(flt); flt.connect(g); g.connect(shaper); o.start(st); o.stop(st + n.d + 0.02);
+    });
+  });
+  [0.00, 0.42, 0.56, 1.12, 1.40].forEach(off => {
+    const b = audioCtx.createOscillator(), bg = audioCtx.createGain();
+    b.type = 'sine'; b.frequency.setValueAtTime(155, now + off); b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
+    bg.gain.setValueAtTime(0.75, now + off); bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
+    b.connect(bg); bg.connect(shaper); b.start(now + off); b.stop(now + off + 0.4);
+  });
+  const noiseLen = Math.floor(audioCtx.sampleRate * 1.9), noiseBuf = audioCtx.createBuffer(1, noiseLen, audioCtx.sampleRate), data = noiseBuf.getChannelData(0);
+  for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
+  for (let h = 0; h < 24; h++) {
+    const t = now + h * 0.075, src = audioCtx.createBufferSource(), hp = audioCtx.createBiquadFilter(), hg = audioCtx.createGain();
+    src.buffer = noiseBuf; hp.type = 'highpass'; hp.frequency.setValueAtTime(7500, t);
+    const isClap = (h === 4 || h === 12 || h === 20);
+    hg.gain.setValueAtTime(isClap ? 0.32 : 0.09, t); hg.gain.exponentialRampToValueAtTime(0.001, t + (isClap ? 0.14 : 0.035));
+    src.connect(hp); hp.connect(hg); hg.connect(audioCtx.destination); src.start(t); src.stop(t + 0.15);
   }
+}
+function playBigWin() {
+  if (!sndOn) return; initAudio(); if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [261.63, 329.63, 392.00, 523.25, 659.25, 783.99].forEach((f, i) => {
+    const o = audioCtx.createOscillator(), flt = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(f, now + i * 0.08);
+    flt.type = 'lowpass'; flt.frequency.setValueAtTime(2400, now + i * 0.08);
+    g.gain.setValueAtTime(0.001, now + i * 0.08); g.gain.linearRampToValueAtTime(0.14, now + i * 0.08 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 1.1);
+    o.connect(flt); flt.connect(g); g.connect(audioCtx.destination); o.start(now + i * 0.08); o.stop(now + i * 0.08 + 1.15);
+  });
+}
 
-  function generateGrid() {
-    const luck = me.chance / 100;
-    appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-    if (Math.random() < luck * 0.65 || me.force500k) {
-      const target = me.force500k ? SYMBOLS : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-      const count = me.force500k ? 14 : (8 + Math.floor(Math.random() * 4));
-      let placed = 0;
-      while (placed < count) {
-        const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
-        if (appState.grid[c][r].type === 'normal') { appState.grid[c][r] = { type: 'normal', id: target.id, icon: target.icon, mult: target.mult }; placed++; }
-      }
-    }
-    const wildColsCount = me.force500k ? 3 : (me.forceWild || Math.random() < (0.14 + luck * 0.14) ? 1 : 0);
-    if (wildColsCount > 0) {
-      const availableCols = new Array(0, 2, 4, 1, 3, 5);
-      for (let i = 0; i < wildColsCount; i++) {
-        const col = availableCols[i], mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
-        for (let r = 0; r < ROWS; r++) appState.grid[col][r] = { type: 'wild_col', mult: mult, rowIdx: r };
-      }
-    }
-    me.forceWild = false; me.force500k = false;
+const BETS = [10, 25, 50, 100, 250, 500, 1000, 2500];
+const COLS = 6, ROWS = 5, ADMIN_PASS = '7777';
+const SYMBOLS = [
+  { id: 'crown', icon: '👑', mult: 3.5, weight: 7 },
+  { id: 'cup', icon: '🏆', mult: 2.2, weight: 10 },
+  { id: 'bell', icon: '🔔', mult: 1.6, weight: 12 },
+  { id: 'clover', icon: '🍀', mult: 1.2, weight: 15 },
+  { id: 'cherry', icon: '🍒', mult: 0.8, weight: 18 }
+];
+const WILD_MULTS = [2, 3, 5, 10, 15, 20, 25, 50, 100];
+const ORB_MULTS = [2, 3, 5, 10, 15, 25, 50, 100];
+
+let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
+try { savedId = localStorage.getItem('rg_player_id') || savedId; localStorage.setItem('rg_player_id', savedId); } catch (e) {}
+
+let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 35, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
+let playersCache = {};
+let app = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: [] };
+const sleep = ms => new Promise(r => setTimeout(r, app.turbo ? ms * 0.45 : ms));
+
+function pickAv(el, av) {
+  document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected'); me.avatar = av;
+}
+let secretClicks = 0;
+function tapSecret() {
+  if (++secretClicks >= 5) { me.isAdmin = !me.isAdmin; secretClicks = 0; alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен'); }
+}
+
+async function fbReq(path, method, body) {
+  try {
+    const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(FB_URL + path + '.json', opts);
+    if (!res.ok) throw new Error(res.status);
+    elById('net-status').innerHTML = '<span class="dot online"></span>В сети (Firebase)';
+    return await res.json();
+  } catch (e) {
+    elById('net-status').innerHTML = '<span class="dot offline"></span>Локальный режим';
+    return null;
   }
+}
 
-  function renderGrid(animateDrop = false, explodingCoords = new Set()) {
-    const gridEl = elById('slot-grid'); gridEl.innerHTML = '';
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const cell = appState.grid[c][r], el = document.createElement('div');
-        el.className = 'cell-6x5';
-        if (animateDrop) { el.classList.add('cell-drop'); el.style.animationDelay = (c * 0.04 + r * 0.015) + 's'; }
-        if (explodingCoords.has(c + ',' + r)) el.classList.add('cell-explode');
-        if (cell.type === 'wild_col') {
-          el.classList.add('wild-col-cell');
-          if (r === 0) el.innerHTML = '<div class="wild-badge-top">WILD</div><div class="wild-mult-big">' + cell.mult + 'x</div>';
-          else if (r === ROWS - 1) el.innerHTML = '<div class="wild-badge-top">WILD</div>';
-          else el.innerHTML = '<div class="wild-icon-main">' + (r === 2 ? '⚡' : '⚔️') + '</div>';
-        } else if (cell.type === 'orb') {
-          el.classList.add('orb-cell'); el.innerHTML = '<div>🌕</div><div class="orb-val">' + cell.mult + 'x</div>';
-        } else if (cell.type === 'scatter') {
-          el.classList.add('scatter-cell'); el.innerHTML = '<div>🏛️</div><div class="scat-tag">SCATTER</div>';
-        } else el.textContent = cell.icon;
-        gridEl.appendChild(el);
-      }
+function pushMe() {
+  me.lastSeen = Date.now(); playersCache[me.id] = Object.assign({}, me); updateHUD();
+  if (me.isAdmin) renderAdmin();
+  fbReq('/players/' + me.id, 'PUT', me);
+}
+
+async function pollServer() {
+  if (elById('game-screen').classList.contains('hidden')) return;
+  const db = await fbReq('/players', 'GET');
+  if (db && typeof db === 'object') {
+    playersCache = db;
+    const rem = db[me.id];
+    if (rem) {
+      let ack = false;
+      if (typeof rem.balance === 'number' && rem.balance !== me.balance && !app.isSpinning) { me.balance = rem.balance; updateHUD(); }
+      if (typeof rem.chance === 'number') me.chance = rem.chance;
+      if (rem.forceWild) { me.forceWild = true; ack = true; }
+      if (rem.force500k) { me.force500k = true; ack = true; }
+      if (ack) fbReq('/players/' + me.id, 'PATCH', { forceWild: false, force500k: false });
     }
   }
+  me.lastSeen = Date.now(); playersCache[me.id] = Object.assign({}, me);
+  fbReq('/players/' + me.id, 'PATCH', { lastSeen: me.lastSeen, name: me.name, avatar: me.avatar, isAdmin: me.isAdmin });
+  if (me.isAdmin) renderAdmin();
+}
 
-  function spawnFloatingWin(amount) {
-    const rect = elById('slot-grid').getBoundingClientRect(), el = document.createElement('div');
-    el.className = 'float-win'; el.textContent = '+' + fmt(amount);
-    el.style.left = (rect.left + rect.width * (0.35 + Math.random() * 0.3)) + 'px';
-    el.style.top = (rect.top + rect.height * 0.45) + 'px';
-    document.body.appendChild(el); setTimeout(() => el.remove(), 1100);
+function enterGame() {
+  initAudio();
+  const n = elById('player-name-input').value.trim(), p = elById('admin-pass-input').value.trim();
+  if (n) me.name = n;
+  if (p === ADMIN_PASS || me.name.toLowerCase() === 'admin') me.isAdmin = true;
+  elById('hud-name').textContent = me.name; elById('hud-avatar').textContent = me.avatar;
+  elById('admin-badge').classList.toggle('hidden', !me.isAdmin);
+  elById('admin-panel').classList.toggle('hidden', !me.isAdmin);
+  elById('setup-screen').classList.add('hidden'); elById('game-screen').classList.remove('hidden');
+  app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+  renderGrid(true); pushMe(); pollServer();
+}
+function openProfile() { elById('game-screen').classList.add('hidden'); elById('setup-screen').classList.remove('hidden'); }
+setInterval(pollServer, 2500);
+
+function pickCell(allowSpec) {
+  if (allowSpec) {
+    const r = Math.random();
+    if (r < 0.035) return { type: 'scatter', icon: '🏛️' };
+    if (r < 0.075) return { type: 'orb', icon: '🌕', mult: ORB_MULTS[Math.floor(Math.random() * ORB_MULTS.length)] };
   }
+  const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
+  let rnd = Math.random() * totalW;
+  for (let i = 0; i < SYMBOLS.length; i++) {
+    if (rnd < SYMBOLS[i].weight) return { type: 'normal', id: SYMBOLS[i].id, icon: SYMBOLS[i].icon, mult: SYMBOLS[i].mult };
+    rnd -= SYMBOLS[i].weight;
+  }
+  return { type: 'normal', id: 'cherry', icon: '🍒', mult: 0.8 };
+}
 
-  function triggerWildHyperEffects() {
-    const card = elById('game-screen'), cabinet = elById('slot-cabinet');
-    card.classList.remove('cabinet-shake'); void card.offsetWidth; card.classList.add('cabinet-shake');
-    const flash = document.createElement('div'); flash.className = 'wild-flash-screen'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 700);
-    const wave = document.createElement('div'); wave.className = 'shockwave-ring'; document.body.appendChild(wave); setTimeout(() => wave.remove(), 800);
-    cabinet.classList.add('wild-hyper'); setTimeout(() => cabinet.classList.remove('wild-hyper'), 1800);
-    const icons = new Array('⚡', '⚔️', '🔥', '💥', '✨');
-    for (let i = 0; i < 18; i++) {
-      setTimeout(() => {
-        const s = document.createElement('div'); s.className = 'lightning-bolt-fx'; s.textContent = icons[i % icons.length];
-        s.style.left = (12 + Math.random() * 76) + 'vw'; s.style.top = (22 + Math.random() * 52) + 'vh';
-        document.body.appendChild(s); setTimeout(() => s.remove(), 950);
-      }, i * 35);
+function generateGrid() {
+  const luck = me.chance / 100;
+  app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+  if (Math.random() < luck * 0.65 || me.force500k) {
+    const t = me.force500k ? SYMBOLS[0] : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 4));
+    let pl = 0;
+    while (pl < cnt) {
+      const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
+      if (app.grid[c][r].type === 'normal') { app.grid[c][r] = { type: 'normal', id: t.id, icon: t.icon, mult: t.mult }; pl++; }
     }
   }
-
-  async function showBigWinOverlay(amount) {
-    const overlay = elById('bigwin-overlay'), titleEl = elById('bigwin-title'), amountEl = elById('bigwin-amount');
-    titleEl.textContent = amount >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑';
-    overlay.classList.remove('hidden'); SoundFX.playBigWin();
-    for (let i = 0; i < 40; i++) {
-      const coin = document.createElement('div'); coin.className = 'coin-particle'; coin.textContent = i % 3 === 0 ? '💎' : '🪙';
-      coin.style.left = (Math.random() * 96) + 'vw'; coin.style.animationDuration = (1.2 + Math.random() * 1.4) + 's';
-      document.body.appendChild(coin); setTimeout(() => coin.remove(), 2700);
+  const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.14 + luck * 0.14)) ? 1 : 0);
+  if (wCnt > 0) {
+    const cols = [0, 2, 4, 1, 3, 5];
+    for (let i = 0; i < wCnt; i++) {
+      const col = cols[i], mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
+      for (let r = 0; r < ROWS; r++) app.grid[col][r] = { type: 'wild_col', mult: mult, rowIdx: r };
     }
-    for (let s = 1; s <= 25; s++) { amountEl.textContent = fmt((amount / 25) * s) + ' 💰'; await new Promise(r => setTimeout(r, 40)); }
-    await new Promise(r => setTimeout(r, 900)); overlay.classList.add('hidden');
   }
+  me.forceWild = false; me.force500k = false;
+}
 
-  async function startSpin(isFreeSpin = false) {
-    if (appState.isSpinning) return;
-    const bet = BETS[appState.betIndex];
-    if (!isFreeSpin) {
-      if (me.balance < bet) { setBanner('❌ Недостаточно средств!'); stopAuto(); return; }
-      me.balance -= bet; pushMyState();
+function renderGrid(anim, expl) {
+  const gEl = elById('slot-grid'); gEl.innerHTML = '';
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = app.grid[c][r], el = document.createElement('div');
+      el.className = 'cell-6x5';
+      if (anim) { el.classList.add('cell-drop'); el.style.animationDelay = (c * 0.04 + r * 0.015) + 's'; }
+      if (expl && expl.has(c + ',' + r)) el.classList.add('cell-explode');
+      if (cell.type === 'wild_col') {
+        el.classList.add('wild-col-cell');
+        if (r === 0) el.innerHTML = '<div class="wild-badge-top">WILD</div><div class="wild-mult-big">' + cell.mult + 'x</div>';
+        else if (r === ROWS - 1) el.innerHTML = '<div class="wild-badge-top">WILD</div>';
+        else el.innerHTML = '<div class="wild-icon-main">' + (r === 2 ? '⚡' : '⚔️') + '</div>';
+      } else if (cell.type === 'orb') {
+        el.classList.add('orb-cell'); el.innerHTML = '<div>🌕</div><div class="orb-val">' + cell.mult + 'x</div>';
+      } else if (cell.type === 'scatter') {
+        el.classList.add('scatter-cell'); el.innerHTML = '<div>🏛️</div><div class="scat-tag">SCATTER</div>';
+      } else el.textContent = cell.icon;
+      gEl.appendChild(el);
     }
-    appState.isSpinning = true; toggleControls(false);
-    generateGrid(); renderGrid(true);
-    for (let c = 0; c < COLS; c++) setTimeout(() => SoundFX.playTick(c), c * (appState.turbo ? 20 : 45));
+  }
+}
 
-    let hasWild = false, wildMultSum = 0;
-    for (let c = 0; c < COLS; c++) { if (appState.grid[c].type === 'wild_col') { hasWild = true; wildMultSum += appState.grid[c].mult; } }
-    if (hasWild) { SoundFX.playPhonkWild(); triggerWildHyperEffects(); setBanner('⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x' + wildMultSum + '!'); }
-    else setBanner(isFreeSpin ? '⚡ FREE SPINS (' + appState.freeSpins + ')...' : '🎰 Вращение...');
-    await sleep(520);
+function spawnFloat(amt) {
+  const rect = elById('slot-grid').getBoundingClientRect(), el = document.createElement('div');
+  el.className = 'float-win'; el.textContent = '+' + fmt(amt);
+  el.style.left = (rect.left + rect.width * (0.35 + Math.random() * 0.3)) + 'px';
+  el.style.top = (rect.top + rect.height * 0.45) + 'px';
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1100);
+}
 
-    let cascadeStep = 0, spinBaseWin = 0, spinOrbMult = 0;
-    while (true) {
-      const counts = {}, coordsById = {}; let wildCols = 0;
-      for (let c = 0; c < COLS; c++) {
-        if (appState.grid[c].type === 'wild_col') wildCols++;
-        for (let r = 0; r < ROWS; r++) {
-          const cell = appState.grid[c][r];
-          if (cell.type === 'normal') {
-            counts[cell.id] = (counts[cell.id] || 0) + 1;
-            if (!coordsById[cell.id]) coordsById[cell.id] = new Array();
-            coordsById[cell.id].push(c + ',' + r);
-          }
+function triggerWildFX() {
+  const card = elById('game-screen'), cab = elById('slot-cabinet');
+  card.classList.remove('cabinet-shake'); void card.offsetWidth; card.classList.add('cabinet-shake');
+  const fl = document.createElement('div'); fl.className = 'wild-flash-screen'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 700);
+  const wv = document.createElement('div'); wv.className = 'shockwave-ring'; document.body.appendChild(wv); setTimeout(() => wv.remove(), 800);
+  cab.classList.add('wild-hyper'); setTimeout(() => cab.classList.remove('wild-hyper'), 1800);
+  const icons = ['⚡', '⚔️', '🔥', '💥', '✨'];
+  for (let i = 0; i < 18; i++) {
+    setTimeout(() => {
+      const s = document.createElement('div'); s.className = 'lightning-bolt-fx'; s.textContent = icons[i % 5];
+      s.style.left = (12 + Math.random() * 76) + 'vw'; s.style.top = (22 + Math.random() * 52) + 'vh';
+      document.body.appendChild(s); setTimeout(() => s.remove(), 950);
+    }, i * 35);
+  }
+}
+
+async function showBigWin(amt) {
+  const ov = elById('bigwin-overlay'), tEl = elById('bigwin-title'), aEl = elById('bigwin-amount');
+  tEl.textContent = amt >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑';
+  ov.classList.remove('hidden'); playBigWin();
+  for (let i = 0; i < 36; i++) {
+    const c = document.createElement('div'); c.className = 'coin-particle'; c.textContent = i % 3 === 0 ? '💎' : '🪙';
+    c.style.left = (Math.random() * 96) + 'vw'; c.style.animationDuration = (1.2 + Math.random() * 1.4) + 's';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 2700);
+  }
+  for (let s = 1; s <= 25; s++) { aEl.textContent = fmt((amt / 25) * s) + ' 💰'; await new Promise(r => setTimeout(r, 40)); }
+  await new Promise(r => setTimeout(r, 900)); ov.classList.add('hidden');
+}
+
+async function startSpin(isFS) {
+  if (app.isSpinning) return;
+  const bet = BETS[app.betIndex];
+  if (!isFS) {
+    if (me.balance < bet) { setBanner('❌ Недостаточно средств!'); stopAuto(); return; }
+    me.balance -= bet; pushMe();
+  }
+  app.isSpinning = true; setBtns(false);
+  generateGrid(); renderGrid(true, null);
+  for (let c = 0; c < COLS; c++) setTimeout(() => playTick(c), c * (app.turbo ? 20 : 45));
+
+  let hasW = false, wSum = 0;
+  for (let c = 0; c < COLS; c++) { if (app.grid[c][0].type === 'wild_col') { hasW = true; wSum += app.grid[c][0].mult; } }
+  if (hasW) { playPhonkWild(); triggerWildFX(); setBanner('⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x' + wSum + '!'); }
+  else setBanner(isFS ? '⚡ FREE SPINS (' + app.freeSpins + ')...' : '🎰 Вращение...');
+  await sleep(520);
+
+  let casc = 0, baseWin = 0, orbMult = 0;
+  while (true) {
+    const cnts = {}, coords = {}; let wCols = 0;
+    for (let c = 0; c < COLS; c++) {
+      if (app.grid[c][0].type === 'wild_col') wCols++;
+      for (let r = 0; r < ROWS; r++) {
+        const cell = app.grid[c][r];
+        if (cell.type === 'normal') {
+          cnts[cell.id] = (cnts[cell.id] || 0) + 1;
+          if (!coords[cell.id]) coords[cell.id] = [];
+          coords[cell.id].push(c + ',' + r);
         }
       }
-      const exploding = new Set(); let stepWin = 0;
-      for (const sym of SYMBOLS) {
-        const totalMatched = (counts[sym.id] || 0) + wildCols;
-        if ((counts[sym.id] || 0) > 0 && totalMatched >= 8) {
-          coordsById[sym.id].forEach(coord => exploding.add(coord));
-          stepWin += bet * sym.mult * (1 + (totalMatched - 8) * 0.25);
-        }
+    }
+    const expl = new Set(); let stepWin = 0;
+    for (let i = 0; i < SYMBOLS.length; i++) {
+      const sym = SYMBOLS[i], tot = (cnts[sym.id] || 0) + wCols;
+      if ((cnts[sym.id] || 0) > 0 && tot >= 8) {
+        coords[sym.id].forEach(crd => expl.add(crd));
+        stepWin += bet * sym.mult * (1 + (tot - 8) * 0.25);
       }
-      if (exploding.size === 0) break;
-      cascadeStep++; spinBaseWin += stepWin;
-      SoundFX.playCascade(cascadeStep); renderGrid(false, exploding); spawnFloatingWin(stepWin);
-      setBanner('💥 КАСКАД #' + cascadeStep + ': +' + fmt(stepWin) + ' 💰');
-      await sleep(420);
-
-      for (let c = 0; c < COLS; c++) {
-        if (appState.grid[c].type === 'wild_col') continue;
-        const rem = new Array();
-        for (let r = ROWS - 1; r >= 0; r--) if (!exploding.has(c + ',' + r)) rem.unshift(appState.grid[c][r]);
-        while (rem.length < ROWS) rem.unshift(pickCell(true));
-        appState.grid[c] = rem;
-      }
-      renderGrid(true); await sleep(350);
     }
+    if (expl.size === 0) break;
+    casc++; baseWin += stepWin;
+    playCascade(casc); renderGrid(false, expl); spawnFloat(stepWin);
+    setBanner('💥 КАСКАД #' + casc + ': +' + fmt(stepWin) + ' 💰');
+    await sleep(420);
 
-    let scatterCount = 0;
-    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
-      const cell = appState.grid[c][r];
-      if (cell.type === 'orb') spinOrbMult += cell.mult;
-      if (cell.type === 'scatter') scatterCount++;
+    for (let c = 0; c < COLS; c++) {
+      if (app.grid[c][0].type === 'wild_col') continue;
+      const rem = [];
+      for (let r = ROWS - 1; r >= 0; r--) if (!expl.has(c + ',' + r)) rem.unshift(app.grid[c][r]);
+      while (rem.length < ROWS) rem.unshift(pickCell(true));
+      app.grid[c] = rem;
     }
-
-    let totalMult = Math.max(1, wildMultSum + spinOrbMult);
-    if (isFreeSpin) { if (spinBaseWin > 0 && (wildMultSum + spinOrbMult) > 0) appState.bonusMult += (wildMultSum + spinOrbMult); totalMult = appState.bonusMult; }
-    elById('total-mult').textContent = 'x' + totalMult;
-
-    let totalWin = Math.round(spinBaseWin * totalMult);
-    if (wildMultSum >= 60 && totalWin > 0 && totalWin < 500000 && spinBaseWin >= bet * 40) totalWin = 500000;
-
-    if (totalWin > 0) {
-      me.balance += totalWin; pushMyState();
-      elById('balance-box').classList.add('balance-pop'); setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
-      setBanner('💥 КАСКАД #' + Math.max(1, cascadeStep) + ': +' + fmt(totalWin) + ' 💰');
-      if (totalWin >= bet * 15 || totalWin >= 100000) await showBigWinOverlay(totalWin);
-    } else { pushMyState(); setBanner('Нажмите SPIN или ⚔️ WILD в админке!'); }
-
-    if (scatterCount >= 4 && appState.freeSpins === 0) {
-      appState.freeSpins = 10; appState.bonusMult = 1;
-      setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!'); SoundFX.playBigWin(); await sleep(1000);
-    }
-
-    appState.isSpinning = false; toggleControls(true);
-    if (appState.freeSpins > 0) { appState.freeSpins--; setTimeout(() => startSpin(true), 550); }
-    else if (appState.autoSpins > 0) { appState.autoSpins--; updateAutoBtn(); if (appState.autoSpins > 0) setTimeout(() => startSpin(false), 500); }
+    renderGrid(true, null); await sleep(350);
   }
 
-  function updateHUD() {
-    const bet = BETS[appState.betIndex];
-    elById('bet-val').textContent = fmt(bet); elById('buy-cost').textContent = fmt(bet * 100); elById('balance-val').textContent = fmt(me.balance);
+  let scat = 0;
+  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+    if (app.grid[c][r].type === 'orb') orbMult += app.grid[c][r].mult;
+    if (app.grid[c][r].type === 'scatter') scat++;
   }
-  function setBanner(t) { elById('status-banner').textContent = t; }
-  function toggleControls(en) { new Array('spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn').forEach(id => elById(id).disabled = !en); }
 
-  elById('bet-up').onclick = () => { if (appState.betIndex < BETS.length - 1) { appState.betIndex++; updateHUD(); } };
-  elById('bet-down').onclick = () => { if (appState.betIndex > 0) { appState.betIndex--; updateHUD(); } };
-  elById('bet-max').onclick = () => { appState.betIndex = BETS.length - 1; updateHUD(); };
-  elById('spin-btn').onclick = () => startSpin(false);
-  elById('buy-bonus-btn').onclick = () => {
-    const cost = BETS[appState.betIndex] * 100;
-    if (me.balance < cost) return setBanner('❌ Недостаточно средств для BUY BONUS!');
-    me.balance -= cost; appState.freeSpins = 10; appState.bonusMult = 1; pushMyState();
-    SoundFX.playPhonkWild(); triggerWildHyperEffects(); startSpin(true);
-  };
-  elById('turbo-btn').onclick = function() { appState.turbo = !appState.turbo; this.classList.toggle('active-toggle', appState.turbo); };
-  elById('sound-toggle-btn').onclick = function() { const on = SoundFX.toggle(); this.textContent = on ? '🔊' : '🔇'; this.classList.toggle('active-toggle', on); };
+  let totMult = Math.max(1, wSum + orbMult);
+  if (isFS) { if (baseWin > 0 && (wSum + orbMult) > 0) app.bonusMult += (wSum + orbMult); totMult = app.bonusMult; }
+  elById('total-mult').textContent = 'x' + totMult;
 
-  elById('auto-btn').onclick = () => appState.autoSpins > 0 ? stopAuto() : elById('auto-modal').classList.remove('hidden');
-  elById('close-auto-modal').onclick = () => elById('auto-modal').classList.add('hidden');
-  document.querySelectorAll('.auto-opt').forEach(b => b.onclick = () => {
-    appState.autoSpins = parseInt(b.dataset.spins, 10); elById('auto-modal').classList.add('hidden'); updateAutoBtn(); startSpin(false);
+  let totWin = Math.round(baseWin * totMult);
+  if (wSum >= 60 && totWin > 0 && totWin < 500000 && baseWin >= bet * 40) totWin = 500000;
+
+  if (totWin > 0) {
+    me.balance += totWin; pushMe();
+    elById('balance-box').classList.add('balance-pop'); setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
+    setBanner('💥 КАСКАД #' + Math.max(1, casc) + ': +' + fmt(totWin) + ' 💰');
+    if (totWin >= bet * 15 || totWin >= 100000) await showBigWin(totWin);
+  } else { pushMe(); setBanner('Нажмите SPIN или ⚔️ WILD в админке!'); }
+
+  if (scat >= 4 && app.freeSpins === 0) {
+    app.freeSpins = 10; app.bonusMult = 1;
+    setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!'); playBigWin(); await sleep(1000);
+  }
+
+  app.isSpinning = false; setBtns(true);
+  if (app.freeSpins > 0) { app.freeSpins--; setTimeout(() => startSpin(true), 550); }
+  else if (app.autoSpins > 0) { app.autoSpins--; updAutoBtn(); if (app.autoSpins > 0) setTimeout(() => startSpin(false), 500); }
+}
+
+function updateHUD() {
+  const bet = BETS[app.betIndex];
+  elById('bet-val').textContent = fmt(bet); elById('buy-cost').textContent = fmt(bet * 100); elById('balance-val').textContent = fmt(me.balance);
+}
+function setBanner(t) { elById('status-banner').textContent = t; }
+function setBtns(en) { ['spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn'].forEach(id => elById(id).disabled = !en); }
+function chgBet(d) { const ni = app.betIndex + d; if (ni >= 0 && ni < BETS.length) { app.betIndex = ni; updateHUD(); } }
+function maxBet() { app.betIndex = BETS.length - 1; updateHUD(); }
+function toggleTurbo(btn) { app.turbo = !app.turbo; btn.classList.toggle('active-toggle', app.turbo); }
+function buyBonus() {
+  const cost = BETS[app.betIndex] * 100;
+  if (me.balance < cost) return setBanner('❌ Недостаточно средств для BUY BONUS!');
+  me.balance -= cost; app.freeSpins = 10; app.bonusMult = 1; pushMe();
+  playPhonkWild(); triggerWildFX(); startSpin(true);
+}
+function clickAuto() { if (app.autoSpins > 0) stopAuto(); else elById('auto-modal').classList.remove('hidden'); }
+function closeAuto() { elById('auto-modal').classList.add('hidden'); }
+function runAuto(n) { app.autoSpins = n; closeAuto(); updAutoBtn(); startSpin(false); }
+function stopAuto() { app.autoSpins = 0; updAutoBtn(); }
+function updAutoBtn() {
+  const b = elById('auto-btn');
+  if (app.autoSpins > 0) { b.textContent = '⏹ ' + app.autoSpins; b.classList.add('btn-auto-stop'); }
+  else { b.textContent = '🔄 АВТО'; b.classList.remove('btn-auto-stop'); }
+}
+
+async function clearOld() {
+  const now = Date.now();
+  for (const id of Object.keys(playersCache)) {
+    if (id !== me.id && now - (playersCache[id].lastSeen || 0) > 25000) { delete playersCache[id]; await fbReq('/players/' + id, 'DELETE'); }
+  }
+  renderAdmin(); setBanner('🗑️ Старые игроки удалены!');
+}
+
+function renderAdmin() {
+  const tb = elById('admin-tbody'), now = Date.now();
+  if (tb.contains(document.activeElement)) return;
+  tb.innerHTML = '';
+  Object.values(playersCache).forEach(p => {
+    const on = (now - (p.lastSeen || 0)) < 12000, tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + (p.avatar || '👑') + ' <b>' + p.name + '</b> ' + (p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : '') + '</td>' +
+      '<td><span class="dot ' + (on ? 'online' : 'offline') + '"></span>' + (on ? 'В игре' : 'Офлайн') + '</td>' +
+      '<td><input type="number" class="admin-input" id="bal_' + p.id + '" value="' + Math.round(p.balance) + '"></td>' +
+      '<td><input type="number" class="admin-input" id="ch_' + p.id + '" min="0" max="100" value="' + p.chance + '"></td>' +
+      '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
+        '<button class="btn btn-ok-admin" onclick="admOk(\'' + p.id + '\')">OK</button>' +
+        '<button class="btn btn-wild-admin" onclick="admWild(\'' + p.id + '\')">⚔️ WILD</button>' +
+        '<button class="btn btn-bigwin-admin" onclick="adm500k(\'' + p.id + '\')">🔥 500K</button></td>';
+    tb.appendChild(tr);
   });
-  function stopAuto() { appState.autoSpins = 0; updateAutoBtn(); }
-  function updateAutoBtn() {
-    const b = elById('auto-btn');
-    if (appState.autoSpins > 0) { b.textContent = '⏹ ' + appState.autoSpins; b.classList.add('btn-auto-stop'); }
-    else { b.textContent = '🔄 АВТО'; b.classList.remove('btn-auto-stop'); }
-  }
+}
 
-  elById('clear-old-btn').onclick = async () => {
-    const now = Date.now();
-    for (const id of Object.keys(playersCache)) {
-      if (id !== me.id && now - (playersCache[id].lastSeen || 0) > 25000) { delete playersCache[id]; await fbRequest('/players/' + id, 'DELETE'); }
-    }
-    renderAdminTable(); setBanner('🗑️ Старые игроки удалены из базы!');
-  };
-
-  function renderAdminTable() {
-    const tbody = elById('admin-tbody'), now = Date.now();
-    if (tbody.contains(document.activeElement)) return;
-    tbody.innerHTML = '';
-    Object.values(playersCache).forEach(p => {
-      const isOnline = (now - (p.lastSeen || 0)) < 12000, tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + (p.avatar || '👑') + ' <b>' + p.name + '</b> ' + (p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : '') + '</td>' +
-        '<td><span class="dot ' + (isOnline ? 'online' : 'offline') + '"></span>' + (isOnline ? 'В игре' : 'Офлайн') + '</td>' +
-        '<td><input type="number" class="admin-input" data-bal="' + p.id + '" value="' + Math.round(p.balance) + '"></td>' +
-        '<td><input type="number" class="admin-input" data-ch="' + p.id + '" min="0" max="100" value="' + p.chance + '"></td>' +
-        '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
-          '<button class="btn btn-ok-admin" data-ok="' + p.id + '">OK</button>' +
-          '<button class="btn btn-wild-admin" data-wild="' + p.id + '">⚔️ WILD</button>' +
-          '<button class="btn btn-bigwin-admin" data-500k="' + p.id + '">🔥 500K</button></td>';
-      tbody.appendChild(tr);
-    });
-    tbody.querySelectorAll('[data-ok]').forEach(btn => btn.onclick = async () => {
-      const id = btn.dataset.ok, p = playersCache[id]; if (!p) return;
-      const newBal = Math.max(0, parseInt(tbody.querySelector('[data-bal="' + id + '"]').value, 10) || 0);
-      const newCh = Math.min(100, Math.max(0, parseInt(tbody.querySelector('[data-ch="' + id + '"]').value, 10) || 0));
-      p.balance = newBal; p.chance = newCh; if (id === me.id) { me.balance = newBal; me.chance = newCh; updateHUD(); }
-      await fbRequest('/players/' + id, 'PATCH', { balance: newBal, chance: newCh });
-      setBanner('✅ Игроку ' + p.name + ' обновлены баланс и шанс!');
-    });
-    tbody.querySelectorAll('[data-wild]').forEach(btn => btn.onclick = async () => {
-      const id = btn.dataset.wild, p = playersCache[id]; if (!p) return;
-      p.forceWild = true; if (id === me.id) me.forceWild = true;
-      await fbRequest('/players/' + id, 'PATCH', { forceWild: true });
-      setBanner('⚔️ Игроку ' + p.name + ' отправлен PHONK WILD!');
-    });
-    tbody.querySelectorAll('[data-500k]').forEach(btn => btn.onclick = async () => {
-      const id = btn.dataset.500k, p = playersCache[id]; if (!p) return;
-      p.force500k = true; p.forceWild = true; if (id === me.id) { me.force500k = true; me.forceWild = true; }
-      await fbRequest('/players/' + id, 'PATCH', { force500k: true, forceWild: true });
-      setBanner('🔥 Игроку ' + p.name + ' отправлен занос 500K!');
-    });
-  }
-
-  window.addEventListener('keydown', e => {
-    if (e.code === 'Space' && !elById('game-screen').classList.contains('hidden')) { e.preventDefault(); if (!appState.isSpinning) startSpin(false); }
-  });
-});
+async function admOk(id) {
+  const p = playersCache[id]; if (!p) return;
+  const nb = Math.max(0, parseInt(elById('bal_' + id).value, 10) || 0);
+  const nc = Math.min(100, Math.max(0, parseInt(elById('ch_' + id).value, 10) || 0));
+  p.balance = nb; p.chance = nc; if (id === me.id) { me.balance = nb; me.chance = nc; updateHUD(); }
+  await fbReq('/players/' + id, 'PATCH', { balance: nb, chance: nc });
+  setBanner('✅ Игроку ' + p.name + ' обновлены данные!');
+}
+async function admWild(id) {
+  const p = playersCache[id]; if (!p) return;
+  p.forceWild = true; if (id === me.id) me.forceWild = true;
+  await fbReq('/players/' + id, 'PATCH', { forceWild: true });
+  setBanner('⚔️ Игроку ' + p.name + ' отправлен PHONK WILD!');
+}
+async function adm500k(id) {
+  const p = playersCache[id]; if (!p) return;
+  p.force500k = true; p.forceWild = true; if (id === me.id) { me.force500k = true; me.forceWild = true; }
+  await fbReq('/players/' + id, 'PATCH', { force500k: true, forceWild: true });
+  setBanner('🔥 Игроку ' + p.name + ' отправлен занос 500K!');
+}
 </script>
 </body>
 </html>
