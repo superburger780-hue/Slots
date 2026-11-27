@@ -10,8 +10,8 @@
 body{background:radial-gradient(circle at 50% 15%,#3b260d 0%,#090502 88%);color:var(--gl);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;overflow-x:hidden}
 .gold-text{background:linear-gradient(180deg,#fff9d6 0%,#ffd700 48%,#b38000 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .card{background:linear-gradient(160deg,#21160b 0%,#0d0803 100%);border:2px solid var(--gm);border-radius:18px;box-shadow:0 15px 50px rgba(0,0,0,.92),0 0 35px rgba(212,175,55,.25),inset 0 0 20px rgba(0,0,0,.85);padding:16px;width:100%;max-width:880px;position:relative}
-.cabinet-shake{animation:shakeHard .75s cubic-bezier(.36,.07,.19,.97) both}
-@keyframes shakeHard{10%,90%{transform:translate3d(-5px,2px,0) rotate(-.7deg) scale(1.01)}20%,80%{transform:translate3d(7px,-3px,0) rotate(.8deg) scale(1.02)}30%,50%,70%{transform:translate3d(-8px,4px,0) rotate(-.9deg) scale(1.02)}40%,60%{transform:translate3d(8px,-3px,0) rotate(.7deg) scale(1.01)}}
+.cabinet-shake{animation:shakeHard .85s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shakeHard{10%,90%{transform:translate3d(-6px,3px,0) rotate(-.9deg) scale(1.015)}20%,80%{transform:translate3d(8px,-4px,0) rotate(1deg) scale(1.025)}30%,50%,70%{transform:translate3d(-9px,5px,0) rotate(-1.1deg) scale(1.025)}40%,60%{transform:translate3d(9px,-4px,0) rotate(.9deg) scale(1.015)}}
 #setup-screen{max-width:440px;text-align:center;padding:24px;animation:modalPop .35s ease-out}
 #secret-title{cursor:pointer;user-select:none;letter-spacing:1px}
 input{width:100%;padding:12px 14px;margin-bottom:10px;background:#0a0603;border:1px solid var(--gd);border-radius:10px;color:var(--gl);font-size:15px;outline:none}
@@ -38,24 +38,51 @@ input:focus{border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
 .balance-pop{transform:scale(1.12);border-color:var(--g);box-shadow:0 0 18px rgba(255,215,0,.75)}
 .tumble-hud{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,#160e05,#2b1c09,#160e05);border:1px solid var(--gd);border-radius:10px;padding:7px 14px;margin-bottom:10px;font-size:13px;font-weight:800}
 .mult-pill{background:radial-gradient(circle,#ffea75,#b8860b);color:#1a0f00;padding:3px 10px;border-radius:20px;font-weight:900;font-size:14px;box-shadow:0 0 12px rgba(255,215,0,.5)}
-.slot-cabinet{background:linear-gradient(180deg,#523a10 0%,#211505 50%,#523a10 100%);padding:10px;border-radius:16px;border:3px solid var(--g);box-shadow:0 10px 30px rgba(0,0,0,.85),inset 0 0 15px rgba(255,215,0,.3);transition:box-shadow .3s,border-color .3s}
-.slot-cabinet.wild-hyper{border-color:#fff;box-shadow:0 0 45px #ffd700,0 0 80px rgba(255,140,0,.8),inset 0 0 25px #fff}
+.slot-cabinet{background:linear-gradient(180deg,#523a10 0%,#211505 50%,#523a10 100%);padding:10px;border-radius:16px;border:3px solid var(--g);box-shadow:0 10px 30px rgba(0,0,0,.85),inset 0 0 15px rgba(255,215,0,.3);transition:box-shadow .25s,border-color .25s}
+.slot-cabinet.wild-hyper{border-color:#fff;box-shadow:0 0 55px #ffd700,0 0 110px rgba(255,140,0,.95),inset 0 0 35px #fff}
 .grid-6x5{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#070402;padding:8px;border-radius:10px;border:2px solid #1f1608;overflow:hidden;position:relative}
 .cell-6x5{aspect-ratio:1/1;max-height:76px;background:linear-gradient(180deg,#171007 0%,#24180a 100%);border:1px solid #3a2a0d;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;user-select:none;position:relative}
 @media(max-width:520px){.cell-6x5{font-size:26px;border-radius:6px}.grid-6x5{gap:4px;padding:5px}}
-.wild-col-cell{background:linear-gradient(180deg,#fff 0%,#ffe66d 22%,#ff8800 55%,#7c2d00 82%,#ffd700 100%)!important;border:2px solid #fff!important;animation:wildExpand .55s cubic-bezier(.18,1.38,.4,1) forwards,wildGlowPulse .7s ease-in-out infinite alternate;z-index:5}
-.wild-col-cell::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,transparent 50%,rgba(255,255,255,.6) 100%);animation:wildBeam .65s ease-out forwards;pointer-events:none}
-@keyframes wildBeam{0%{opacity:1;transform:scaleX(1.6)}100%{opacity:0;transform:scaleX(1)}}
-@keyframes wildExpand{0%{transform:scaleY(.02) scaleX(1.5);filter:brightness(5)}55%{transform:scaleY(1.12) scaleX(.92);filter:brightness(2.2)}100%{transform:scaleY(1) scaleX(1);filter:brightness(1.1)}}
-@keyframes wildGlowPulse{from{box-shadow:inset 0 0 12px rgba(255,255,255,.8),0 0 16px rgba(255,200,0,.85)}to{box-shadow:inset 0 0 26px #fff,0 0 34px #ffae00}}
-.wild-badge-top{font-size:10px;font-weight:900;color:#2b0f00;background:rgba(255,255,255,.95);padding:1px 6px;border-radius:4px}
-.wild-mult-big{font-size:20px;font-weight:900;color:#fff;text-shadow:0 2px 5px #000,0 0 15px #ff3300;animation:bounceScale .4s infinite alternate}
-.wild-icon-main{font-size:32px;filter:drop-shadow(0 0 8px #fff);animation:lightningFlash .45s infinite alternate}
-@keyframes lightningFlash{from{transform:scale(.9) rotate(-8deg)}to{transform:scale(1.2) rotate(8deg)}}
-.wild-flash-screen{position:fixed;inset:0;pointer-events:none;z-index:175;background:radial-gradient(circle,rgba(255,230,100,.65) 0%,rgba(255,140,0,.25) 55%,transparent 100%);animation:screenFlashAnim .65s ease-out forwards}
+
+/* ГИПЕР-ЭФФЕКТЫ EXPANDING WILD */
+.wild-col-cell{
+  background:linear-gradient(180deg,#ffffff 0%,#fff08a 18%,#ff9100 50%,#802000 82%,#ffd700 100%)!important;
+  border:2px solid #fff!important;
+  animation:wildSlashExpand .6s cubic-bezier(.16,1.45,.35,1) forwards,wildElectricPulse .55s ease-in-out infinite alternate;
+  z-index:6;
+}
+.wild-col-cell::before{
+  content:"";position:absolute;inset:-4px;border-radius:10px;
+  border:2px solid rgba(255,255,255,.9);
+  animation:wildAuraRing .8s ease-out infinite;pointer-events:none;
+}
+.wild-col-cell::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,#fff 0%,rgba(255,230,100,.8) 50%,#fff 100%);
+  animation:wildLaserFlash .75s ease-out forwards;pointer-events:none;
+}
+@keyframes wildSlashExpand{
+  0%{transform:scaleY(.01) scaleX(1.8);filter:brightness(6)}
+  50%{transform:scaleY(1.16) scaleX(.88);filter:brightness(2.5)}
+  100%{transform:scaleY(1) scaleX(1);filter:brightness(1.15)}
+}
+@keyframes wildElectricPulse{
+  from{box-shadow:inset 0 0 14px #fff,0 0 18px #ffd700,0 0 32px #ff6a00}
+  to{box-shadow:inset 0 0 28px #fff,0 0 36px #fff,0 0 55px #ffae00}
+}
+@keyframes wildAuraRing{0%{transform:scale(.95);opacity:1}100%{transform:scale(1.22);opacity:0}}
+@keyframes wildLaserFlash{0%{opacity:1}100%{opacity:0}}
+
+.wild-badge-top{font-size:10px;font-weight:900;color:#2b0f00;background:#fff;padding:1px 6px;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.6)}
+.wild-mult-big{font-size:21px;font-weight:900;color:#fff;text-shadow:0 2px 5px #000,0 0 16px #ff2200,0 0 28px #fff;animation:bounceScale .35s infinite alternate}
+.wild-icon-main{font-size:33px;filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 18px #ffd700);animation:swordZap .4s infinite alternate}
+@keyframes swordZap{from{transform:scale(.88) rotate(-12deg)}to{transform:scale(1.25) rotate(12deg)}}
+
+.wild-flash-screen{position:fixed;inset:0;pointer-events:none;z-index:175;background:radial-gradient(circle,rgba(255,245,170,.85) 0%,rgba(255,150,0,.35) 55%,transparent 100%);animation:screenFlashAnim .75s ease-out forwards}
 @keyframes screenFlashAnim{0%{opacity:1}100%{opacity:0}}
-.shockwave-ring{position:fixed;left:50%;top:45%;width:40px;height:40px;border:5px solid #ffd700;border-radius:50%;box-shadow:0 0 30px #ffd700,inset 0 0 20px #fff;pointer-events:none;z-index:176;transform:translate(-50%,-50%) scale(0);animation:shockwaveExpand .75s cubic-bezier(.12,.8,.25,1) forwards}
-@keyframes shockwaveExpand{0%{transform:translate(-50%,-50%) scale(.2);opacity:1;border-width:8px}100%{transform:translate(-50%,-50%) scale(22);opacity:0;border-width:1px}}
+.shockwave-ring{position:fixed;left:50%;top:45%;width:40px;height:40px;border:6px solid #fff;border-radius:50%;box-shadow:0 0 40px #ffd700,inset 0 0 25px #fff;pointer-events:none;z-index:176;transform:translate(-50%,-50%) scale(0);animation:shockwaveExpand .85s cubic-bezier(.12,.8,.25,1) forwards}
+@keyframes shockwaveExpand{0%{transform:translate(-50%,-50%) scale(.15);opacity:1;border-width:10px}100%{transform:translate(-50%,-50%) scale(24);opacity:0;border-width:1px}}
+
 .cell-drop{animation:dropIn .34s cubic-bezier(.22,1.22,.45,1) forwards}
 @keyframes dropIn{0%{transform:translateY(-150%) scale(.8);opacity:.15}80%{transform:translateY(4%) scale(1.03);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
 .cell-explode{animation:explodeOut .4s ease-in forwards;z-index:5}
@@ -77,8 +104,8 @@ input:focus{border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
 .bigwin-title{font-size:42px;font-weight:900;text-transform:uppercase;text-align:center;text-shadow:0 0 28px rgba(255,215,0,.95);animation:bounceScale .5s infinite alternate}
 .bigwin-amount{font-size:50px;font-weight:900;color:#fff;text-shadow:0 0 22px #ffd700,0 4px 10px #000;margin-top:8px}
 @keyframes bounceScale{from{transform:scale(.94)}to{transform:scale(1.08)}}
-.lightning-bolt-fx{position:fixed;font-size:44px;z-index:185;pointer-events:none;filter:drop-shadow(0 0 12px #ffd700);animation:sparkBurst .95s ease-out forwards}
-@keyframes sparkBurst{0%{transform:scale(.2) translateY(0) rotate(0deg);opacity:1}100%{transform:scale(1.6) translateY(-110px) rotate(25deg);opacity:0}}
+.lightning-bolt-fx{position:fixed;font-size:46px;z-index:185;pointer-events:none;filter:drop-shadow(0 0 14px #ffd700);animation:sparkBurst 1.05s ease-out forwards}
+@keyframes sparkBurst{0%{transform:scale(.2) translateY(0) rotate(0deg);opacity:1}100%{transform:scale(1.75) translateY(-130px) rotate(35deg);opacity:0}}
 .coin-particle{position:fixed;top:-40px;font-size:26px;z-index:190;pointer-events:none;animation:coinFall linear forwards}
 @keyframes coinFall{to{transform:translateY(110vh) rotate(720deg)}}
 #admin-panel{margin-top:16px;border-top:2px dashed var(--gd);padding-top:12px}
@@ -277,20 +304,22 @@ function playBigWin() {
 
 const BETS = Array.of(10, 25, 50, 100, 250, 500, 1000, 2500);
 const COLS = 6, ROWS = 5, ADMIN_PASS = '7777';
+// Сниженные коэффициенты символов для более редких и реалистичных выигрышей
 const SYMBOLS = Array.of(
-  { id: 'crown', icon: '👑', mult: 3.5, weight: 7 },
-  { id: 'cup', icon: '🏆', mult: 2.2, weight: 10 },
-  { id: 'bell', icon: '🔔', mult: 1.6, weight: 12 },
-  { id: 'clover', icon: '🍀', mult: 1.2, weight: 15 },
-  { id: 'cherry', icon: '🍒', mult: 0.8, weight: 18 }
+  { id: 'crown', icon: '👑', mult: 1.8, weight: 6 },
+  { id: 'cup', icon: '🏆', mult: 1.1, weight: 9 },
+  { id: 'bell', icon: '🔔', mult: 0.8, weight: 12 },
+  { id: 'clover', icon: '🍀', mult: 0.5, weight: 16 },
+  { id: 'cherry', icon: '🍒', mult: 0.35, weight: 22 }
 );
-const WILD_MULTS = Array.of(2, 3, 5, 10, 15, 20, 25, 50, 100);
-const ORB_MULTS = Array.of(2, 3, 5, 10, 15, 25, 50, 100);
+const WILD_MULTS = Array.of(2, 2, 3, 3, 5, 5, 10, 15, 25, 50);
+const ORB_MULTS = Array.of(2, 2, 3, 5, 10, 15, 25, 50);
 
 let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
 try { savedId = localStorage.getItem('rg_player_id') || savedId; localStorage.setItem('rg_player_id', savedId); } catch (e) {}
 
-let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 35, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
+// Базовый шанс снижен до 22%
+let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 22, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
 let playersCache = {};
 let app = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: Array.of() };
 const sleep = ms => new Promise(r => setTimeout(r, app.turbo ? ms * 0.45 : ms));
@@ -362,8 +391,8 @@ setInterval(pollServer, 2500);
 function pickCell(allowSpec) {
   if (allowSpec) {
     const r = Math.random();
-    if (r < 0.035) return { type: 'scatter', icon: '🏛️' };
-    if (r < 0.075) return { type: 'orb', icon: '🌕', mult: ORB_MULTS[Math.floor(Math.random() * ORB_MULTS.length)] };
+    if (r < 0.022) return { type: 'scatter', icon: '🏛️' };
+    if (r < 0.048) return { type: 'orb', icon: '🌕', mult: ORB_MULTS[Math.floor(Math.random() * ORB_MULTS.length)] };
   }
   const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
   let rnd = Math.random() * totalW;
@@ -371,22 +400,24 @@ function pickCell(allowSpec) {
     if (rnd < SYMBOLS[i].weight) return { type: 'normal', id: SYMBOLS[i].id, icon: SYMBOLS[i].icon, mult: SYMBOLS[i].mult };
     rnd -= SYMBOLS[i].weight;
   }
-  return { type: 'normal', id: 'cherry', icon: '🍒', mult: 0.8 };
+  return { type: 'normal', id: 'cherry', icon: '🍒', mult: 0.35 };
 }
 
 function generateGrid() {
   const luck = me.chance / 100;
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-  if (Math.random() < luck * 0.65 || me.force500k) {
+  // Снижен шанс принудительного сбора комбинации
+  if (Math.random() < luck * 0.42 || me.force500k) {
     const t = me.force500k ? SYMBOLS : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-    const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 4));
+    const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 2));
     let pl = 0;
     while (pl < cnt) {
       const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
       if (app.grid[c][r].type === 'normal') { app.grid[c][r] = { type: 'normal', id: t.id, icon: t.icon, mult: t.mult }; pl++; }
     }
   }
-  const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.14 + luck * 0.14)) ? 1 : 0);
+  // Шанс естественного выпадения WILD снижен (5% + luck*8%)
+  const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.05 + luck * 0.08)) ? 1 : 0);
   if (wCnt > 0) {
     const cols = Array.of(0, 2, 4, 1, 3, 5);
     for (let i = 0; i < wCnt; i++) {
@@ -428,19 +459,31 @@ function spawnFloat(amt) {
   document.body.appendChild(el); setTimeout(() => el.remove(), 1100);
 }
 
+// УСИЛЕННЫЕ ЭФФЕКТЫ НА ВЫПАДЕНИЕ EXPANDING WILD
 function triggerWildFX() {
   const card = elById('game-screen'), cab = elById('slot-cabinet');
   card.classList.remove('cabinet-shake'); void card.offsetWidth; card.classList.add('cabinet-shake');
-  const fl = document.createElement('div'); fl.className = 'wild-flash-screen'; document.body.appendChild(fl); setTimeout(() => fl.remove(), 700);
-  const wv = document.createElement('div'); wv.className = 'shockwave-ring'; document.body.appendChild(wv); setTimeout(() => wv.remove(), 800);
-  cab.classList.add('wild-hyper'); setTimeout(() => cab.classList.remove('wild-hyper'), 1800);
-  const icons = Array.of('⚡', '⚔️', '🔥', '💥', '✨');
-  for (let i = 0; i < 18; i++) {
+
+  // Двойная вспышка и двойная ударная волна
+  for (let w = 0; w < 2; w++) {
     setTimeout(() => {
-      const s = document.createElement('div'); s.className = 'lightning-bolt-fx'; s.textContent = icons[i % 5];
-      s.style.left = (12 + Math.random() * 76) + 'vw'; s.style.top = (22 + Math.random() * 52) + 'vh';
-      document.body.appendChild(s); setTimeout(() => s.remove(), 950);
-    }, i * 35);
+      const fl = document.createElement('div'); fl.className = 'wild-flash-screen';
+      document.body.appendChild(fl); setTimeout(() => fl.remove(), 750);
+      const wv = document.createElement('div'); wv.className = 'shockwave-ring';
+      document.body.appendChild(wv); setTimeout(() => wv.remove(), 850);
+    }, w * 220);
+  }
+
+  cab.classList.add('wild-hyper'); setTimeout(() => cab.classList.remove('wild-hyper'), 2200);
+
+  // 26 молний, мечей и искр по всему экрану
+  const icons = Array.of('⚡', '⚔️', '🔥', '💥', '✨', '👑');
+  for (let i = 0; i < 26; i++) {
+    setTimeout(() => {
+      const s = document.createElement('div'); s.className = 'lightning-bolt-fx'; s.textContent = icons[i % 6];
+      s.style.left = (8 + Math.random() * 84) + 'vw'; s.style.top = (18 + Math.random() * 60) + 'vh';
+      document.body.appendChild(s); setTimeout(() => s.remove(), 1050);
+    }, i * 30);
   }
 }
 
@@ -469,10 +512,17 @@ async function startSpin(isFS) {
   for (let c = 0; c < COLS; c++) setTimeout(() => playTick(c), c * (app.turbo ? 20 : 45));
 
   let hasW = false, wSum = 0;
-  for (let c = 0; c < COLS; c++) { if (app.grid[c].type === 'wild_col') { hasW = true; wSum += app.grid[c].mult; } }
-  if (hasW) { playPhonkWild(); triggerWildFX(); setBanner('⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x' + wSum + '!'); }
-  else setBanner(isFS ? '⚡ FREE SPINS (' + app.freeSpins + ')...' : '🎰 Вращение...');
-  await sleep(520);
+  for (let c = 0; c < COLS; c++) {
+    if (app.grid[c].type === 'wild_col') { hasW = true; wSum += app.grid[c].mult; }
+  }
+  if (hasW) {
+    playPhonkWild();
+    triggerWildFX();
+    setBanner('⚔️ МЕЧ ПРОРУБИЛ WILD! Множитель x' + wSum + '!');
+  } else {
+    setBanner(isFS ? '⚡ FREE SPINS (' + app.freeSpins + ')...' : '🎰 Вращение...');
+  }
+  await sleep(550);
 
   let casc = 0, baseWin = 0, orbMult = 0;
   while (true) {
@@ -493,7 +543,7 @@ async function startSpin(isFS) {
       const sym = SYMBOLS[i], tot = (cnts[sym.id] || 0) + wCols;
       if ((cnts[sym.id] || 0) > 0 && tot >= 8) {
         coords[sym.id].forEach(crd => expl.add(crd));
-        stepWin += bet * sym.mult * (1 + (tot - 8) * 0.25);
+        stepWin += bet * sym.mult * (1 + (tot - 8) * 0.2);
       }
     }
     if (expl.size === 0) break;
@@ -523,14 +573,14 @@ async function startSpin(isFS) {
   elById('total-mult').textContent = 'x' + totMult;
 
   let totWin = Math.round(baseWin * totMult);
-  if (wSum >= 60 && totWin > 0 && totWin < 500000 && baseWin >= bet * 40) totWin = 500000;
+  if (wSum >= 60 && totWin > 0 && totWin < 500000 && baseWin >= bet * 30) totWin = 500000;
 
   if (totWin > 0) {
     me.balance += totWin; pushMe();
     elById('balance-box').classList.add('balance-pop'); setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
     setBanner('💥 КАСКАД #' + Math.max(1, casc) + ': +' + fmt(totWin) + ' 💰');
     if (totWin >= bet * 15 || totWin >= 100000) await showBigWin(totWin);
-  } else { pushMe(); setBanner('Нажмите SPIN или ⚔️ WILD в админке!'); }
+  } else { pushMe(); setBanner('Попробуй ещё раз! Собери 8+ символов или ⚔️ WILD'); }
 
   if (scat >= 4 && app.freeSpins === 0) {
     app.freeSpins = 10; app.bonusMult = 1;
@@ -602,17 +652,4 @@ async function admOk(id) {
   setBanner('✅ Игроку ' + p.name + ' обновлены данные!');
 }
 async function admWild(id) {
-  const p = playersCache[id]; if (!p) return;
-  p.forceWild = true; if (id === me.id) me.forceWild = true;
-  await fbReq('/players/' + id, 'PATCH', { forceWild: true });
-  setBanner('⚔️ Игроку ' + p.name + ' отправлен PHONK WILD!');
-}
-async function adm500k(id) {
-  const p = playersCache[id]; if (!p) return;
-  p.force500k = true; p.forceWild = true; if (id === me.id) { me.force500k = true; me.forceWild = true; }
-  await fbReq('/players/' + id, 'PATCH', { force500k: true, forceWild: true });
-  setBanner('🔥 Игроку ' + p.name + ' отправлен занос 500K!');
-}
-</script>
-</body>
-</html>
+  const p = playersCache[id]; if (!
