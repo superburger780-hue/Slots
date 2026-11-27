@@ -3,7 +3,7 @@ const elById = id => document.getElementById(id);
 const fmt = n => Math.round(n).toString();
 
 let audioCtx = null, sndOn = true;
-const wildAudio = new Audio('wild.mp3');
+const wildAudio = new Audio('wild.mp3.mp3');
 wildAudio.volume = 0.85;
 let wildTimer = null;
 
