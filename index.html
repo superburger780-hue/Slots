@@ -12,6 +12,7 @@ body{background:radial-gradient(circle at 50% 15%,#3b260d 0%,#090502 88%);color:
 .card{background:linear-gradient(160deg,#21160b 0%,#0d0803 100%);border:2px solid var(--gm);border-radius:18px;box-shadow:0 15px 50px rgba(0,0,0,.92),0 0 35px rgba(212,175,55,.25),inset 0 0 20px rgba(0,0,0,.85);padding:16px;width:100%;max-width:880px;position:relative}
 .cabinet-shake{animation:shakeHard .85s cubic-bezier(.36,.07,.19,.97) both}
 @keyframes shakeHard{10%,90%{transform:translate3d(-6px,3px,0) rotate(-.9deg) scale(1.015)}20%,80%{transform:translate3d(8px,-4px,0) rotate(1deg) scale(1.025)}30%,50%,70%{transform:translate3d(-9px,5px,0) rotate(-1.1deg) scale(1.025)}40%,60%{transform:translate3d(9px,-4px,0) rotate(.9deg) scale(1.015)}}
+@keyframes modalPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
 #setup-screen{max-width:440px;text-align:center;padding:24px;animation:modalPop .35s ease-out}
 #secret-title{cursor:pointer;user-select:none;letter-spacing:1px}
 input{width:100%;padding:12px 14px;margin-bottom:10px;background:#0a0603;border:1px solid var(--gd);border-radius:10px;color:var(--gl);font-size:15px;outline:none}
@@ -304,7 +305,6 @@ function playBigWin() {
 
 const BETS = Array.of(10, 25, 50, 100, 250, 500, 1000, 2500);
 const COLS = 6, ROWS = 5, ADMIN_PASS = '7777';
-// Сниженные коэффициенты символов для более редких и реалистичных выигрышей
 const SYMBOLS = Array.of(
   { id: 'crown', icon: '👑', mult: 1.8, weight: 6 },
   { id: 'cup', icon: '🏆', mult: 1.1, weight: 9 },
@@ -318,7 +318,6 @@ const ORB_MULTS = Array.of(2, 2, 3, 5, 10, 15, 25, 50);
 let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
 try { savedId = localStorage.getItem('rg_player_id') || savedId; localStorage.setItem('rg_player_id', savedId); } catch (e) {}
 
-// Базовый шанс снижен до 22%
 let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 22, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
 let playersCache = {};
 let app = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: Array.of() };
@@ -406,7 +405,6 @@ function pickCell(allowSpec) {
 function generateGrid() {
   const luck = me.chance / 100;
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-  // Снижен шанс принудительного сбора комбинации
   if (Math.random() < luck * 0.42 || me.force500k) {
     const t = me.force500k ? SYMBOLS : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
     const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 2));
@@ -416,7 +414,6 @@ function generateGrid() {
       if (app.grid[c][r].type === 'normal') { app.grid[c][r] = { type: 'normal', id: t.id, icon: t.icon, mult: t.mult }; pl++; }
     }
   }
-  // Шанс естественного выпадения WILD снижен (5% + luck*8%)
   const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.05 + luck * 0.08)) ? 1 : 0);
   if (wCnt > 0) {
     const cols = Array.of(0, 2, 4, 1, 3, 5);
@@ -459,12 +456,10 @@ function spawnFloat(amt) {
   document.body.appendChild(el); setTimeout(() => el.remove(), 1100);
 }
 
-// УСИЛЕННЫЕ ЭФФЕКТЫ НА ВЫПАДЕНИЕ EXPANDING WILD
 function triggerWildFX() {
   const card = elById('game-screen'), cab = elById('slot-cabinet');
   card.classList.remove('cabinet-shake'); void card.offsetWidth; card.classList.add('cabinet-shake');
 
-  // Двойная вспышка и двойная ударная волна
   for (let w = 0; w < 2; w++) {
     setTimeout(() => {
       const fl = document.createElement('div'); fl.className = 'wild-flash-screen';
@@ -476,7 +471,6 @@ function triggerWildFX() {
 
   cab.classList.add('wild-hyper'); setTimeout(() => cab.classList.remove('wild-hyper'), 2200);
 
-  // 26 молний, мечей и искр по всему экрану
   const icons = Array.of('⚡', '⚔️', '🔥', '💥', '✨', '👑');
   for (let i = 0; i < 26; i++) {
     setTimeout(() => {
@@ -651,5 +645,20 @@ async function admOk(id) {
   await fbReq('/players/' + id, 'PATCH', { balance: nb, chance: nc });
   setBanner('✅ Игроку ' + p.name + ' обновлены данные!');
 }
+
 async function admWild(id) {
-  const p = playersCache[id]; if (!
+  const p = playersCache[id]; if (!p) return;
+  p.forceWild = true;
+  if (id === me.id) me.forceWild = true;
+  await fbReq('/players/' + id, 'PATCH', { forceWild: true });
+  setBanner('⚔️ Игроку ' + p.name + ' активирован WILD на следующий спин!');
+}
+
+async function adm500k(id) {
+  const p = playersCache[id]; if (!p) return;
+  p.force500k = true;
+  if (id ===
+me.id) me.force500k = true;
+await fbReq('/players/' + id, 'PATCH', { force500k: true });
+setBanner('🔥 Игроку ' + p.name + ' активирован MAX WIN 500K на следующий спин!');
+}
