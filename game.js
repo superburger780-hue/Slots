@@ -247,11 +247,11 @@ async function fbReq(path, method, body) {
     const opts = { method: method || 'GET', headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(FB_URL + path + '.json', opts);
-    if (!res.ok) throw new Error(res.status);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     elById('net-status').innerHTML = '<span class="dot online"></span>В сети (Firebase)';
     return await res.json();
   } catch (e) {
-    elById('net-status').innerHTML = '<span class="dot offline"></span>Локальный режим';
+    elById('net-status').innerHTML = '<span class="dot offline"></span>Ошибка: ' + e.message;
     return null;
   }
 }
