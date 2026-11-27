@@ -184,7 +184,7 @@ const SYMBOLS = new Array(
   { id: 'cherry', icon: '🍒', mult: 0.25, weight: 26 }
 );
 
-const WILD_MULTS = new Array(2, 2, 2, 3, 3, 5, 5, 10, 15, 25);
+const WILD_MULTS = new Array(2, 2, 3, 3, 5, 5, 10, 15, 20, 25);
 const ORB_MULTS = new Array(2, 2, 2, 3, 5, 10, 15, 25);
 
 function itemAt(arr, idx) {
@@ -357,7 +357,6 @@ function buildDeadGrid() {
 function generateGrid(isFS) {
   const hasAdminForce = me.forceWild || me.force500k;
 
-  // В обычных спинах с шансом 75% вообще ничего не выпадает
   if (!isFS && !hasAdminForce && Math.random() < 0.75) {
     buildDeadGrid();
     return;
@@ -380,10 +379,10 @@ function generateGrid(isFS) {
     }
   }
 
-  // Прогрессивный шанс выпадения WILD: первый -> 25% второй -> 50% третий -> 100% четвёртый
+  // Прогрессивный шанс выпадения WILD столбцов: 1-й -> 25% 2-й -> 50% 3-й -> 100% 4-й
   let wCnt = 0;
   if (me.force500k) {
-    wCnt = 4;
+    wCnt = 3;
   } else if (me.forceWild || Math.random() < (0.04 + luck * 0.08)) {
     wCnt = 1;
     if (Math.random() < 0.25) {
@@ -398,9 +397,10 @@ function generateGrid(isFS) {
   }
 
   if (wCnt > 0) {
-    const startCol = Math.floor(Math.random() * (COLS - wCnt + 1));
+    // Расставляем WILD столбцы через один (как на скриншоте: 1-й, 3-й, 5-й барабаны, затем 2-й, 4-й, 6-й)
+    const cols = new Array(0, 2, 4, 1, 3, 5);
     for (let i = 0; i < wCnt; i++) {
-      const col = startCol + i;
+      const col = itemAt(cols, i);
       const mult = me.force500k ? (15 + i * 5) : itemAt(WILD_MULTS, Math.floor(Math.random() * WILD_MULTS.length));
       const colArr = itemAt(app.grid, col);
       for (let r = 0; r < ROWS; r++) {
@@ -416,38 +416,9 @@ function renderGrid(anim, expl) {
   const gEl = elById('slot-grid');
   gEl.innerHTML = '';
 
-  const wildCols = new Array();
-  let totalWildMult = 0;
-  for (let c = 0; c < COLS; c++) {
-    const topCell = itemAt(itemAt(app.grid, c), 0);
-    if (topCell.type === 'wild_col') {
-      wildCols.push(c);
-      totalWildMult += topCell.mult;
-    }
-  }
-
-  const isMergedMegaWild = wildCols.length >= 2;
-  const firstWildCol = isMergedMegaWild ? itemAt(wildCols, 0) : -1;
-
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const cell = itemAt(itemAt(app.grid, c), r);
-
-      if (isMergedMegaWild && cell.type === 'wild_col') {
-        if (r === 0 && c === firstWildCol) {
-          const megaEl = document.createElement('div');
-          megaEl.className = 'mega-wild-merged';
-          megaEl.style.gridColumn = (firstWildCol + 1) + ' / span ' + wildCols.length;
-          megaEl.style.gridRow = '1 / span ' + ROWS;
-          megaEl.innerHTML =
-            '<div class="mega-wild-title">⚔️ MEGA WILD ×' + wildCols.length + ' ⚔️</div>' +
-            '<div class="mega-wild-mult">' + totalWildMult + 'x</div>' +
-            '<div class="mega-wild-sub">ОБЪЕДИНЁННЫЙ МНОЖИТЕЛЬ</div>';
-          gEl.appendChild(megaEl);
-        }
-        continue;
-      }
-
       const el = document.createElement('div');
       el.className = 'cell-6x5';
       if (anim) {
@@ -582,11 +553,7 @@ async function startSpin(isFS) {
   if (wCount > 0) {
     playPhonkWild();
     triggerWildFX();
-    if (wCount >= 2) {
-      setBanner('🔥 СЛИЯНИЕ ' + wCount + ' WILD В MEGA WILD x' + wSum + '!');
-    } else {
-      setBanner('⚔️ МЕЧ ПРОРУБИЛ WILD! Множитель x' + wSum + '!');
-    }
+    setBanner('⚔️ МЕЧ ПРОРУБИЛ ' + wCount + ' WILD! Общий множитель x' + wSum + '!');
   } else {
     setBanner(isFS ? '⚡ FREE SPINS (' + app.freeSpins + ')...' : '🎰 Вращение...');
   }
