@@ -45,7 +45,7 @@ function playCascade(combo) {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
   const shift = Math.pow(1.07, Math.min(combo, 10));
-  const notes = Array.of(523.25, 659.25, 783.99, 1046.50);
+  const notes = new Array(523.25, 659.25, 783.99, 1046.50);
   notes.forEach((f, i) => {
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
@@ -74,7 +74,7 @@ function playPhonkWild() {
   shaper.curve = curve;
   shaper.connect(audioCtx.destination);
 
-  const melody = Array.of(
+  const melody = new Array(
     { t: 0.00, f: 587.33, d: 0.13 },
     { t: 0.14, f: 587.33, d: 0.13 },
     { t: 0.28, f: 698.46, d: 0.13 },
@@ -88,7 +88,7 @@ function playPhonkWild() {
     { t: 1.56, f: 1046.50, d: 0.28 }
   );
 
-  Array.of(1.0, 1.48).forEach(ratio => {
+  new Array(1.0, 1.48).forEach(ratio => {
     melody.forEach(n => {
       const st = now + n.t;
       const o = audioCtx.createOscillator();
@@ -109,7 +109,7 @@ function playPhonkWild() {
     });
   });
 
-  Array.of(0.00, 0.42, 0.56, 1.12, 1.40).forEach(off => {
+  new Array(0.00, 0.42, 0.56, 1.12, 1.40).forEach(off => {
     const b = audioCtx.createOscillator();
     const bg = audioCtx.createGain();
     b.type = 'sine';
@@ -152,7 +152,7 @@ function playBigWin() {
   initAudio();
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
-  Array.of(261.63, 329.63, 392.00, 523.25, 659.25, 783.99).forEach((f, i) => {
+  new Array(261.63, 329.63, 392.00, 523.25, 659.25, 783.99).forEach((f, i) => {
     const o = audioCtx.createOscillator();
     const flt = audioCtx.createBiquadFilter();
     const g = audioCtx.createGain();
@@ -171,12 +171,12 @@ function playBigWin() {
   });
 }
 
-const BETS = Array.of(10, 25, 50, 100, 250, 500, 1000, 2500);
+const BETS = new Array(10, 25, 50, 100, 250, 500, 1000, 2500);
 const COLS = 6;
 const ROWS = 5;
 const ADMIN_PASS = '7777';
 
-const SYMBOLS = Array.of(
+const SYMBOLS = new Array(
   { id: 'crown', icon: '👑', mult: 1.8, weight: 6 },
   { id: 'cup', icon: '🏆', mult: 1.1, weight: 9 },
   { id: 'bell', icon: '🔔', mult: 0.8, weight: 12 },
@@ -184,8 +184,12 @@ const SYMBOLS = Array.of(
   { id: 'cherry', icon: '🍒', mult: 0.35, weight: 22 }
 );
 
-const WILD_MULTS = Array.of(2, 2, 3, 3, 5, 5, 10, 15, 25, 50);
-const ORB_MULTS = Array.of(2, 2, 3, 5, 10, 15, 25, 50);
+const WILD_MULTS = new Array(2, 2, 3, 3, 5, 5, 10, 15, 25, 50);
+const ORB_MULTS = new Array(2, 2, 3, 5, 10, 15, 25, 50);
+
+function itemAt(arr, idx) {
+  return arr.slice(idx, idx + 1).pop();
+}
 
 let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
 try {
@@ -213,7 +217,7 @@ let app = {
   autoSpins: 0,
   freeSpins: 0,
   bonusMult: 1,
-  grid: Array.of()
+  grid: new Array()
 };
 
 const sleep = ms => new Promise(r => setTimeout(r, app.turbo ? ms * 0.45 : ms));
@@ -313,12 +317,12 @@ function pickCell(allowSpec) {
   if (allowSpec) {
     const r = Math.random();
     if (r < 0.022) return { type: 'scatter', icon: '🏛️' };
-    if (r < 0.048) return { type: 'orb', icon: '🌕', mult: ORB_MULTS.at(Math.floor(Math.random() * ORB_MULTS.length)) };
+    if (r < 0.048) return { type: 'orb', icon: '🌕', mult: itemAt(ORB_MULTS, Math.floor(Math.random() * ORB_MULTS.length)) };
   }
   const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
   let rnd = Math.random() * totalW;
   for (let i = 0; i < SYMBOLS.length; i++) {
-    const sym = SYMBOLS.at(i);
+    const sym = itemAt(SYMBOLS, i);
     if (rnd < sym.weight) return { type: 'normal', id: sym.id, icon: sym.icon, mult: sym.mult };
     rnd -= sym.weight;
   }
@@ -329,14 +333,14 @@ function generateGrid() {
   const luck = me.chance / 100;
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
   if (Math.random() < luck * 0.42 || me.force500k) {
-    const t = me.force500k ? SYMBOLS.at(0) : SYMBOLS.at(Math.floor(Math.random() * SYMBOLS.length));
+    const t = me.force500k ? itemAt(SYMBOLS, 0) : itemAt(SYMBOLS, Math.floor(Math.random() * SYMBOLS.length));
     const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 2));
     let pl = 0;
     while (pl < cnt) {
       const c = Math.floor(Math.random() * COLS);
       const r = Math.floor(Math.random() * ROWS);
-      const colArr = app.grid.at(c);
-      if (colArr.at(r).type === 'normal') {
+      const colArr = itemAt(app.grid, c);
+      if (itemAt(colArr, r).type === 'normal') {
         colArr.splice(r, 1, { type: 'normal', id: t.id, icon: t.icon, mult: t.mult });
         pl++;
       }
@@ -344,11 +348,11 @@ function generateGrid() {
   }
   const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.05 + luck * 0.08)) ? 1 : 0);
   if (wCnt > 0) {
-    const cols = Array.of(0, 2, 4, 1, 3, 5);
+    const cols = new Array(0, 2, 4, 1, 3, 5);
     for (let i = 0; i < wCnt; i++) {
-      const col = cols.at(i);
-      const mult = me.force500k ? (15 + i * 5) : WILD_MULTS.at(Math.floor(Math.random() * WILD_MULTS.length));
-      const colArr = app.grid.at(col);
+      const col = itemAt(cols, i);
+      const mult = me.force500k ? (15 + i * 5) : itemAt(WILD_MULTS, Math.floor(Math.random() * WILD_MULTS.length));
+      const colArr = itemAt(app.grid, col);
       for (let r = 0; r < ROWS; r++) {
         colArr.splice(r, 1, { type: 'wild_col', mult: mult, rowIdx: r });
       }
@@ -363,7 +367,7 @@ function renderGrid(anim, expl) {
   gEl.innerHTML = '';
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
-      const cell = app.grid.at(c).at(r);
+      const cell = itemAt(itemAt(app.grid, c), r);
       const el = document.createElement('div');
       el.className = 'cell-6x5';
       if (anim) {
@@ -424,12 +428,12 @@ function triggerWildFX() {
   cab.classList.add('wild-hyper');
   setTimeout(() => cab.classList.remove('wild-hyper'), 2200);
 
-  const icons = Array.of('⚡', '⚔️', '🔥', '💥', '✨', '👑');
+  const icons = new Array('⚡', '⚔️', '🔥', '💥', '✨', '👑');
   for (let i = 0; i < 26; i++) {
     setTimeout(() => {
       const s = document.createElement('div');
       s.className = 'lightning-bolt-fx';
-      s.textContent = icons.at(i % 6);
+      s.textContent = itemAt(icons, i % 6);
       s.style.left = (8 + Math.random() * 84) + 'vw';
       s.style.top = (18 + Math.random() * 60) + 'vh';
       document.body.appendChild(s);
@@ -466,7 +470,7 @@ async function showBigWin(amt) {
 
 async function startSpin(isFS) {
   if (app.isSpinning) return;
-  const bet = BETS.at(app.betIndex);
+  const bet = itemAt(BETS, app.betIndex);
   if (!isFS) {
     if (me.balance < bet) {
       setBanner('❌ Недостаточно средств!');
@@ -488,7 +492,7 @@ async function startSpin(isFS) {
   let hasW = false;
   let wSum = 0;
   for (let c = 0; c < COLS; c++) {
-    const topCell = app.grid.at(c).at(0);
+    const topCell = itemAt(itemAt(app.grid, c), 0);
     if (topCell.type === 'wild_col') {
       hasW = true;
       wSum += topCell.mult;
@@ -514,16 +518,16 @@ async function startSpin(isFS) {
     let wCols = 0;
 
     for (let c = 0; c < COLS; c++) {
-      const colArr = app.grid.at(c);
-      if (colArr.at(0).type === 'wild_col') wCols++;
+      const colArr = itemAt(app.grid, c);
+      if (itemAt(colArr, 0).type === 'wild_col') wCols++;
       for (let r = 0; r < ROWS; r++) {
-        const cell = colArr.at(r);
+        const cell = itemAt(colArr, r);
         if (cell.type === 'normal') {
           const prevCnt = Reflect.get(cnts, cell.id) || 0;
           Reflect.set(cnts, cell.id, prevCnt + 1);
           let list = Reflect.get(coords, cell.id);
           if (!list) {
-            list = Array.of();
+            list = new Array();
             Reflect.set(coords, cell.id, list);
           }
           list.push(c + ',' + r);
@@ -535,7 +539,7 @@ async function startSpin(isFS) {
     let stepWin = 0;
 
     for (let i = 0; i < SYMBOLS.length; i++) {
-      const sym = SYMBOLS.at(i);
+      const sym = itemAt(SYMBOLS, i);
       const symCnt = Reflect.get(cnts, sym.id) || 0;
       const tot = symCnt + wCols;
       if (symCnt > 0 && tot >= 8) {
@@ -554,11 +558,11 @@ async function startSpin(isFS) {
     await sleep(420);
 
     for (let c = 0; c < COLS; c++) {
-      const colArr = app.grid.at(c);
-      if (colArr.at(0).type === 'wild_col') continue;
-      const rem = Array.of();
+      const colArr = itemAt(app.grid, c);
+      if (itemAt(colArr, 0).type === 'wild_col') continue;
+      const rem = new Array();
       for (let r = ROWS - 1; r >= 0; r--) {
-        if (!expl.has(c + ',' + r)) rem.unshift(colArr.at(r));
+        if (!expl.has(c + ',' + r)) rem.unshift(itemAt(colArr, r));
       }
       while (rem.length < ROWS) rem.unshift(pickCell(true));
       app.grid.splice(c, 1, rem);
@@ -569,9 +573,9 @@ async function startSpin(isFS) {
 
   let scat = 0;
   for (let c = 0; c < COLS; c++) {
-    const colArr = app.grid.at(c);
+    const colArr = itemAt(app.grid, c);
     for (let r = 0; r < ROWS; r++) {
-      const cell = colArr.at(r);
+      const cell = itemAt(colArr, r);
       if (cell.type === 'orb') orbMult += cell.mult;
       if (cell.type === 'scatter') scat++;
     }
@@ -620,7 +624,7 @@ async function startSpin(isFS) {
 }
 
 function updateHUD() {
-  const bet = BETS.at(app.betIndex);
+  const bet = itemAt(BETS, app.betIndex);
   elById('bet-val').textContent = fmt(bet);
   elById('buy-cost').textContent = fmt(bet * 100);
   elById('balance-val').textContent = fmt(me.balance);
@@ -631,7 +635,7 @@ function setBanner(t) {
 }
 
 function setBtns(en) {
-  Array.of('spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn').forEach(id => {
+  new Array('spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn').forEach(id => {
     elById(id).disabled = !en;
   });
 }
@@ -655,7 +659,7 @@ function toggleTurbo(btn) {
 }
 
 function buyBonus() {
-  const cost = BETS.at(app.betIndex) * 100;
+  const cost = itemAt(BETS, app.betIndex) * 100;
   if (me.balance < cost) return setBanner('❌ Недостаточно средств для BUY BONUS!');
   me.balance -= cost;
   app.freeSpins = 10;
