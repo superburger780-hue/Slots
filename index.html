@@ -2,1197 +2,608 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ROYAL GOLD 6x5 — MAX WIN EDITION</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ROYAL GOLD 6x5 — MAX WIN</title>
 <style>
-  :root {
-    --gold-light: #fff6cc;
-    --gold: #ffd700;
-    --gold-mid: #d4af37;
-    --gold-dark: #7a5c12;
-    --green-on: #2ecc71;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: radial-gradient(circle at 50% 15%, #3b260d 0%, #090502 88%);
-    color: var(--gold-light);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    overflow-x: hidden;
-  }
-  .gold-text {
-    background: linear-gradient(180deg, #fff9d6 0%, #ffd700 48%, #b38000 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 900;
-  }
-  .card {
-    background: linear-gradient(160deg, #21160b 0%, #0d0803 100%);
-    border: 2px solid var(--gold-mid);
-    border-radius: 18px;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.92), 0 0 35px rgba(212, 175, 55, 0.25), inset 0 0 20px rgba(0,0,0,0.85);
-    padding: 16px;
-    width: 100%;
-    max-width: 880px;
-    position: relative;
-  }
-
-  #setup-screen { max-width: 430px; text-align: center; padding: 22px; }
-  #secret-title { cursor: pointer; user-select: none; letter-spacing: 1px; }
-  input {
-    width: 100%; padding: 12px 14px; margin-bottom: 10px;
-    background: #0a0603; border: 1px solid var(--gold-dark);
-    border-radius: 10px; color: var(--gold-light); font-size: 15px; outline: none;
-  }
-  input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.35); }
-  .avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 10px 0 14px; }
-  .avatar-opt {
-    font-size: 26px; padding: 7px 0; background: #140c05;
-    border: 2px solid #3d2e10; border-radius: 10px; cursor: pointer; user-select: none;
-  }
-  .avatar-opt.selected { border-color: var(--gold); background: rgba(255, 215, 0, 0.2); box-shadow: 0 0 12px rgba(255, 215, 0, 0.45); }
-
-  .btn {
-    background: linear-gradient(180deg, #ffea75 0%, #d4af37 52%, #8f6b10 100%);
-    color: #1c1100; border: 1px solid #fff3a8; border-radius: 12px;
-    padding: 11px 18px; font-size: 14px; font-weight: 900;
-    cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
-    box-shadow: 0 5px 18px rgba(212, 175, 55, 0.4), inset 0 1px 0 rgba(255,255,255,0.6);
-    transition: transform 0.1s, filter 0.15s;
-  }
-  .btn:active:not(:disabled) { transform: scale(0.96); }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-secondary {
-    background: linear-gradient(180deg, #24190c, #140d05);
-    border: 1px solid var(--gold-mid);
-    color: var(--gold); box-shadow: none; padding: 8px 11px; font-size: 13px;
-  }
-  .btn-secondary.active-toggle {
-    background: rgba(255, 215, 0, 0.25);
-    border-color: var(--gold);
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.35);
-  }
-  .btn-auto-stop {
-    background: linear-gradient(180deg, #ff5252 0%, #b71c1c 100%);
-    border-color: #ff8a80;
-    color: #fff;
-    box-shadow: 0 0 12px rgba(255, 82, 82, 0.5);
-  }
-  .btn-buy {
-    background: linear-gradient(180deg, #ff6b6b 0%, #c92a2a 55%, #7a1111 100%);
-    color: #fff; border-color: #ffa8a8;
-    box-shadow: 0 4px 15px rgba(220, 40, 40, 0.45);
-  }
-  .btn-bigwin-admin {
-    background: linear-gradient(180deg, #ff922b 0%, #d9480f 100%);
-    color: #fff; border: 1px solid #ffd8a8;
-    padding: 5px 9px; font-size: 11px; border-radius: 8px;
-    box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
-  }
-
-  .top-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 8px; padding-bottom: 10px; margin-bottom: 10px;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-  }
-  .player-info { display: flex; align-items: center; gap: 8px; }
-  .player-avatar {
-    font-size: 26px; width: 40px; height: 40px;
-    display: flex; align-items: center; justify-content: center;
-    background: radial-gradient(circle, #2b1d0b, #0a0602);
-    border: 2px solid var(--gold); border-radius: 50%;
-  }
-  .badge-admin {
-    background: var(--gold); color: #000; font-size: 10px;
-    font-weight: 900; padding: 2px 5px; border-radius: 4px; margin-left: 4px;
-  }
-  .balance-box {
-    font-size: 17px; background: #090603;
-    padding: 6px 12px; border-radius: 10px; border: 1px solid var(--gold-dark);
-  }
-
-  .tumble-hud {
-    display: flex; justify-content: space-between; align-items: center;
-    background: linear-gradient(90deg, #160e05, #2b1c09, #160e05);
-    border: 1px solid var(--gold-dark);
-    border-radius: 10px;
-    padding: 7px 14px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    font-weight: 800;
-  }
-  .mult-pill {
-    background: radial-gradient(circle, #ffea75, #b8860b);
-    color: #1a0f00;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 900;
-    font-size: 14px;
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
-  }
-
-  .slot-cabinet {
-    background: linear-gradient(180deg, #523a10 0%, #211505 50%, #523a10 100%);
-    padding: 10px;
-    border-radius: 16px;
-    border: 3px solid var(--gold);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.85), inset 0 0 15px rgba(255, 215, 0, 0.3);
-  }
-  .grid-6x5 {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
-    background: #070402;
-    padding: 8px;
-    border-radius: 10px;
-    border: 2px solid #1f1608;
-    overflow: hidden;
-  }
-  .cell-6x5 {
-    aspect-ratio: 1 / 1;
-    max-height: 76px;
-    background: linear-gradient(180deg, #171007 0%, #24180a 100%);
-    border: 1px solid #3a2a0d;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 34px;
-    user-select: none;
-    position: relative;
-    transition: transform 0.2s, opacity 0.2s;
-  }
-  @media (max-width: 520px) {
-    .cell-6x5 { font-size: 26px; border-radius: 6px; }
-    .grid-6x5 { gap: 4px; padding: 5px; }
-  }
-
-  .cell-drop {
-    animation: dropIn 0.32s cubic-bezier(0.22, 1.18, 0.45, 1) forwards;
-  }
-  @keyframes dropIn {
-    0% { transform: translateY(-140%) scale(0.85); opacity: 0.2; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-  }
-
-  .cell-explode {
-    animation: explodeOut 0.38s ease-in forwards;
-    z-index: 5;
-  }
-  @keyframes explodeOut {
-    0% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 20px var(--gold); }
-    45% { transform: scale(1.22); filter: brightness(2.2); background: rgba(255, 215, 0, 0.5); }
-    100% { transform: scale(0); opacity: 0; }
-  }
-
-  .orb-cell {
-    background: radial-gradient(circle, #fff3a1 0%, #ff9900 55%, #7a2e00 100%);
-    border: 2px solid #fff;
-    box-shadow: 0 0 16px #ffae00, inset 0 0 8px #fff;
-    animation: orbPulse 0.8s infinite alternate;
-  }
-  .orb-val {
-    font-size: 15px;
-    font-weight: 900;
-    color: #1a0800;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
-  }
-  @keyframes orbPulse {
-    from { transform: scale(0.96); }
-    to { transform: scale(1.05); }
-  }
-
-  .scat-tag {
-    font-size: 8px;
-    font-weight: 900;
-    background: #0099ff;
-    color: #fff;
-    padding: 1px 4px;
-    border-radius: 3px;
-    margin-top: -3px;
-  }
-
-  .status-banner {
-    text-align: center;
-    min-height: 28px;
-    margin: 10px 0;
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--gold);
-  }
-
-  .controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    background: #0d0804;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid #3d2e10;
-  }
-  .bet-group, .action-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .btn-spin-main { padding: 12px 24px; font-size: 16px; border-radius: 12px; }
-
-  .auto-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 12px 0;
-  }
-
-  .bigwin-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.86);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    pointer-events: none;
-    padding: 16px;
-  }
-  .bigwin-title {
-    font-size: 42px;
-    font-weight: 900;
-    text-transform: uppercase;
-    text-align: center;
-    text-shadow: 0 0 28px rgba(255, 215, 0, 0.95);
-    animation: bounceScale 0.55s infinite alternate;
-  }
-  .bigwin-amount {
-    font-size: 50px;
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 0 0 22px #ffd700, 0 4px 10px #000;
-    margin-top: 8px;
-  }
-  @keyframes bounceScale { from { transform: scale(0.94); } to { transform: scale(1.08); } }
-
-  .coin-particle {
-    position: fixed;
-    top: -40px;
-    font-size: 26px;
-    z-index: 190;
-    pointer-events: none;
-    animation: coinFall linear forwards;
-  }
-  @keyframes coinFall { to { transform: translateY(110vh) rotate(720deg); } }
-
-  #admin-panel { margin-top: 16px; border-top: 2px dashed var(--gold-dark); padding-top: 12px; }
-  .admin-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; background: #0a0603; }
-  th, td { padding: 7px; text-align: left; border-bottom: 1px solid #2b200c; }
-  th { color: var(--gold); }
-  .dot { height: 9px; width: 9px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-  .online { background: var(--green-on); box-shadow: 0 0 6px var(--green-on); }
-  .admin-input { width: 68px; padding: 4px; margin: 0; font-size: 13px; text-align: center; }
-
-  .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.82);
-    display: flex; align-items: center; justify-content: center; padding: 15px; z-index: 150;
-  }
-  .modal-box { max-width: 400px; width: 100%; text-align: center; }
-  .hidden { display: none !important; }
+:root{--gl:#fff6cc;--g:#ffd700;--gm:#d4af37;--gd:#7a5c12;--on:#2ecc71}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at 50% 15%,#3b260d 0%,#090502 88%);color:var(--gl);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;overflow-x:hidden}
+.gold-text{background:linear-gradient(180deg,#fff9d6 0%,#ffd700 48%,#b38000 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.card{background:linear-gradient(160deg,#21160b 0%,#0d0803 100%);border:2px solid var(--gm);border-radius:18px;box-shadow:0 15px 50px rgba(0,0,0,.92),0 0 35px rgba(212,175,55,.25),inset 0 0 20px rgba(0,0,0,.85);padding:16px;width:100%;max-width:880px;position:relative}
+.cabinet-shake{animation:shakeHard .55s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shakeHard{10%,90%{transform:translate3d(-3px,1px,0) rotate(-.4deg)}20%,80%{transform:translate3d(5px,-2px,0) rotate(.5deg)}30%,50%,70%{transform:translate3d(-6px,2px,0) rotate(-.6deg)}40%,60%{transform:translate3d(6px,-1px,0) rotate(.4deg)}}
+#setup-screen{max-width:430px;text-align:center;padding:22px;animation:modalPop .35s ease-out}
+#secret-title{cursor:pointer;user-select:none;letter-spacing:1px}
+input{width:100%;padding:12px 14px;margin-bottom:10px;background:#0a0603;border:1px solid var(--gd);border-radius:10px;color:var(--gl);font-size:15px;outline:none}
+input:focus{border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
+.avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:10px 0 14px}
+.avatar-opt{font-size:26px;padding:7px 0;background:#140c05;border:2px solid #3d2e10;border-radius:10px;cursor:pointer;user-select:none;transition:transform .15s}
+.avatar-opt.selected{border-color:var(--g);background:rgba(255,215,0,.2);box-shadow:0 0 12px rgba(255,215,0,.45);transform:scale(1.06)}
+.btn{background:linear-gradient(180deg,#ffea75 0%,#d4af37 52%,#8f6b10 100%);color:#1c1100;border:1px solid #fff3a8;border-radius:12px;padding:11px 18px;font-size:14px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 5px 18px rgba(212,175,55,.4),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .12s,filter .15s}
+.btn:active:not(:disabled){transform:scale(.94)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:linear-gradient(180deg,#24190c,#140d05);border:1px solid var(--gm);color:var(--g);box-shadow:none;padding:8px 11px;font-size:13px}
+.btn-secondary.active-toggle{background:rgba(255,215,0,.25);border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
+.btn-auto-stop{background:linear-gradient(180deg,#ff5252 0%,#b71c1c 100%);border-color:#ff8a80;color:#fff;animation:pulseRed 1s infinite alternate}
+@keyframes pulseRed{from{box-shadow:0 0 8px rgba(255,82,82,.4)}to{box-shadow:0 0 18px rgba(255,82,82,.9)}}
+.btn-buy{background:linear-gradient(180deg,#ff6b6b 0%,#c92a2a 55%,#7a1111 100%);color:#fff;border-color:#ffa8a8;box-shadow:0 4px 15px rgba(220,40,40,.45)}
+.btn-bigwin-admin{background:linear-gradient(180deg,#ff922b 0%,#d9480f 100%);color:#fff;border:1px solid #ffd8a8;padding:5px 8px;font-size:11px;border-radius:8px}
+.btn-wild-admin{background:linear-gradient(180deg,#38bdf8 0%,#0284c7 100%);color:#fff;border:1px solid #bae6fd;padding:5px 8px;font-size:11px;border-radius:8px}
+.top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid rgba(212,175,55,.3)}
+.player-info{display:flex;align-items:center;gap:8px}
+.player-avatar{font-size:26px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#2b1d0b,#0a0602);border:2px solid var(--g);border-radius:50%}
+.badge-admin{background:var(--g);color:#000;font-size:10px;font-weight:900;padding:2px 5px;border-radius:4px;margin-left:4px}
+.balance-box{font-size:17px;background:#090603;padding:6px 12px;border-radius:10px;border:1px solid var(--gd);transition:transform .2s,border-color .2s}
+.balance-pop{transform:scale(1.1);border-color:var(--g);box-shadow:0 0 15px rgba(255,215,0,.6)}
+.tumble-hud{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,#160e05,#2b1c09,#160e05);border:1px solid var(--gd);border-radius:10px;padding:7px 14px;margin-bottom:10px;font-size:13px;font-weight:800}
+.mult-pill{background:radial-gradient(circle,#ffea75,#b8860b);color:#1a0f00;padding:3px 10px;border-radius:20px;font-weight:900;font-size:14px;box-shadow:0 0 12px rgba(255,215,0,.5)}
+.slot-cabinet{background:linear-gradient(180deg,#523a10 0%,#211505 50%,#523a10 100%);padding:10px;border-radius:16px;border:3px solid var(--g);box-shadow:0 10px 30px rgba(0,0,0,.85),inset 0 0 15px rgba(255,215,0,.3)}
+.grid-6x5{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#070402;padding:8px;border-radius:10px;border:2px solid #1f1608;overflow:hidden}
+.cell-6x5{aspect-ratio:1/1;max-height:76px;background:linear-gradient(180deg,#171007 0%,#24180a 100%);border:1px solid #3a2a0d;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;user-select:none;position:relative}
+@media(max-width:520px){.cell-6x5{font-size:26px;border-radius:6px}.grid-6x5{gap:4px;padding:5px}}
+.wild-col-cell{background:linear-gradient(180deg,#fff8b8 0%,#ffae00 28%,#9e3d00 72%,#ffd700 100%)!important;border:1px solid #fff!important;animation:wildExpand .48s cubic-bezier(.18,1.32,.4,1) forwards,wildGlowPulse 1.2s ease-in-out infinite alternate;z-index:4}
+@keyframes wildExpand{0%{transform:scaleY(.05) scaleX(1.3);filter:brightness(3.5)}60%{transform:scaleY(1.08) scaleX(.95);filter:brightness(1.8)}100%{transform:scaleY(1) scaleX(1);filter:brightness(1)}}
+@keyframes wildGlowPulse{from{box-shadow:inset 0 0 10px rgba(255,255,255,.6),0 0 10px rgba(255,190,0,.65)}to{box-shadow:inset 0 0 20px rgba(255,255,255,.95),0 0 24px rgba(255,230,0,1)}}
+.wild-badge-top{font-size:11px;font-weight:900;color:#2b0f00;background:rgba(255,255,255,.9);padding:1px 6px;border-radius:4px}
+.wild-mult-big{font-size:20px;font-weight:900;color:#fff;text-shadow:0 2px 4px #000,0 0 12px #ff5500;animation:bounceScale .5s infinite alternate}
+.wild-icon-main{font-size:32px;animation:lightningFlash .7s infinite alternate}
+@keyframes lightningFlash{from{transform:scale(.92) rotate(-4deg)}to{transform:scale(1.12) rotate(4deg)}}
+.cell-drop{animation:dropIn .34s cubic-bezier(.22,1.22,.45,1) forwards}
+@keyframes dropIn{0%{transform:translateY(-150%) scale(.8);opacity:.15}80%{transform:translateY(4%) scale(1.03);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+.cell-explode{animation:explodeOut .4s ease-in forwards;z-index:5}
+@keyframes explodeOut{0%{transform:scale(1)}45%{transform:scale(1.26) rotate(6deg);filter:brightness(2.5);background:rgba(255,215,0,.6)}100%{transform:scale(0) rotate(-12deg);opacity:0}}
+.orb-cell{background:radial-gradient(circle,#fff3a1 0%,#ff9900 55%,#7a2e00 100%);border:2px solid #fff;box-shadow:0 0 16px #ffae00,inset 0 0 8px #fff;animation:orbPulse .75s infinite alternate}
+.orb-val{font-size:15px;font-weight:900;color:#1a0800}
+@keyframes orbPulse{from{transform:scale(.95)}to{transform:scale(1.07)}}
+.scatter-cell{background:radial-gradient(circle,#38bdf8 0%,#0369a1 70%,#082f49 100%);border:1px solid #bae6fd}
+.scat-tag{font-size:8px;font-weight:900;background:#0284c7;color:#fff;padding:1px 4px;border-radius:3px;margin-top:-3px}
+.status-banner{text-align:center;min-height:28px;margin:10px 0;font-size:15px;font-weight:800;color:var(--g)}
+.controls{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#0d0804;padding:10px 12px;border-radius:12px;border:1px solid #3d2e10}
+.bet-group,.action-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn-spin-main{padding:12px 24px;font-size:16px;border-radius:12px;animation:spinGlow 2s infinite alternate}
+@keyframes spinGlow{from{box-shadow:0 4px 15px rgba(212,175,55,.35)}to{box-shadow:0 4px 24px rgba(255,225,80,.75)}}
+.auto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.bigwin-overlay{position:fixed;inset:0;background:radial-gradient(circle,rgba(60,35,0,.88) 0%,rgba(0,0,0,.92) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;pointer-events:none;padding:16px}
+.bigwin-title{font-size:42px;font-weight:900;text-transform:uppercase;text-align:center;text-shadow:0 0 28px rgba(255,215,0,.95);animation:bounceScale .5s infinite alternate}
+.bigwin-amount{font-size:50px;font-weight:900;color:#fff;text-shadow:0 0 22px #ffd700,0 4px 10px #000;margin-top:8px}
+@keyframes bounceScale{from{transform:scale(.94)}to{transform:scale(1.08)}}
+.lightning-bolt-fx{position:fixed;font-size:38px;z-index:185;pointer-events:none;animation:sparkBurst .9s ease-out forwards}
+@keyframes sparkBurst{0%{transform:scale(.3) translateY(0);opacity:1}100%{transform:scale(1.4) translateY(-90px);opacity:0}}
+.coin-particle{position:fixed;top:-40px;font-size:26px;z-index:190;pointer-events:none;animation:coinFall linear forwards}
+@keyframes coinFall{to{transform:translateY(110vh) rotate(720deg)}}
+#admin-panel{margin-top:16px;border-top:2px dashed var(--gd);padding-top:12px}
+.admin-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#0a0603}
+th,td{padding:7px;text-align:left;border-bottom:1px solid #2b200c}
+th{color:var(--g)}
+.dot{height:9px;width:9px;border-radius:50%;display:inline-block;margin-right:5px}
+.online{background:var(--on);box-shadow:0 0 6px var(--on)}
+.admin-input{width:64px;padding:4px;margin:0;font-size:13px;text-align:center}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:15px;z-index:150}
+.modal-box{max-width:400px;width:100%;text-align:center;animation:modalPop .25s ease-out}
+@keyframes modalPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
 
-  <!-- ЭКРАН ВХОДА -->
-  <div id="setup-screen" class="card">
-    <h1 id="secret-title" class="gold-text" style="margin-bottom:6px; font-size:25px;">ROYAL GOLD 6×5</h1>
-    <p style="font-size:13px; color:#bfa66a; margin-bottom:14px;">MAX WIN EDITION • Выберите аватар и имя</p>
+<div id="setup-screen" class="card">
+  <h1 id="secret-title" class="gold-text" style="margin-bottom:6px;font-size:25px;">ROYAL GOLD 6×5</h1>
+  <p style="font-size:13px;color:#bfa66a;margin-bottom:14px;">EXPANDING WILD EDITION • Выберите аватар и имя</p>
+  <div class="avatar-grid" id="init-avatars"></div>
+  <input type="text" id="init-name" placeholder="Ваше имя" maxlength="16">
+  <input type="password" id="admin-pass-input" class="hidden" placeholder="Секретный пароль админа">
+  <button class="btn" id="start-btn" style="width:100%" onclick="startGame()">Войти в игру</button>
+  <div id="setup-error" style="color:#ff5555;font-size:13px;margin-top:10px;"></div>
+</div>
 
-    <div class="avatar-grid" id="init-avatars"></div>
-    <input type="text" id="init-name" placeholder="Ваше имя" maxlength="16">
-    <input type="password" id="admin-pass-input" class="hidden" placeholder="Секретный пароль админа">
-
-    <button class="btn" id="start-btn" style="width:100%" onclick="startGame()">Войти в игру</button>
-    <div id="setup-error" style="color:#ff5555; font-size:13px; margin-top:10px;"></div>
-  </div>
-
-  <!-- ИГРОВОЙ ЭКРАН -->
-  <div id="game-screen" class="card hidden">
-    <div class="top-bar">
-      <div class="player-info">
-        <div class="player-avatar" id="ui-avatar">👑</div>
-        <div>
-          <div>
-            <strong id="ui-username" class="gold-text" style="font-size:16px;">Игрок</strong>
-            <span id="ui-admin-badge" class="badge-admin hidden">ADMIN</span>
-          </div>
-          <div style="font-size:11px; color:#2ecc71;" id="conn-status">● Подключение...</div>
-        </div>
-      </div>
-
-      <div class="balance-box">
-        Баланс: <span id="ui-balance" class="gold-text">1000</span> 💰
-      </div>
-
-      <div style="display:flex; gap:6px;">
-        <button class="btn btn-secondary active-toggle" id="btn-sound" onclick="toggleSound()">🔊</button>
-        <button class="btn btn-secondary" onclick="openProfileModal()">✏️ Профиль</button>
+<div id="game-screen" class="card hidden">
+  <div class="top-bar">
+    <div class="player-info">
+      <div class="player-avatar" id="ui-avatar">👑</div>
+      <div>
+        <div><strong id="ui-username" class="gold-text" style="font-size:16px;">Игрок</strong><span id="ui-admin-badge" class="badge-admin hidden">ADMIN</span></div>
+        <div style="font-size:11px;color:#2ecc71;" id="conn-status">● Подключение...</div>
       </div>
     </div>
-
-    <div class="tumble-hud">
-      <div id="hud-mode">Обычная игра (8+ одинаковых = взрыв)</div>
-      <div>Множитель: <span class="mult-pill" id="hud-mult">x1</span></div>
-    </div>
-
-    <div class="slot-cabinet">
-      <div class="grid-6x5" id="grid-container"></div>
-    </div>
-
-    <div class="status-banner" id="status-text">Сделайте ставку и нажмите SPIN!</div>
-
-    <div class="controls">
-      <div class="bet-group">
-        <span style="font-size:12px; color:#bfa66a;">Ставка:</span>
-        <button class="btn btn-secondary" onclick="stepBet(-1)">-</button>
-        <strong id="ui-bet" style="min-width:62px; text-align:center; font-size:15px;">50</strong>
-        <button class="btn btn-secondary" onclick="stepBet(1)">+</button>
-        <button class="btn btn-secondary" onclick="setMaxBet()" title="Максимальная ставка">MAX</button>
-        <button class="btn btn-secondary" id="btn-turbo" onclick="toggleTurbo()" title="Турбо">⚡</button>
-      </div>
-
-      <div class="action-group">
-        <button id="btn-buy" class="btn btn-buy" onclick="buyBonus()">
-          BUY BONUS (<span id="buy-cost">5000</span>)
-        </button>
-        <button id="btn-auto" class="btn btn-secondary" onclick="handleAutoButton()">🔄 АВТО</button>
-        <button id="btn-spin" class="btn btn-spin-main" onclick="spin(false)">SPIN</button>
-      </div>
-    </div>
-
-    <!-- АДМИН-ПАНЕЛЬ -->
-    <div id="admin-panel" class="hidden">
-      <div class="admin-header">
-        <h3 class="gold-text">👑 Панель Администратора (Игроки в сети)</h3>
-        <button class="btn btn-secondary" onclick="clearOldPlayers()">🗑 Очистить старых</button>
-      </div>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead>
-            <tr><th>Игрок</th><th>Статус</th><th>Баланс</th><th>Шанс (%)</th><th>Управление</th></tr>
-          </thead>
-          <tbody id="admin-users-table"></tbody>
-        </table>
-      </div>
+    <div class="balance-box" id="balance-box">Баланс: <span id="ui-balance" class="gold-text">1000</span> 💰</div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-secondary active-toggle" id="btn-sound" onclick="toggleSound()">🔊</button>
+      <button class="btn btn-secondary" onclick="openProfileModal()">✏️ Профиль</button>
     </div>
   </div>
 
-  <!-- ОВЕРЛЕЙ BIG WIN / БОЛЬШОЙ КУШ -->
-  <div id="bigwin-overlay" class="bigwin-overlay hidden">
-    <div class="bigwin-title gold-text" id="bigwin-label">BIG WIN!</div>
-    <div class="bigwin-amount" id="bigwin-val">+0 💰</div>
+  <div class="tumble-hud">
+    <div id="hud-mode">⚔️ Меч расширяет весь ряд в WILD × Множитель!</div>
+    <div>Множитель: <span class="mult-pill" id="hud-mult">x1</span></div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА АВТОСПИНОВ -->
-  <div id="auto-modal" class="modal-backdrop hidden">
-    <div class="card modal-box">
-      <h3 class="gold-text" style="margin-bottom:6px;">Настройка Автоспинов</h3>
-      <p style="font-size:12px; color:#bfa66a;">Выберите количество автоматических вращений</p>
-      <div class="auto-grid">
-        <button class="btn" onclick="startAutoSpins(10)">10</button>
-        <button class="btn" onclick="startAutoSpins(25)">25</button>
-        <button class="btn" onclick="startAutoSpins(50)">50</button>
-        <button class="btn" onclick="startAutoSpins(100)">100</button>
-        <button class="btn" onclick="startAutoSpins(250)">250</button>
-        <button class="btn" onclick="startAutoSpins(-1)">∞ БЕЗ ЛИМИТА</button>
-      </div>
-      <button class="btn btn-secondary" style="width:100%" onclick="closeAutoModal()">Отмена</button>
+  <div class="slot-cabinet"><div class="grid-6x5" id="grid-container"></div></div>
+  <div class="status-banner" id="status-text">Сделайте ставку и нажмите SPIN!</div>
+
+  <div class="controls">
+    <div class="bet-group">
+      <span style="font-size:12px;color:#bfa66a;">Ставка:</span>
+      <button class="btn btn-secondary" onclick="stepBet(-1)">-</button>
+      <strong id="ui-bet" style="min-width:62px;text-align:center;font-size:15px;">50</strong>
+      <button class="btn btn-secondary" onclick="stepBet(1)">+</button>
+      <button class="btn btn-secondary" onclick="setMaxBet()">MAX</button>
+      <button class="btn btn-secondary" id="btn-turbo" onclick="toggleTurbo()">⚡</button>
+    </div>
+    <div class="action-group">
+      <button id="btn-buy" class="btn btn-buy" onclick="buyBonus()">BUY BONUS (<span id="buy-cost">5000</span>)</button>
+      <button id="btn-auto" class="btn btn-secondary" onclick="handleAutoButton()">🔄 АВТО</button>
+      <button id="btn-spin" class="btn btn-spin-main" onclick="spin(false)">SPIN</button>
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ПРОФИЛЯ -->
-  <div id="profile-modal" class="modal-backdrop hidden">
-    <div class="card modal-box">
-      <h3 class="gold-text" style="margin-bottom:10px;">Настройка профиля</h3>
-      <div class="avatar-grid" id="edit-avatars"></div>
-      <input type="text" id="edit-name" placeholder="Новое имя" maxlength="16">
-      <div style="display:flex; gap:10px; margin-top:8px;">
-        <button class="btn" style="flex:1" onclick="saveProfile()">Сохранить</button>
-        <button class="btn btn-secondary" style="flex:1" onclick="closeProfileModal()">Отмена</button>
-      </div>
+  <div id="admin-panel" class="hidden">
+    <div class="admin-header">
+      <h3 class="gold-text">👑 Панель Администратора (Игроки в сети)</h3>
+      <button class="btn btn-secondary" onclick="clearOldPlayers()">🗑 Очистить старых</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Игрок</th><th>Статус</th><th>Баланс</th><th>Шанс (%)</th><th>Управление</th></tr></thead>
+        <tbody id="admin-users-table"></tbody>
+      </table>
     </div>
   </div>
+</div>
+
+<div id="bigwin-overlay" class="bigwin-overlay hidden">
+  <div class="bigwin-title gold-text" id="bigwin-label">BIG WIN!</div>
+  <div class="bigwin-amount" id="bigwin-val">+0 💰</div>
+</div>
+
+<div id="auto-modal" class="modal-backdrop hidden">
+  <div class="card modal-box">
+    <h3 class="gold-text" style="margin-bottom:6px;">Настройка Автоспинов</h3>
+    <p style="font-size:12px;color:#bfa66a;">Выберите количество автоматических вращений</p>
+    <div class="auto-grid">
+      <button class="btn" onclick="startAutoSpins(10)">10</button>
+      <button class="btn" onclick="startAutoSpins(25)">25</button>
+      <button class="btn" onclick="startAutoSpins(50)">50</button>
+      <button class="btn" onclick="startAutoSpins(100)">100</button>
+      <button class="btn" onclick="startAutoSpins(250)">250</button>
+      <button class="btn" onclick="startAutoSpins(-1)">∞ БЕЗ ЛИМИТА</button>
+    </div>
+    <button class="btn btn-secondary" style="width:100%" onclick="closeAutoModal()">Отмена</button>
+  </div>
+</div>
+
+<div id="profile-modal" class="modal-backdrop hidden">
+  <div class="card modal-box">
+    <h3 class="gold-text" style="margin-bottom:10px;">Настройка профиля</h3>
+    <div class="avatar-grid" id="edit-avatars"></div>
+    <input type="text" id="edit-name" placeholder="Новое имя" maxlength="16">
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn" style="flex:1" onclick="saveProfile()">Сохранить</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="closeProfileModal()">Отмена</button>
+    </div>
+  </div>
+</div>
 
 <script>
-  const DB_URL = 'https://' + 'sixseven-783d2-default-rtdb' + '.europe-west1.firebasedatabase.app';
+const DB_URL = 'https://' + 'sixseven-783d2-default-rtdb' + '.europe-west1.firebasedatabase.app';
+const AVATARS = Array.of('👑','🦁','🐺','🐉','💎','🎩','🦊','🐯','🦅','🔥','🃏','💰');
+const ADMIN_PASS = '7777', COLS = 6, ROWS = 5;
+const BET_STEPS = Array.of(10,50,100,250,500,1000,2500,5000,10000,25000,50000,100000,250000,500000,1000000);
+let betIndex = 1;
 
-  const AVATARS = Array.of('👑', '🦁', '🐺', '🐉', '💎', '🎩', '🦊', '🐯', '🦅', '🔥', '🃏', '💰');
-  const ADMIN_PASS = '7777';
-  const COLS = 6;
-  const ROWS = 5;
+const SYMBOLS = Array.of(
+  {id:'crown',icon:'👑',pay8:.6,pay10:1.5,pay12:4,weight:1},
+  {id:'diamond',icon:'💎',pay8:.4,pay10:1,pay12:2.5,weight:2},
+  {id:'ring',icon:'💍',pay8:.3,pay10:.75,pay12:1.8,weight:3},
+  {id:'chalice',icon:'🏆',pay8:.2,pay10:.5,pay12:1.2,weight:5},
+  {id:'bell',icon:'🔔',pay8:.15,pay10:.35,pay12:.8,weight:7},
+  {id:'clover',icon:'🍀',pay8:.1,pay10:.25,pay12:.6,weight:9},
+  {id:'cherry',icon:'🍒',pay8:.08,pay10:.2,pay12:.45,weight:11},
+  {id:'coin',icon:'🪙',pay8:.05,pay10:.12,pay12:.3,weight:13}
+);
 
-  const BET_STEPS = Array.of(10, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000);
-  let betIndex = 1;
+const WEIGHTED_POOL = new Array();
+SYMBOLS.forEach(s => { for(let i=0;i<s.weight;i++) WEIGHTED_POOL.push(s); });
+const ORB_VALUES = Array.of(2,2,2,3,3,4,5,6,8,10,15,25,50);
+const WILD_REEL_MULTS = Array.of(2,3,4,5,6,8,9,10,15,20,25,50);
 
-  // Сильно сниженные коэффициенты выплат за 8+, 10+, 12+ символов
-  const SYMBOLS = Array.of(
-    { id: 'crown',   icon: '👑', pay8: 0.6,  pay10: 1.5,  pay12: 4.0, weight: 1 },
-    { id: 'diamond', icon: '💎', pay8: 0.4,  pay10: 1.0,  pay12: 2.5, weight: 2 },
-    { id: 'ring',    icon: '💍', pay8: 0.3,  pay10: 0.75, pay12: 1.8, weight: 3 },
-    { id: 'chalice', icon: '🏆', pay8: 0.2,  pay10: 0.5,  pay12: 1.2, weight: 5 },
-    { id: 'bell',    icon: '🔔', pay8: 0.15, pay10: 0.35, pay12: 0.8, weight: 7 },
-    { id: 'clover',  icon: '🍀', pay8: 0.1,  pay10: 0.25, pay12: 0.6, weight: 9 },
-    { id: 'cherry',  icon: '🍒', pay8: 0.08, pay10: 0.2,  pay12: 0.45, weight: 11 },
-    { id: 'coin',    icon: '🪙', pay8: 0.05, pay10: 0.12, pay12: 0.3, weight: 13 }
-  );
+let isAdminMode=false, playersMap={}, soundEnabled=true, turboMode=false, autoSpinsRemaining=0, freeSpins=0, globalBonusMult=0, audioCtx=null;
+let lastUsedBigWinId=0, lastUsedWildId=0, expandedWildCols={};
 
-  const WEIGHTED_POOL = new Array();
-  SYMBOLS.forEach(s => {
-    for (let i = 0; i < s.weight; i++) WEIGHTED_POOL.push(s);
+let profile = {
+  id:'p_'+Math.random().toString(36).substring(2,9), name:'Игрок', avatar:'👑', balance:1000,
+  isAdmin:false, winChance:22, forceBigWin500k:false, bigWinId:0, forceWildEvent:false, wildEventId:0, lastSeen:Date.now()
+};
+
+let selectedInitAvatar='👑', selectedEditAvatar='👑', currentBet=BET_STEPS.at(betIndex), isSpinning=false, board=new Array(), secretClicks=0;
+
+function ensureAudio(){
+  if(!soundEnabled) return false;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    return true;
+  }catch(_){return false;}
+}
+function playTone(f,type,d,v=.08,dl=0){
+  if(!ensureAudio()) return;
+  try{
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type=type; o.frequency.setValueAtTime(f,audioCtx.currentTime+dl);
+    g.gain.setValueAtTime(v,audioCtx.currentTime+dl);
+    g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dl+d);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(audioCtx.currentTime+dl); o.stop(audioCtx.currentTime+dl+d);
+  }catch(_){}
+}
+const sfxClick=(p=620)=>playTone(p,'sine',.07,.09);
+const sfxSpinStart=()=>{playTone(220,'triangle',.12,.11,0);playTone(330,'triangle',.14,.11,.06);};
+const sfxDrop=c=>playTone(105+c*22,'triangle',.1,.13);
+const sfxScatterLand=cnt=>{const b=520+cnt*110;playTone(b,'sine',.25,.13,0);playTone(b*1.25,'triangle',.3,.12,.07);};
+const sfxExplode=st=>{const s=Math.min(st*40,240);playTone(380+s,'sawtooth',.16,.09,0);playTone(620+s,'sine',.22,.11,.05);};
+const sfxOrb=()=>{playTone(880,'sine',.25,.12,0);playTone(1320,'sine',.3,.12,.08);};
+const sfxCoinTick=()=>playTone(1200+Math.random()*400,'sine',.06,.07);
+const sfxBonusTrigger=()=>Array.of(440,554,659,880,1108,1318).forEach((f,i)=>playTone(f,'triangle',.35,.13,i*.09));
+const sfxWin=big=>(big?Array.of(523,659,784,1046,1318,1568):Array.of(523,659,784)).forEach((n,i)=>playTone(n,'sine',.28,.11,i*.08));
+
+function playWildSoundtrack(){
+  if(!ensureAudio()) return;
+  playTone(55,'sawtooth',.9,.18,0); playTone(82.4,'triangle',.85,.16,.05);
+  Array.of({f:293.66,d:.18,t:0},{f:349.23,d:.18,t:.14},{f:440,d:.22,t:.28},{f:587.33,d:.35,t:.44},{f:523.25,d:.2,t:.72},{f:587.33,d:.2,t:.88},{f:659.25,d:.25,t:1.04},{f:880,d:.65,t:1.24})
+    .forEach(n=>{playTone(n.f,'sawtooth',n.d,.1,n.t);playTone(n.f*.5,'triangle',n.d+.05,.12,n.t);});
+}
+function triggerCabinetShake(){
+  const s=document.getElementById('game-screen'); s.classList.remove('cabinet-shake'); void s.offsetWidth; s.classList.add('cabinet-shake');
+}
+function spawnLightningSparks(cnt=18){
+  const ic=Array.of('⚡','✨','🔥','⚔️');
+  for(let i=0;i<cnt;i++){
+    const e=document.createElement('div'); e.className='lightning-bolt-fx'; e.textContent=ic.at(i%ic.length);
+    e.style.left=(15+Math.random()*70)+'vw'; e.style.top=(25+Math.random()*45)+'vh'; e.style.animationDelay=(Math.random()*.25)+'s';
+    document.body.appendChild(e); setTimeout(()=>e.remove(),1100);
+  }
+}
+
+function toggleSound(){soundEnabled=!soundEnabled;const b=document.getElementById('btn-sound');b.textContent=soundEnabled?'🔊':'🔇';b.classList.toggle('active-toggle',soundEnabled);if(soundEnabled)sfxClick(780);}
+function toggleTurbo(){turboMode=!turboMode;document.getElementById('btn-turbo').classList.toggle('active-toggle',turboMode);sfxClick(turboMode?880:480);}
+function handleAutoButton(){sfxClick(600);if(autoSpinsRemaining!==0)stopAutoSpins();else document.getElementById('auto-modal').classList.remove('hidden');}
+function closeAutoModal(){sfxClick(440);document.getElementById('auto-modal').classList.add('hidden');}
+function startAutoSpins(c){sfxClick(750);autoSpinsRemaining=c;closeAutoModal();updateAutoButtonUI();if(!isSpinning)spin(false);}
+function stopAutoSpins(){autoSpinsRemaining=0;updateAutoButtonUI();}
+function updateAutoButtonUI(){
+  const b=document.getElementById('btn-auto');
+  if(autoSpinsRemaining===0){b.textContent='🔄 АВТО';b.classList.remove('btn-auto-stop');b.classList.add('btn-secondary');}
+  else{b.textContent='⏹ СТОП ('+(autoSpinsRemaining===-1?'∞':autoSpinsRemaining)+')';b.classList.remove('btn-secondary');b.classList.add('btn-auto-stop');}
+}
+
+document.getElementById('secret-title').addEventListener('click',()=>{
+  secretClicks++; sfxClick(400+secretClicks*80);
+  if(secretClicks>=5){isAdminMode=true;document.getElementById('admin-pass-input').classList.remove('hidden');document.getElementById('admin-pass-input').focus();}
+});
+
+function renderAvatarPicker(cid,cur,cb){
+  const box=document.getElementById(cid); box.innerHTML='';
+  AVATARS.forEach(av=>{
+    const d=document.createElement('div'); d.className='avatar-opt'+(av===cur?' selected':''); d.textContent=av;
+    d.onclick=()=>{sfxClick(680);cb(av);renderAvatarPicker(cid,av,cb);}; box.appendChild(d);
   });
+}
+renderAvatarPicker('init-avatars',selectedInitAvatar,av=>{selectedInitAvatar=av;});
 
-  // Небольшие множители сфер для обычных вращений (x2..x50)
-  const ORB_VALUES = Array.of(2, 2, 2, 3, 3, 4, 5, 6, 8, 10, 15, 25, 50);
+async function startGame(){
+  const err=document.getElementById('setup-error'); err.textContent='';
+  profile.name=document.getElementById('init-name').value.trim()||'Игрок_'+Math.floor(100+Math.random()*900);
+  profile.avatar=selectedInitAvatar;
+  if(isAdminMode){
+    if(document.getElementById('admin-pass-input').value.trim()!==ADMIN_PASS){err.textContent='Неверный пароль.';playTone(180,'sawtooth',.25,.12);return;}
+    profile.isAdmin=true; profile.winChance=35;
+  }
+  sfxBonusTrigger();
+  document.getElementById('setup-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  if(profile.isAdmin){document.getElementById('ui-admin-badge').classList.remove('hidden');document.getElementById('admin-panel').classList.remove('hidden');}
+  buildInitialGrid(); updateUI(); await syncWithCloud(); setInterval(syncWithCloud,2000);
+}
 
-  let isAdminMode = false;
-  let playersMap = {};
-  let soundEnabled = true;
-  let turboMode = false;
-  let autoSpinsRemaining = 0;
-  let freeSpins = 0;
-  let globalBonusMult = 0;
-  let audioCtx = null;
-  let lastUsedBigWinId = 0;
+async function syncWithCloud(){
+  try{
+    const res=await fetch(DB_URL+'/players.json'); const all=(await res.json())||{};
+    if(all[profile.id]){
+      const r=all[profile.id];
+      if(!profile.isAdmin && r.adminUpdatedAt && r.adminUpdatedAt!==profile._lastAdminUpdate){
+        profile._lastAdminUpdate=r.adminUpdatedAt; profile.balance=r.balance; profile.winChance=r.winChance; updateUI();
+      }
+      if(r.forceBigWin500k && r.bigWinId && r.bigWinId!==lastUsedBigWinId){profile.forceBigWin500k=true;profile.bigWinId=r.bigWinId;}
+      if(r.forceWildEvent && r.wildEventId && r.wildEventId!==lastUsedWildId){profile.forceWildEvent=true;profile.wildEventId=r.wildEventId;}
+    }
+    profile.lastSeen=Date.now();
+    await fetch(DB_URL+'/players/'+profile.id+'.json',{
+      method:'PATCH',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:profile.id,name:profile.name,avatar:profile.avatar,balance:profile.balance,winChance:profile.winChance,isAdmin:profile.isAdmin,forceBigWin500k:profile.forceBigWin500k,bigWinId:profile.bigWinId,forceWildEvent:profile.forceWildEvent,wildEventId:profile.wildEventId,lastSeen:profile.lastSeen})
+    });
+    all[profile.id]=Object.assign({},profile); playersMap=all;
+    document.getElementById('conn-status').textContent='● В сети'; document.getElementById('conn-status').style.color='#2ecc71';
+    if(profile.isAdmin) renderAdminTable();
+  }catch(_){document.getElementById('conn-status').textContent='● Ошибка сети';document.getElementById('conn-status').style.color='#ff5555';}
+}
 
-  let profile = {
-    id: 'p_' + Math.random().toString(36).substring(2, 9),
-    name: 'Игрок',
-    avatar: '👑',
-    balance: 1000,
-    isAdmin: false,
-    winChance: 22,
-    forceBigWin500k: false,
-    bigWinId: 0,
-    lastSeen: Date.now()
-  };
+async function clearOldPlayers(){if(!profile.isAdmin)return;sfxClick(350);await fetch(DB_URL+'/players.json',{method:'DELETE'});playersMap={};await syncWithCloud();}
+function openProfileModal(){sfxClick(640);selectedEditAvatar=profile.avatar;document.getElementById('edit-name').value=profile.name;renderAvatarPicker('edit-avatars',selectedEditAvatar,av=>{selectedEditAvatar=av;});document.getElementById('profile-modal').classList.remove('hidden');}
+function closeProfileModal(){sfxClick(440);document.getElementById('profile-modal').classList.add('hidden');}
+async function saveProfile(){sfxClick(760);const n=document.getElementById('edit-name').value.trim();if(n)profile.name=n;profile.avatar=selectedEditAvatar;updateUI();closeProfileModal();await syncWithCloud();}
 
-  let selectedInitAvatar = '👑';
-  let selectedEditAvatar = '👑';
-  let currentBet = BET_STEPS.at(betIndex);
-  let isSpinning = false;
-  let board = new Array();
-  let secretClicks = 0;
+function pickWildMult(){const r=Math.random();if(r>.96)return 50;if(r>.9)return 25;if(r>.8)return 20;if(r>.65)return 10;return WILD_REEL_MULTS.at(Math.floor(Math.random()*8));}
 
-  function playTone(freq, type, dur, vol = 0.08, delay = 0) {
-    if (!soundEnabled) return;
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
-      gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + dur);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(audioCtx.currentTime + delay);
-      osc.stop(audioCtx.currentTime + delay + dur);
-    } catch (_) {}
+function makeCellItem(forceScatter=false,allowSpecial=false){
+  if(forceScatter) return {type:'scatter',id:'scatter',icon:'🏛️'};
+  const r=Math.random();
+  // Шанс 0.0001% (0.000001) на расширяющийся WILD-барабан
+  const wildChance=0.000001;
+  if(allowSpecial && r<wildChance) return {type:'wild_trigger',id:'wild_trigger',icon:'⚔️'};
+  if(allowSpecial && r>=wildChance && r<wildChance+0.02){
+    const o=Math.random(); let idx=o>.99?12:(o>.97?11:(o>.93?10:Math.floor(Math.random()*8)));
+    return {type:'orb',id:'orb',icon:'🔮',mult:ORB_VALUES.at(idx)};
+  }
+  if(!forceScatter && r>0.985) return {type:'scatter',id:'scatter',icon:'🏛️'};
+  const sym=WEIGHTED_POOL.at(Math.floor(Math.random()*WEIGHTED_POOL.length));
+  return {type:'sym',id:sym.id,icon:sym.icon,symData:sym};
+}
+
+function buildInitialGrid(){
+  board=new Array();
+  for(let c=0;c<COLS;c++){const col=new Array();for(let r=0;r<ROWS;r++)col.push(makeCellItem(false,false));board.push(col);}
+  renderBoard(false);
+}
+
+function renderBoard(animAll=false,dropped=null){
+  const box=document.getElementById('grid-container'); box.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div'); cell.className='cell-6x5'; cell.id='gcell-'+c+'-'+r;
+      if(expandedWildCols[c]){
+        cell.classList.add('wild-col-cell'); const wm=expandedWildCols[c];
+        if(r===0) cell.innerHTML='<span class="wild-badge-top">WILD</span><span class="wild-mult-big">'+wm+'x</span>';
+        else if(r===2) cell.innerHTML='<span class="wild-icon-main">⚡</span>';
+        else if(r===4) cell.innerHTML='<span class="wild-badge-top">WILD</span>';
+        else cell.innerHTML='<span style="font-size:22px;">⚔️</span>';
+        box.appendChild(cell); continue;
+      }
+      const it=board.at(c).at(r);
+      if(animAll||(dropped && dropped.has(c+'-'+r))){cell.classList.add('cell-drop');cell.style.animationDelay=(c*(turboMode?18:35))+'ms';}
+      if(it.type==='wild_trigger'){cell.classList.add('orb-cell');cell.innerHTML='<span>⚔️</span><span class="orb-val">WILD</span>';}
+      else if(it.type==='orb'){cell.classList.add('orb-cell');cell.innerHTML='<span>🔥</span><span class="orb-val">x'+it.mult+'</span>';}
+      else if(it.type==='scatter'){cell.classList.add('scatter-cell');cell.innerHTML='<span>🏛️</span><span class="scat-tag">SCATTER</span>';}
+      else cell.textContent=it.icon;
+      box.appendChild(cell);
+    }
+  }
+}
+
+function stepBet(d){if(isSpinning||freeSpins>0||autoSpinsRemaining!==0)return;betIndex=Math.max(0,Math.min(BET_STEPS.length-1,betIndex+d));currentBet=BET_STEPS.at(betIndex);sfxClick(d>0?720:520);updateUI();}
+function setMaxBet(){if(isSpinning||freeSpins>0||autoSpinsRemaining!==0)return;let b=0;for(let i=0;i<BET_STEPS.length;i++)if(BET_STEPS.at(i)<=profile.balance)b=i;betIndex=b;currentBet=BET_STEPS.at(betIndex);sfxClick(850);updateUI();}
+function getWildColsMultSum(){let s=0;Object.values(expandedWildCols).forEach(m=>{s+=m;});return s;}
+
+function updateUI(pop=false){
+  document.getElementById('ui-username').textContent=profile.name;
+  document.getElementById('ui-avatar').textContent=profile.avatar;
+  document.getElementById('ui-balance').textContent=Math.floor(profile.balance);
+  document.getElementById('ui-bet').textContent=currentBet;
+  document.getElementById('buy-cost').textContent=currentBet*100;
+  if(pop){const b=document.getElementById('balance-box');b.classList.add('balance-pop');setTimeout(()=>b.classList.remove('balance-pop'),350);}
+  const mEl=document.getElementById('hud-mode'), multEl=document.getElementById('hud-mult'), wm=getWildColsMultSum();
+  if(freeSpins>0){mEl.innerHTML='🔥 <span style="color:#ffd700;">BONUS FREE SPINS: '+freeSpins+' (Липкие WILD!)</span>';multEl.textContent='x'+Math.max(1,globalBonusMult+wm);}
+  else if(autoSpinsRemaining!==0){mEl.innerHTML='🔄 <span style="color:#ffd700;">АВТОСПИН (Осталось: '+(autoSpinsRemaining===-1?'∞':autoSpinsRemaining)+')</span>';multEl.textContent='x'+Math.max(1,wm);}
+  else{mEl.textContent='⚔️ Меч расширяет весь ряд в WILD × Множитель!';multEl.textContent='x'+Math.max(1,wm);}
+}
+
+const sleep=ms=>new Promise(r=>setTimeout(r,turboMode?Math.floor(ms*.45):ms));
+
+async function buyBonus(){
+  if(isSpinning||freeSpins>0||autoSpinsRemaining!==0)return;
+  const p=currentBet*100;
+  if(profile.balance<p){document.getElementById('status-text').textContent='Недостаточно монет для покупки бонуса!';playTone(180,'sawtooth',.25,.12);return;}
+  sfxBonusTrigger(); profile.balance-=p; updateUI(); await spin(true);
+}
+
+async function spin(isBoughtBonus=false){
+  if(isSpinning) return;
+  const isFree=(freeSpins>0 && !isBoughtBonus), cost=(isFree||isBoughtBonus)?0:currentBet;
+  if(profile.balance<cost){document.getElementById('status-text').textContent='Недостаточно средств!';playTone(180,'sawtooth',.25,.12);stopAutoSpins();return;}
+  if(!isFree) expandedWildCols={};
+
+  const isAdminBigWin=Boolean(profile.forceBigWin500k);
+  if(isAdminBigWin){
+    lastUsedBigWinId=profile.bigWinId||Date.now(); profile.forceBigWin500k=false;
+    fetch(DB_URL+'/players/'+profile.id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({forceBigWin500k:false})}).catch(()=>{});
+  }
+  const isAdminWild=Boolean(profile.forceWildEvent);
+  if(isAdminWild){
+    lastUsedWildId=profile.wildEventId||Date.now(); profile.forceWildEvent=false;
+    fetch(DB_URL+'/players/'+profile.id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({forceWildEvent:false})}).catch(()=>{});
   }
 
-  function sfxDrop(col) { playTone(110 + col * 20, 'triangle', 0.09, 0.12); }
-  function sfxExplode() {
-    playTone(440, 'sawtooth', 0.15, 0.08);
-    playTone(660, 'sine', 0.2, 0.1, 0.05);
-  }
-  function sfxOrb() {
-    playTone(880, 'sine', 0.25, 0.12);
-    playTone(1320, 'sine', 0.3, 0.12, 0.08);
-  }
-  function sfxWin(big) {
-    const notes = big ? Array.of(523, 659, 784, 1046, 1318, 1568) : Array.of(523, 659, 784);
-    notes.forEach((n, idx) => playTone(n, 'sine', 0.28, 0.11, idx * 0.08));
-  }
+  sfxSpinStart(); isSpinning=true;
+  if(isFree) freeSpins--;
+  else if(!isBoughtBonus){profile.balance-=cost;if(autoSpinsRemaining>0){autoSpinsRemaining--;updateAutoButtonUI();}}
+  updateUI();
+  document.getElementById('btn-spin').disabled=true; document.getElementById('btn-buy').disabled=true;
+  document.getElementById('status-text').textContent=isFree?'🔥 БОНУСНОЕ ВРАЩЕНИЕ...':'🎰 ПАДЕНИЕ СИМВОЛОВ...';
 
-  function toggleSound() {
-    soundEnabled = !soundEnabled;
-    const btn = document.getElementById('btn-sound');
-    btn.textContent = soundEnabled ? '🔊' : '🔇';
-    btn.classList.toggle('active-toggle', soundEnabled);
-  }
+  const forceWin=isAdminBigWin||isAdminWild||isBoughtBonus||(Math.random()*100<profile.winChance);
+  board=new Array();
+  for(let c=0;c<COLS;c++){const col=new Array();for(let r=0;r<ROWS;r++)col.push(makeCellItem(false,!isAdminBigWin && !isAdminWild));board.push(col);}
 
-  function toggleTurbo() {
-    turboMode = !turboMode;
-    document.getElementById('btn-turbo').classList.toggle('active-toggle', turboMode);
-  }
-
-  function handleAutoButton() {
-    if (autoSpinsRemaining !== 0) {
-      stopAutoSpins();
-    } else {
-      document.getElementById('auto-modal').classList.remove('hidden');
+  if(isAdminBigWin){
+    const cr=SYMBOLS.at(0); let pl=0;
+    for(let c=0;c<COLS;c++)for(let r=0;r<ROWS;r++){
+      if(pl<14&&(c+r)%2===0){board.at(c).splice(r,1,{type:'sym',id:cr.id,icon:cr.icon,symData:cr});pl++;}
+      else if(board.at(c).at(r).id===cr.id)board.at(c).splice(r,1,{type:'sym',id:'coin',icon:'🪙',symData:SYMBOLS.at(7)});
+    }
+  }else if(isAdminWild){
+    board.at(0).splice(2,1,{type:'wild_trigger',id:'wild_trigger',icon:'⚔️'});
+    board.at(2).splice(1,1,{type:'wild_trigger',id:'wild_trigger',icon:'⚔️'});
+    board.at(4).splice(3,1,{type:'wild_trigger',id:'wild_trigger',icon:'⚔️'});
+    const cr=SYMBOLS.at(0);
+    for(let r=0;r<ROWS;r++){
+      board.at(1).splice(r,1,{type:'sym',id:cr.id,icon:cr.icon,symData:cr});
+      board.at(3).splice(r,1,{type:'sym',id:cr.id,icon:cr.icon,symData:cr});
+    }
+  }else if(isBoughtBonus){
+    Array.of(Array.of(0,1),Array.of(2,2),Array.of(3,1),Array.of(5,3)).forEach(sp=>board.at(sp.at(0)).splice(sp.at(1),1,makeCellItem(true,false)));
+  }else if(forceWin){
+    const ws=WEIGHTED_POOL.at(Math.floor(Math.random()*WEIGHTED_POOL.length)), tc=8+(Math.random()<.2?2:0); let pl=0;
+    while(pl<tc){
+      const rc=Math.floor(Math.random()*COLS), rr=Math.floor(Math.random()*ROWS);
+      if(!expandedWildCols[rc] && board.at(rc).at(rr).id!==ws.id){board.at(rc).splice(rr,1,{type:'sym',id:ws.id,icon:ws.icon,symData:ws});pl++;}
     }
   }
 
-  function closeAutoModal() {
-    document.getElementById('auto-modal').classList.add('hidden');
+  renderBoard(true);
+  let scLand=0;
+  for(let c=0;c<COLS;c++)setTimeout(()=>{sfxDrop(c);for(let r=0;r<ROWS;r++)if(!expandedWildCols[c]&&board.at(c).at(r).type==='scatter'){scLand++;sfxScatterLand(scLand);}},c*(turboMode?22:45));
+  await sleep(480);
+
+  let newlyExp=false; const presetW={0:15,2:20,4:25};
+  for(let c=0;c<COLS;c++){
+    if(expandedWildCols[c])continue;
+    let sw=false; for(let r=0;r<ROWS;r++)if(board.at(c).at(r).type==='wild_trigger'){sw=true;break;}
+    if(sw){expandedWildCols[c]=isAdminWild?(presetW[c]||15):pickWildMult();newlyExp=true;}
+  }
+  if(newlyExp){
+    playWildSoundtrack(); triggerCabinetShake(); spawnLightningSparks(22); renderBoard(false); updateUI();
+    document.getElementById('status-text').innerHTML='⚡ РАСШИРЕНИЕ WILD-СТОЛБЦА! ОБЩИЙ МНОЖИТЕЛЬ: <span class="gold-text">x'+getWildColsMultSum()+'</span> ⚡';
+    await sleep(1450);
   }
 
-  function startAutoSpins(count) {
-    autoSpinsRemaining = count;
-    closeAutoModal();
-    updateAutoButtonUI();
-    if (!isSpinning) spin(false);
-  }
+  let spinBaseWin=0, spinOrbSum=0, cascadeStep=0;
+  const wildCount=Object.keys(expandedWildCols).length*ROWS;
 
-  function stopAutoSpins() {
-    autoSpinsRemaining = 0;
-    updateAutoButtonUI();
-  }
-
-  function updateAutoButtonUI() {
-    const btn = document.getElementById('btn-auto');
-    if (autoSpinsRemaining === 0) {
-      btn.textContent = '🔄 АВТО';
-      btn.classList.remove('btn-auto-stop');
-      btn.classList.add('btn-secondary');
-    } else {
-      const label = autoSpinsRemaining === -1 ? '∞' : autoSpinsRemaining;
-      btn.textContent = '⏹ СТОП (' + label + ')';
-      btn.classList.remove('btn-secondary');
-      btn.classList.add('btn-auto-stop');
+  while(true){
+    const cnts={};
+    for(let c=0;c<COLS;c++){if(expandedWildCols[c])continue;for(let r=0;r<ROWS;r++){const it=board.at(c).at(r);if(it.type==='sym')cnts[it.id]=(cnts[it.id]||0)+1;}}
+    const winIds=new Set(); let stepPay=0;
+    Object.keys(cnts).forEach(id=>{
+      const tot=cnts[id]+wildCount;
+      if(tot>=8){winIds.add(id);const s=SYMBOLS.find(x=>x.id===id);stepPay+=Math.max(1,Math.round(currentBet*(tot>=12?s.pay12:(tot>=10?s.pay10:s.pay8))));}
+    });
+    if(winIds.size===0)break;
+    cascadeStep++; spinBaseWin+=stepPay; sfxExplode(cascadeStep);
+    for(let c=0;c<COLS;c++){if(expandedWildCols[c])continue;for(let r=0;r<ROWS;r++)if(winIds.has(board.at(c).at(r).id)){const el=document.getElementById('gcell-'+c+'-'+r);if(el)el.classList.add('cell-explode');}}
+    document.getElementById('status-text').innerHTML='💥 КАСКАД #'+cascadeStep+': <span class="gold-text">+'+spinBaseWin+' 💰</span>';
+    await sleep(420);
+    const drp=new Set();
+    for(let c=0;c<COLS;c++){
+      if(expandedWildCols[c])continue;
+      const surv=new Array(); for(let r=0;r<ROWS;r++)if(!winIds.has(board.at(c).at(r).id))surv.push(board.at(c).at(r));
+      const miss=ROWS-surv.length, nc=new Array();
+      for(let m=0;m<miss;m++){nc.push(makeCellItem(false,!isAdminBigWin && !isAdminWild));drp.add(c+'-'+m);}
+      board.splice(c,1,nc.concat(surv));
     }
+    renderBoard(false,drp); sfxDrop(2); await sleep(380);
   }
 
-  document.getElementById('secret-title').addEventListener('click', () => {
-    secretClicks++;
-    if (secretClicks >= 5) {
-      isAdminMode = true;
-      document.getElementById('admin-pass-input').classList.remove('hidden');
-      document.getElementById('admin-pass-input').focus();
-    }
+  for(let c=0;c<COLS;c++){if(expandedWildCols[c])continue;for(let r=0;r<ROWS;r++)if(board.at(c).at(r).type==='orb'){spinOrbSum+=board.at(c).at(r).mult;sfxOrb();}}
+  let scatCount=0;
+  for(let c=0;c<COLS;c++){if(expandedWildCols[c])continue;for(let r=0;r<ROWS;r++)if(board.at(c).at(r).type==='scatter')scatCount++;}
+
+  const wmTot=getWildColsMultSum(); let finalWin=0;
+  if(isAdminBigWin){finalWin=500000;document.getElementById('hud-mult').textContent='x1000';}
+  else if(spinBaseWin>0){
+    if(isFree){if(spinOrbSum>0)globalBonusMult+=spinOrbSum;const am=Math.max(1,globalBonusMult+wmTot);finalWin=spinBaseWin*am;document.getElementById('hud-mult').textContent='x'+am;}
+    else{const am=Math.max(1,spinOrbSum+wmTot);finalWin=spinBaseWin*am;if(am>1)document.getElementById('hud-mult').textContent='x'+am;}
+  }
+
+  let gotBonus=false;
+  if(scatCount>=4 && !isAdminBigWin && !isAdminWild){
+    gotBonus=true; freeSpins+=isFree?5:11; if(!isFree)globalBonusMult=0;
+    finalWin+=Math.max(1,Math.round(currentBet*.5)); sfxBonusTrigger(); triggerCabinetShake();
+    document.getElementById('status-text').innerHTML='🏛️ БОНУСНАЯ ИГРА! +'+(isFree?5:11)+' БЕСПЛАТНЫХ ВРАЩЕНИЙ!'; await sleep(950);
+  }
+
+  if(finalWin>0){
+    profile.balance+=finalWin; updateUI(true);
+    const ratio=isAdminBigWin?100:(finalWin/currentBet); sfxWin(ratio>=10);
+    document.getElementById('status-text').innerHTML='✨ ВЫИГРЫШ ЗА СПИН: <span class="gold-text">+'+finalWin+' 💰</span>'+(wmTot>0?' (WILD x'+wmTot+')':'');
+    if(ratio>=100||isAdminBigWin||isAdminWild) stopAutoSpins();
+    if(ratio>=10||isAdminBigWin) await showBigWinBanner(finalWin,ratio); else spawnCoins(12);
+  }else if(!gotBonus){
+    document.getElementById('status-text').textContent='Нет комбинаций. Попробуйте ещё!'; playTone(170,'triangle',.14,.06);
+  }
+
+  if(!isFree && !isAdminBigWin && !isAdminWild && !gotBonus && freeSpins===0 && Math.random()<.015){
+    freeSpins=11; globalBonusMult=0; sfxBonusTrigger(); triggerCabinetShake(); spawnCoins(25); updateUI();
+    document.getElementById('status-text').innerHTML='🎁 СЛУЧАЙНЫЙ БОНУС! +11 БЕСПЛАТНЫХ ВРАЩЕНИЙ! 🎁'; await sleep(1300);
+  }
+  if(!isFree && freeSpins===0){globalBonusMult=0;expandedWildCols={};}
+
+  isSpinning=false; document.getElementById('btn-spin').disabled=false;
+  document.getElementById('btn-buy').disabled=(freeSpins>0||autoSpinsRemaining!==0);
+  updateAutoButtonUI(); updateUI(); await syncWithCloud();
+  if(freeSpins>0||autoSpinsRemaining!==0) setTimeout(()=>{if(!isSpinning&&(freeSpins>0||autoSpinsRemaining!==0))spin(false);},turboMode?420:850);
+}
+
+function spawnCoins(cnt){
+  for(let i=0;i<cnt;i++){
+    const e=document.createElement('div'); e.className='coin-particle'; e.textContent=Math.random()<.7?'🪙':'💰';
+    e.style.left=Math.random()*95+'vw'; e.style.animationDuration=(1.1+Math.random()*1.2)+'s'; e.style.animationDelay=(Math.random()*.4)+'s';
+    document.body.appendChild(e); setTimeout(()=>e.remove(),2600);
+  }
+}
+
+function showBigWinBanner(amt,ratio){
+  return new Promise(res=>{
+    const ov=document.getElementById('bigwin-overlay'), lb=document.getElementById('bigwin-label'), vl=document.getElementById('bigwin-val');
+    lb.textContent=ratio>=100?'🔥 БОЛЬШОЙ КУШ! 🔥':'BIG WIN!'; ov.classList.remove('hidden'); spawnCoins(ratio>=100?45:28);
+    let cur=0, inc=amt/30;
+    const iv=setInterval(()=>{
+      cur+=inc; sfxCoinTick();
+      if(cur>=amt){vl.textContent='+'+Math.floor(amt)+' 💰';clearInterval(iv);setTimeout(()=>{ov.classList.add('hidden');res();},1300);}
+      else vl.textContent='+'+Math.floor(cur)+' 💰';
+    },35);
   });
-
-  function renderAvatarPicker(containerId, currentAvatar, onSelect) {
-    const box = document.getElementById(containerId);
-    box.innerHTML = '';
-    AVATARS.forEach(av => {
-      const div = document.createElement('div');
-      div.className = 'avatar-opt' + (av === currentAvatar ? ' selected' : '');
-      div.textContent = av;
-      div.onclick = () => {
-        onSelect(av);
-        renderAvatarPicker(containerId, av, onSelect);
-      };
-      box.appendChild(div);
-    });
-  }
-
-  renderAvatarPicker('init-avatars', selectedInitAvatar, av => { selectedInitAvatar = av; });
-
-  async function startGame() {
-    const errEl = document.getElementById('setup-error');
-    errEl.textContent = '';
-
-    const rawName = document.getElementById('init-name').value.trim();
-    profile.name = rawName || 'Игрок_' + Math.floor(100 + Math.random() * 900);
-    profile.avatar = selectedInitAvatar;
-
-    if (isAdminMode) {
-      const pass = document.getElementById('admin-pass-input').value.trim();
-      if (pass !== ADMIN_PASS) {
-        errEl.textContent = 'Неверный пароль.';
-        return;
-      }
-      profile.isAdmin = true;
-      profile.winChance = 35;
-    }
-
-    document.getElementById('setup-screen').classList.add('hidden');
-    document.getElementById('game-screen').classList.remove('hidden');
-
-    if (profile.isAdmin) {
-      document.getElementById('ui-admin-badge').classList.remove('hidden');
-      document.getElementById('admin-panel').classList.remove('hidden');
-    }
-
-    buildInitialGrid();
-    updateUI();
-    await syncWithCloud();
-    setInterval(syncWithCloud, 2000);
-  }
-
-  async function syncWithCloud() {
-    try {
-      const res = await fetch(DB_URL + '/players.json');
-      const all = (await res.json()) || {};
-
-      if (all[profile.id]) {
-        const remote = all[profile.id];
-        if (!profile.isAdmin && remote.adminUpdatedAt && remote.adminUpdatedAt !== profile._lastAdminUpdate) {
-          profile._lastAdminUpdate = remote.adminUpdatedAt;
-          profile.balance = remote.balance;
-          profile.winChance = remote.winChance;
-          updateUI();
-        }
-        if (remote.forceBigWin500k && remote.bigWinId && remote.bigWinId !== lastUsedBigWinId) {
-          profile.forceBigWin500k = true;
-          profile.bigWinId = remote.bigWinId;
-        }
-      }
-
-      profile.lastSeen = Date.now();
-      await fetch(DB_URL + '/players/' + profile.id + '.json', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: profile.id,
-          name: profile.name,
-          avatar: profile.avatar,
-          balance: profile.balance,
-          winChance: profile.winChance,
-          isAdmin: profile.isAdmin,
-          forceBigWin500k: profile.forceBigWin500k,
-          bigWinId: profile.bigWinId,
-          lastSeen: profile.lastSeen
-        })
-      });
-
-      all[profile.id] = Object.assign({}, profile);
-      playersMap = all;
-
-      document.getElementById('conn-status').textContent = '● В сети';
-      document.getElementById('conn-status').style.color = '#2ecc71';
-
-      if (profile.isAdmin) renderAdminTable();
-    } catch (e) {
-      document.getElementById('conn-status').textContent = '● Ошибка сети';
-      document.getElementById('conn-status').style.color = '#ff5555';
-    }
-  }
-
-  async function clearOldPlayers() {
-    if (!profile.isAdmin) return;
-    await fetch(DB_URL + '/players.json', { method: 'DELETE' });
-    playersMap = {};
-    await syncWithCloud();
-  }
-
-  function openProfileModal() {
-    selectedEditAvatar = profile.avatar;
-    document.getElementById('edit-name').value = profile.name;
-    renderAvatarPicker('edit-avatars', selectedEditAvatar, av => { selectedEditAvatar = av; });
-    document.getElementById('profile-modal').classList.remove('hidden');
-  }
-
-  function closeProfileModal() {
-    document.getElementById('profile-modal').classList.add('hidden');
-  }
-
-  async function saveProfile() {
-    const newName = document.getElementById('edit-name').value.trim();
-    if (newName) profile.name = newName;
-    profile.avatar = selectedEditAvatar;
-    updateUI();
-    closeProfileModal();
-    await syncWithCloud();
-  }
-
-  function makeCellItem(forceScatter = false, allowOrb = false) {
-    if (forceScatter) {
-      return { type: 'scatter', id: 'scatter', icon: '🏛️' };
-    }
-    const r = Math.random();
-    if (allowOrb && r < 0.02) {
-      const orbRoll = Math.random();
-      let idx = 0;
-      if (orbRoll > 0.99) idx = 12;      // x50
-      else if (orbRoll > 0.97) idx = 11; // x25
-      else if (orbRoll > 0.93) idx = 10; // x15
-      else idx = Math.floor(Math.random() * 8); // x2..x6
-      return { type: 'orb', id: 'orb', icon: '🔮', mult: ORB_VALUES.at(idx) };
-    }
-    if (!forceScatter && r > 0.985) {
-      return { type: 'scatter', id: 'scatter', icon: '🏛️' };
-    }
-    const sym = WEIGHTED_POOL.at(Math.floor(Math.random() * WEIGHTED_POOL.length));
-    return { type: 'sym', id: sym.id, icon: sym.icon, symData: sym };
-  }
-
-  function buildInitialGrid() {
-    board = new Array();
-    for (let c = 0; c < COLS; c++) {
-      const col = new Array();
-      for (let r = 0; r < ROWS; r++) {
-        col.push(makeCellItem(false, false));
-      }
-      board.push(col);
-    }
-    renderBoard(false);
-  }
-
-  function renderBoard(animateAll = false, droppedSet = null) {
-    const container = document.getElementById('grid-container');
-    container.innerHTML = '';
-
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const item = board.at(c).at(r);
-        const cell = document.createElement('div');
-        cell.className = 'cell-6x5';
-        cell.id = 'gcell-' + c + '-' + r;
-
-        if (animateAll || (droppedSet && droppedSet.has(c + '-' + r))) {
-          cell.classList.add('cell-drop');
-          cell.style.animationDelay = (c * (turboMode ? 18 : 35)) + 'ms';
-        }
-
-        if (item.type === 'orb') {
-          cell.classList.add('orb-cell');
-          cell.innerHTML = '<span>🔥</span><span class="orb-val">x' + item.mult + '</span>';
-        } else if (item.type === 'scatter') {
-          cell.innerHTML = '<span>🏛️</span><span class="scat-tag">SCATTER</span>';
-        } else {
-          cell.textContent = item.icon;
-        }
-        container.appendChild(cell);
-      }
-    }
-  }
-
-  function stepBet(dir) {
-    if (isSpinning || freeSpins > 0 || autoSpinsRemaining !== 0) return;
-    betIndex = Math.max(0, Math.min(BET_STEPS.length - 1, betIndex + dir));
-    currentBet = BET_STEPS.at(betIndex);
-    updateUI();
-  }
-
-  function setMaxBet() {
-    if (isSpinning || freeSpins > 0 || autoSpinsRemaining !== 0) return;
-    let bestIdx = 0;
-    for (let i = 0; i < BET_STEPS.length; i++) {
-      if (BET_STEPS.at(i) <= profile.balance) bestIdx = i;
-    }
-    betIndex = bestIdx;
-    currentBet = BET_STEPS.at(betIndex);
-    updateUI();
-  }
-
-  function updateUI() {
-    document.getElementById('ui-username').textContent = profile.name;
-    document.getElementById('ui-avatar').textContent = profile.avatar;
-    document.getElementById('ui-balance').textContent = Math.floor(profile.balance);
-    document.getElementById('ui-bet').textContent = currentBet;
-    document.getElementById('buy-cost').textContent = currentBet * 100;
-
-    const modeEl = document.getElementById('hud-mode');
-    const multEl = document.getElementById('hud-mult');
-    if (freeSpins > 0) {
-      modeEl.innerHTML = '🔥 <span style="color:#ffd700;">BONUS FREE SPINS: ' + freeSpins + '</span>';
-      multEl.textContent = 'x' + Math.max(1, globalBonusMult);
-    } else if (autoSpinsRemaining !== 0) {
-      const rem = autoSpinsRemaining === -1 ? '∞' : autoSpinsRemaining;
-      modeEl.innerHTML = '🔄 <span style="color:#ffd700;">АВТОСПИН АКТИВЕН (Осталось: ' + rem + ')</span>';
-      multEl.textContent = 'x1';
-    } else {
-      modeEl.textContent = '8+ одинаковых символов = взрыв и каскад';
-      multEl.textContent = 'x1';
-    }
-  }
-
-  function sleep(ms) {
-    return new Promise(r => setTimeout(r, turboMode ? Math.floor(ms * 0.45) : ms));
-  }
-
-  async function buyBonus() {
-    if (isSpinning || freeSpins > 0 || autoSpinsRemaining !== 0) return;
-    const price = currentBet * 100;
-    if (profile.balance < price) {
-      document.getElementById('status-text').textContent = 'Недостаточно монет для покупки бонуса!';
-      return;
-    }
-    profile.balance -= price;
-    updateUI();
-    await spin(true);
-  }
-
-  async function spin(isBoughtBonus = false) {
-    if (isSpinning) return;
-
-    const isFree = (freeSpins > 0 && !isBoughtBonus);
-    const cost = (isFree || isBoughtBonus) ? 0 : currentBet;
-
-    if (profile.balance < cost) {
-      document.getElementById('status-text').textContent = 'Недостаточно средств!';
-      stopAutoSpins();
-      return;
-    }
-
-    const isAdminBigWin = Boolean(profile.forceBigWin500k);
-    if (isAdminBigWin) {
-      lastUsedBigWinId = profile.bigWinId || Date.now();
-      profile.forceBigWin500k = false;
-      fetch(DB_URL + '/players/' + profile.id + '.json', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ forceBigWin500k: false })
-      }).catch(() => {});
-    }
-
-    isSpinning = true;
-    if (isFree) {
-      freeSpins--;
-    } else if (!isBoughtBonus) {
-      profile.balance -= cost;
-      if (autoSpinsRemaining > 0) {
-        autoSpinsRemaining--;
-        updateAutoButtonUI();
-      }
-    }
-
-    updateUI();
-    document.getElementById('btn-spin').disabled = true;
-    document.getElementById('btn-buy').disabled = true;
-    document.getElementById('status-text').textContent = isFree
-      ? '🔥 БОНУСНОЕ ВРАЩЕНИЕ...'
-      : '🎰 ПАДЕНИЕ СИМВОЛОВ...';
-
-    const forceWin = isAdminBigWin || isBoughtBonus || (Math.random() * 100 < profile.winChance);
-    board = new Array();
-    for (let c = 0; c < COLS; c++) {
-      const col = new Array();
-      for (let r = 0; r < ROWS; r++) {
-        col.push(makeCellItem(false, !isAdminBigWin));
-      }
-      board.push(col);
-    }
-
-    if (isAdminBigWin) {
-      const crownSym = SYMBOLS.at(0);
-      let placed = 0;
-      for (let c = 0; c < COLS; c++) {
-        for (let r = 0; r < ROWS; r++) {
-          if (placed < 14 && (c + r) % 2 === 0) {
-            board.at(c).splice(r, 1, { type: 'sym', id: crownSym.id, icon: crownSym.icon, symData: crownSym });
-            placed++;
-          } else if (board.at(c).at(r).id === crownSym.id) {
-            board.at(c).splice(r, 1, { type: 'sym', id: 'coin', icon: '🪙', symData: SYMBOLS.at(7) });
-          }
-        }
-      }
-      board.at(1).splice(2, 1, { type: 'orb', id: 'orb', icon: '🔮', mult: 500 });
-      board.at(3).splice(2, 1, { type: 'orb', id: 'orb', icon: '🔮', mult: 250 });
-      board.at(4).splice(1, 1, { type: 'orb', id: 'orb', icon: '🔮', mult: 250 });
-    } else if (isBoughtBonus) {
-      const spots = Array.of(Array.of(0, 1), Array.of(2, 2), Array.of(3, 1), Array.of(5, 3));
-      spots.forEach(sp => {
-        board.at(sp.at(0)).splice(sp.at(1), 1, makeCellItem(true, false));
-      });
-    } else if (forceWin) {
-      const winSym = WEIGHTED_POOL.at(Math.floor(Math.random() * WEIGHTED_POOL.length));
-      const targetCount = 8 + (Math.random() < 0.2 ? 2 : 0);
-      let placed = 0;
-      while (placed < targetCount) {
-        const rc = Math.floor(Math.random() * COLS);
-        const rr = Math.floor(Math.random() * ROWS);
-        if (board.at(rc).at(rr).id !== winSym.id) {
-          board.at(rc).splice(rr, 1, { type: 'sym', id: winSym.id, icon: winSym.icon, symData: winSym });
-          placed++;
-        }
-      }
-      if (Math.random() < 0.15) {
-        const oc = Math.floor(Math.random() * COLS);
-        const or = Math.floor(Math.random() * ROWS);
-        if (board.at(oc).at(or).id !== winSym.id) {
-          board.at(oc).splice(or, 1, { type: 'orb', id: 'orb', icon: '🔮', mult: ORB_VALUES.at(Math.floor(Math.random() * 4)) });
-        }
-      }
-    }
-
-    renderBoard(true);
-    for (let c = 0; c < COLS; c++) {
-      setTimeout(() => sfxDrop(c), c * (turboMode ? 20 : 40));
-    }
-    await sleep(480);
-
-    let spinBaseWin = 0;
-    let spinOrbSum = 0;
-    let cascadeStep = 0;
-
-    while (true) {
-      const counts = {};
-      for (let c = 0; c < COLS; c++) {
-        for (let r = 0; r < ROWS; r++) {
-          const it = board.at(c).at(r);
-          if (it.type === 'sym') {
-            counts[it.id] = (counts[it.id] || 0) + 1;
-          }
-        }
-      }
-
-      const winningIds = new Set();
-      let stepPay = 0;
-
-      Object.keys(counts).forEach(id => {
-        const cnt = counts[id];
-        if (cnt >= 8) {
-          winningIds.add(id);
-          const sObj = SYMBOLS.find(s => s.id === id);
-          const mult = cnt >= 12 ? sObj.pay12 : (cnt >= 10 ? sObj.pay10 : sObj.pay8);
-          stepPay += Math.max(1, Math.round(currentBet * mult));
-        }
-      });
-
-      if (winningIds.size === 0) break;
-
-      cascadeStep++;
-      spinBaseWin += stepPay;
-      sfxExplode();
-
-      for (let c = 0; c < COLS; c++) {
-        for (let r = 0; r < ROWS; r++) {
-          if (winningIds.has(board.at(c).at(r).id)) {
-            const el = document.getElementById('gcell-' + c + '-' + r);
-            if (el) el.classList.add('cell-explode');
-          }
-        }
-      }
-
-      document.getElementById('status-text').innerHTML =
-        '💥 КАСКАД #' + cascadeStep + ': <span class="gold-text">+' + spinBaseWin + ' 💰</span>';
-
-      await sleep(420);
-
-      const droppedSet = new Set();
-      for (let c = 0; c < COLS; c++) {
-        const survivors = new Array();
-        for (let r = 0; r < ROWS; r++) {
-          if (!winningIds.has(board.at(c).at(r).id)) {
-            survivors.push(board.at(c).at(r));
-          }
-        }
-        const missing = ROWS - survivors.length;
-        const newCol = new Array();
-        for (let m = 0; m < missing; m++) {
-          newCol.push(makeCellItem(false, !isAdminBigWin));
-          droppedSet.add(c + '-' + m);
-        }
-        board.splice(c, 1, newCol.concat(survivors));
-      }
-
-      renderBoard(false, droppedSet);
-      sfxDrop(2);
-      await sleep(380);
-    }
-
-    for (let c = 0; c < COLS; c++) {
-      for (let r = 0; r < ROWS; r++) {
-        if (board.at(c).at(r).type === 'orb') {
-          spinOrbSum += board.at(c).at(r).mult;
-          sfxOrb();
-        }
-      }
-    }
-
-    let scatCount = 0;
-    for (let c = 0; c < COLS; c++) {
-      for (let r = 0; r < ROWS; r++) {
-        if (board.at(c).at(r).type === 'scatter') scatCount++;
-      }
-    }
-
-    let finalTotalWin = 0;
-    if (isAdminBigWin) {
-      finalTotalWin = 500000;
-      document.getElementById('hud-mult').textContent = 'x1000';
-    } else if (spinBaseWin > 0) {
-      if (isFree) {
-        if (spinOrbSum > 0) globalBonusMult += spinOrbSum;
-        const appliedMult = Math.max(1, globalBonusMult);
-        finalTotalWin = spinBaseWin * appliedMult;
-        document.getElementById('hud-mult').textContent = 'x' + appliedMult;
-      } else {
-        const appliedMult = spinOrbSum > 0 ? spinOrbSum : 1;
-        finalTotalWin = spinBaseWin * appliedMult;
-        if (spinOrbSum > 0) document.getElementById('hud-mult').textContent = 'x' + spinOrbSum;
-      }
-    }
-
-    let gotBonusThisSpin = false;
-    if (scatCount >= 4 && !isAdminBigWin) {
-      gotBonusThisSpin = true;
-      freeSpins += isFree ? 5 : 11;
-      if (!isFree) globalBonusMult = 0;
-      finalTotalWin += Math.max(1, Math.round(currentBet * 0.5));
-      sfxWin(true);
-      document.getElementById('status-text').innerHTML =
-        '🏛️ БОНУСНАЯ ИГРА! +' + (isFree ? 5 : 11) + ' БЕСПЛАТНЫХ ВРАЩЕНИЙ!';
-      await sleep(900);
-    }
-
-    if (finalTotalWin > 0) {
-      profile.balance += finalTotalWin;
-      updateUI();
-      const ratio = isAdminBigWin ? 100 : (finalTotalWin / currentBet);
-      sfxWin(ratio >= 10);
-      document.getElementById('status-text').innerHTML =
-        '✨ ВЫИГРЫШ ЗА СПИН: <span class="gold-text">+' + finalTotalWin + ' 💰</span>' +
-        (spinOrbSum > 0 ? ' (Сферы x' + spinOrbSum + ')' : '');
-
-      if (ratio >= 100 || isAdminBigWin) {
-        stopAutoSpins();
-      }
-
-      if (ratio >= 10 || isAdminBigWin) {
-        await showBigWinBanner(finalTotalWin, ratio);
-      } else {
-        spawnCoins(10);
-      }
-    } else if (!gotBonusThisSpin) {
-      document.getElementById('status-text').textContent = 'Нет комбинаций. Попробуйте ещё!';
-    }
-
-    if (!isFree && !isAdminBigWin && !gotBonusThisSpin && freeSpins === 0 && Math.random() < 0.015) {
-      freeSpins = 11;
-      globalBonusMult = 0;
-      sfxWin(true);
-      spawnCoins(25);
-      updateUI();
-      document.getElementById('status-text').innerHTML =
-        '🎁 СЛУЧАЙНЫЙ БОНУС! +11 БЕСПЛАТНЫХ ВРАЩЕНИЙ! 🎁';
-      await sleep(1300);
-    }
-
-    if (!isFree && freeSpins === 0) globalBonusMult = 0;
-
-    isSpinning = false;
-    document.getElementById('btn-spin').disabled = false;
-    document.getElementById('btn-buy').disabled = (freeSpins > 0 || autoSpinsRemaining !== 0);
-    updateAutoButtonUI();
-    updateUI();
-    await syncWithCloud();
-
-    if (freeSpins > 0 || autoSpinsRemaining !== 0) {
-      setTimeout(() => {
-        if (!isSpinning && (freeSpins > 0 || autoSpinsRemaining !== 0)) spin(false);
-      }, turboMode ? 420 : 850);
-    }
-  }
-
-  function spawnCoins(count) {
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement('div');
-      el.className = 'coin-particle';
-      el.textContent = Math.random() < 0.7 ? '🪙' : '💰';
-      el.style.left = Math.random() * 95 + 'vw';
-      el.style.animationDuration = (1.1 + Math.random() * 1.2) + 's';
-      el.style.animationDelay = (Math.random() * 0.4) + 's';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 2600);
-    }
-  }
-
-  function showBigWinBanner(amount, multRatio) {
-    return new Promise(resolve => {
-      const overlay = document.getElementById('bigwin-overlay');
-      const label = document.getElementById('bigwin-label');
-      const valEl = document.getElementById('bigwin-val');
-
-      if (multRatio >= 100) {
-        label.textContent = '🔥 БОЛЬШОЙ КУШ! 🔥';
-      } else {
-        label.textContent = 'BIG WIN!';
-      }
-
-      overlay.classList.remove('hidden');
-      spawnCoins(multRatio >= 100 ? 45 : 28);
-
-      let cur = 0;
-      const steps = 30;
-      const inc = amount / steps;
-      const iv = setInterval(() => {
-        cur += inc;
-        if (cur >= amount) {
-          valEl.textContent = '+' + Math.floor(amount) + ' 💰';
-          clearInterval(iv);
-          setTimeout(() => {
-            overlay.classList.add('hidden');
-            resolve();
-          }, 1300);
-        } else {
-          valEl.textContent = '+' + Math.floor(cur) + ' 💰';
-        }
-      }, 35);
-    });
-  }
-
-  function renderAdminTable() {
-    if (document.activeElement && document.activeElement.classList.contains('admin-input')) return;
-    const tbody = document.getElementById('admin-users-table');
-    tbody.innerHTML = '';
-
-    Object.values(playersMap).forEach(p => {
-      if (!p || !p.id) return;
-      const tr = document.createElement('tr');
-      const bwText = p.forceBigWin500k ? '⏳ Ждёт спина' : '🔥 BIG WIN';
-      tr.innerHTML =
-        '<td>' + p.avatar + ' <strong>' + p.name + '</strong> ' + (p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : '') + '</td>' +
-        '<td><span class="dot online"></span>В игре</td>' +
-        '<td><input type="number" class="admin-input" id="b-' + p.id + '" value="' + Math.floor(p.balance) + '"></td>' +
-        '<td><input type="number" class="admin-input" id="c-' + p.id + '" min="0" max="100" value="' + p.winChance + '"></td>' +
-        '<td style="display:flex; gap:5px; align-items:center;">' +
-          '<button class="btn btn-secondary" onclick="applyAdminEdit(\'' + p.id + '\')">OK</button>' +
-          '<button class="btn btn-bigwin-admin" onclick="triggerBigWin(\'' + p.id + '\')">' + bwText + '</button>' +
-        '</td>';
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function applyAdminEdit(targetId) {
-    const newBal = parseFloat(document.getElementById('b-' + targetId).value) || 0;
-    const newChance = Math.max(0, Math.min(100, parseInt(document.getElementById('c-' + targetId).value, 10) || 0));
-
-    if (targetId === profile.id) {
-      profile.balance = newBal;
-      profile.winChance = newChance;
-      updateUI();
-    }
-
-    await fetch(DB_URL + '/players/' + targetId + '.json', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        balance: newBal,
-        winChance: newChance,
-        adminUpdatedAt: Date.now()
-      })
-    });
-
-    await syncWithCloud();
-    alert('Применено!');
-  }
-
-  async function triggerBigWin(targetId) {
-    const newBwId = Date.now();
-    if (targetId === profile.id) {
-      profile.forceBigWin500k = true;
-      profile.bigWinId = newBwId;
-    }
-
-    await fetch(DB_URL + '/players/' + targetId + '.json', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        forceBigWin500k: true,
-        bigWinId: newBwId
-      })
-    });
-
-    await syncWithCloud();
-    alert('BIG WIN (500 000) заряжен на 1 следующий спин!');
-  }
+}
+
+function renderAdminTable(){
+  if(document.activeElement && document.activeElement.classList.contains('admin-input')) return;
+  const tb=document.getElementById('admin-users-table'); tb.innerHTML='';
+  Object.values(playersMap).forEach(p=>{
+    if(!p||!p.id) return;
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td>'+p.avatar+' <strong>'+p.name+'</strong> '+(p.isAdmin?'<span class="badge-admin">ADMIN</span>':'')+'</td>'+
+      '<td><span class="dot online"></span>В игре</td>'+
+      '<td><input type="number" class="admin-input" id="b-'+p.id+'" value="'+Math.floor(p.balance)+'"></td>'+
+      '<td><input type="number" class="admin-input" id="c-'+p.id+'" min="0" max="100" value="'+p.winChance+'"></td>'+
+      '<td style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">'+
+        '<button class="btn btn-secondary" onclick="applyAdminEdit(\''+p.id+'\')">OK</button>'+
+        '<button class="btn btn-wild-admin" onclick="triggerWildEvent(\''+p.id+'\')">'+(p.forceWildEvent?'⏳ WILD':'⚔️ WILD')+'</button>'+
+        '<button class="btn btn-bigwin-admin" onclick="triggerBigWin(\''+p.id+'\')">'+(p.forceBigWin500k?'⏳ 500K':'🔥 500K')+'</button>'+
+      '</td>';
+    tb.appendChild(tr);
+  });
+}
+
+async function applyAdminEdit(id){
+  sfxClick(700);
+  const nb=parseFloat(document.getElementById('b-'+id).value)||0, nc=Math.max(0,Math.min(100,parseInt(document.getElementById('c-'+id).value,10)||0));
+  if(id===profile.id){profile.balance=nb;profile.winChance=nc;updateUI();}
+  await fetch(DB_URL+'/players/'+id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({balance:nb,winChance:nc,adminUpdatedAt:Date.now()})});
+  await syncWithCloud(); alert('Применено!');
+}
+
+async function triggerWildEvent(id){
+  playWildSoundtrack(); const wid=Date.now();
+  if(id===profile.id){profile.forceWildEvent=true;profile.wildEventId=wid;}
+  await fetch(DB_URL+'/players/'+id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({forceWildEvent:true,wildEventId:wid})});
+  await syncWithCloud(); alert('⚔️ Расширяющиеся WILD-барабаны заряжены на 1 следующий спин!');
+}
+
+async function triggerBigWin(id){
+  sfxBonusTrigger(); const bwid=Date.now();
+  if(id===profile.id){profile.forceBigWin500k=true;profile.bigWinId=bwid;}
+  await fetch(DB_URL+'/players/'+id+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({forceBigWin500k:true,bigWinId:bwid})});
+  await syncWithCloud(); alert('🔥 BIG WIN (500 000) заряжен на 1 следующий спин!');
+}
 </script>
 </body>
 </html>
