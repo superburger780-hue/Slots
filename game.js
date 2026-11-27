@@ -1,4 +1,4 @@
-const FB_URL = "https://firebaseio.com";
+const FB_URL = "https://" + "sixseven-783d2-default-rtdb" + ".firebaseio.com";
 const elById = id => document.getElementById(id);
 const fmt = n => Math.round(n).toString();
 
