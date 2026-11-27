@@ -1,645 +1,661 @@
 <script>
-const FIREBASE_URL = "https://firebaseio.com";
+document.addEventListener('DOMContentLoaded', () => {
+  const FIREBASE_URL = "https://firebaseio.com";
 
-const SoundFX = (() => {
-  let ctx = null, enabled = true;
-  function init() {
-    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === 'suspended') ctx.resume();
-  }
-  function toggle() { enabled = !enabled; return enabled; }
-
-  function playTick(c = 0) {
-    if (!enabled) return; init();
-    const now = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'triangle';
-    o.frequency.setValueAtTime(170 + c * 25, now);
-    o.frequency.exponentialRampToValueAtTime(55, now + 0.06);
-    g.gain.setValueAtTime(0.14, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
-    o.connect(g); g.connect(ctx.destination);
-    o.start(now); o.stop(now + 0.07);
-  }
-
-  function playCascade(combo = 1) {
-    if (!enabled) return; init();
-    const now = ctx.currentTime;
-    const notes = new Array(523.25, 659.25, 783.99, 1046.50);
-    const shift = Math.pow(1.07, Math.min(combo, 10));
-    notes.forEach((f, i) => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(f * shift, now + i * 0.045);
-      g.gain.setValueAtTime(0.001, now + i * 0.045);
-      g.gain.linearRampToValueAtTime(0.16, now + i * 0.045 + 0.015);
-      g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.24);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now + i * 0.045); o.stop(now + i * 0.045 + 0.25);
-    });
-  }
-
-  function playPhonkWild() {
-    if (!enabled) return; init();
-    const now = ctx.currentTime;
-    const shaper = ctx.createWaveShaper();
-    const curve = new Float32Array(256);
-    for (let i = 0; i < 256; i++) {
-      const x = (i * 2) / 256 - 1;
-      curve[i] = Math.tanh(x * 5.0);
-    }
-    shaper.curve = curve;
-    shaper.connect(ctx.destination);
-
-    const melody = new Array(
-      { t: 0.00, f: 587.33, d: 0.13 },
-      { t: 0.14, f: 587.33, d: 0.13 },
-      { t: 0.28, f: 698.46, d: 0.13 },
-      { t: 0.42, f: 587.33, d: 0.13 },
-      { t: 0.56, f: 880.00, d: 0.15 },
-      { t: 0.72, f: 783.99, d: 0.15 },
-      { t: 0.88, f: 698.46, d: 0.22 },
-      { t: 1.12, f: 587.33, d: 0.13 },
-      { t: 1.26, f: 698.46, d: 0.13 },
-      { t: 1.40, f: 880.00, d: 0.15 },
-      { t: 1.56, f: 1046.50, d: 0.28 }
-    );
-
-    const cowbellRatios = new Array(1.0, 1.48);
-    melody.forEach(n => {
-      const st = now + n.t;
-      cowbellRatios.forEach(ratio => {
-        const o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
-        o.type = 'square';
-        o.frequency.setValueAtTime(n.f * ratio, st);
-        flt.type = 'bandpass';
-        flt.frequency.setValueAtTime(1200, st);
-        flt.Q.setValueAtTime(2.8, st);
-        g.gain.setValueAtTime(0.24, st);
-        g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
-        o.connect(flt); flt.connect(g); g.connect(shaper);
-        o.start(st); o.stop(st + n.d + 0.02);
-      });
-    });
-
-    const kicks = new Array(0.00, 0.42, 0.56, 1.12, 1.40);
-    kicks.forEach(off => {
-      const b = ctx.createOscillator(), bg = ctx.createGain();
-      b.type = 'sine';
-      b.frequency.setValueAtTime(155, now + off);
-      b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
-      bg.gain.setValueAtTime(0.75, now + off);
-      bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
-      b.connect(bg); bg.connect(shaper);
-      b.start(now + off); b.stop(now + off + 0.4);
-    });
-
-    const noiseLen = ctx.sampleRate * 1.9;
-    const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
-    const data = noiseBuf.getChannelData(0);
-    for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
-
-    for (let h = 0; h < 24; h++) {
-      const t = now + h * 0.075;
-      const src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), hg = ctx.createGain();
-      src.buffer = noiseBuf;
-      hp.type = 'highpass';
-      hp.frequency.setValueAtTime(7500, t);
-      const isClap = (h === 4 || h === 12 || h === 20);
-      hg.gain.setValueAtTime(isClap ? 0.32 : 0.09, t);
-      hg.gain.exponentialRampToValueAtTime(0.001, t + (isClap ? 0.14 : 0.035));
-      src.connect(hp); hp.connect(hg); hg.connect(ctx.destination);
-      src.start(t); src.stop(t + 0.15);
-    }
-  }
-
-  function playBigWin() {
-    if (!enabled) return; init();
-    const now = ctx.currentTime;
-    const chord = new Array(261.63, 329.63, 392.00, 523.25, 659.25, 783.99);
-    chord.forEach((f, i) => {
-      const o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
-      o.type = 'sawtooth'; o.frequency.setValueAtTime(f, now + i * 0.08);
-      flt.type = 'lowpass'; flt.frequency.setValueAtTime(2400, now + i * 0.08);
-      g.gain.setValueAtTime(0.001, now + i * 0.08);
-      g.gain.linearRampToValueAtTime(0.14, now + i * 0.08 + 0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 1.1);
-      o.connect(flt); flt.connect(g); g.connect(ctx.destination);
-      o.start(now + i * 0.08); o.stop(now + i * 0.08 + 1.15);
-    });
-  }
-  return { toggle, playTick, playCascade, playPhonkWild, playBigWin };
-})();
-
-const AVATARS = new Array('👑','🦁','🐺','🐉','💎','🎩','🦊','🐯','🦅','🔥','🃏','💰');
-const BETS = new Array(10, 25, 50, 100, 250, 500, 1000, 2500);
-const COLS = 6, ROWS = 5;
-const ADMIN_PASS = '7777';
-
-const SYMBOLS = new Array(
-  { id: 'crown', icon: '👑', mult: 3.5, weight: 7 },
-  { id: 'cup', icon: '🏆', mult: 2.2, weight: 10 },
-  { id: 'bell', icon: '🔔', mult: 1.6, weight: 12 },
-  { id: 'clover', icon: '🍀', mult: 1.2, weight: 15 },
-  { id: 'cherry', icon: '🍒', mult: 0.8, weight: 18 }
-);
-const WILD_MULTS = new Array(2, 3, 5, 10, 15, 20, 25, 50, 100);
-const ORB_MULTS = new Array(2, 3, 5, 10, 15, 25, 50, 100);
-
-const savedId = localStorage.getItem('rg_player_id') || ('p_' + Math.random().toString(36).slice(2, 8));
-localStorage.setItem('rg_player_id', savedId);
-
-let me = {
-  id: savedId,
-  name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)),
-  avatar: '👑',
-  balance: 1000,
-  chance: 35,
-  isAdmin: false,
-  forceWild: false,
-  force500k: false,
-  lastSeen: Date.now()
-};
-
-let playersCache = {};
-let appState = {
-  betIndex: 2,
-  isSpinning: false,
-  turbo: false,
-  autoSpins: 0,
-  freeSpins: 0,
-  bonusMult: 1,
-  grid: new Array()
-};
-
-const elById = id => document.getElementById(id);
-const sleep = ms => new Promise(r => setTimeout(r, appState.turbo ? ms * 0.45 : ms));
-const fmt = n => Math.round(n).toString();
-
-async function fbRequest(path, method = 'GET', body = null) {
-  try {
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
-    if (body !== null) opts.body = JSON.stringify(body);
-    const res = await fetch(`${FIREBASE_URL}${path}.json`, opts);
-    if (!res.ok) throw new Error(res.status);
-    elById('net-status').innerHTML = '<span class="dot online"></span>В сети (Firebase)';
-    return await res.json();
-  } catch (err) {
-    elById('net-status').innerHTML = '<span class="dot offline"></span>Ошибка связи с Firebase';
-    return null;
-  }
-}
-
-async function pushMyState() {
-  me.lastSeen = Date.now();
-  playersCache[me.id] = { ...me };
-  await fbRequest(`/players/${me.id}`, 'PUT', me);
-  updateHUD();
-  if (me.isAdmin) renderAdminTable();
-}
-
-async function pollServer() {
-  if (elById('game-screen').classList.contains('hidden')) return;
-  const db = await fbRequest('/players', 'GET');
-  if (db && typeof db === 'object') {
-    playersCache = db;
-    const remoteMe = db[me.id];
-    if (remoteMe) {
-      let needAck = false;
-      if (typeof remoteMe.balance === 'number' && remoteMe.balance !== me.balance && !appState.isSpinning) {
-        me.balance = remoteMe.balance;
-        updateHUD();
-      }
-      if (typeof remoteMe.chance === 'number') me.chance = remoteMe.chance;
-      if (remoteMe.forceWild) { me.forceWild = true; needAck = true; }
-      if (remoteMe.force500k) { me.force500k = true; needAck = true; }
-      if (needAck) {
-        await fbRequest(`/players/${me.id}`, 'PATCH', { forceWild: false, force500k: false });
-      }
-    }
-  }
-  me.lastSeen = Date.now();
-  playersCache[me.id] = { ...me };
-  await fbRequest(`/players/${me.id}`, 'PATCH', {
-    lastSeen: me.lastSeen,
-    name: me.name,
-    avatar: me.avatar,
-    isAdmin: me.isAdmin
-  });
-  if (me.isAdmin) renderAdminTable();
-}
-
-AVATARS.forEach((av, idx) => {
-  const el = document.createElement('div');
-  el.className = 'avatar-opt' + (idx === 0 ? ' selected' : '');
-  el.textContent = av;
-  el.onclick = () => {
-    document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
-    el.classList.add('selected');
-    me.avatar = av;
-  };
-  elById('avatar-grid').appendChild(el);
-});
-
-let secretClicks = 0;
-elById('secret-title').onclick = () => {
-  if (++secretClicks >= 5) {
-    me.isAdmin = !me.isAdmin; secretClicks = 0;
-    alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен');
-  }
-};
-
-elById('start-btn').onclick = async () => {
-  const nameVal = elById('player-name-input').value.trim();
-  const passVal = elById('admin-pass-input').value.trim();
-  if (nameVal) me.name = nameVal;
-  if (passVal === ADMIN_PASS || me.name.toLowerCase() === 'admin') me.isAdmin = true;
-
-  elById('hud-name').textContent = me.name;
-  elById('hud-avatar').textContent = me.avatar;
-  if (me.isAdmin) {
-    elById('admin-badge').classList.remove('hidden');
-    elById('admin-panel').classList.remove('hidden');
-  }
-
-  elById('setup-screen').classList.add('hidden');
-  elById('game-screen').classList.remove('hidden');
-
-  await pushMyState();
-  await pollServer();
-  appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-  renderGrid(true);
-};
-
-elById('profile-btn').onclick = () => {
-  elById('game-screen').classList.add('hidden');
-  elById('setup-screen').classList.remove('hidden');
-};
-
-setInterval(pollServer, 2000);
-
-function pickCell(allowSpecial = true) {
-  if (allowSpecial) {
-    const r = Math.random();
-    if (r < 0.035) return { type: 'scatter', icon: '🏛️' };
-    if (r < 0.075) return { type: 'orb', icon: '🌕', mult: ORB_MULTS[Math.floor(Math.random() * ORB_MULTS.length)] };
-  }
-  const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
-  let rnd = Math.random() * totalW;
-  for (const sym of SYMBOLS) {
-    if (rnd < sym.weight) return { type: 'normal', id: sym.id, icon: sym.icon, mult: sym.mult };
-    rnd -= sym.weight;
-  }
-  return { type: 'normal', ...SYMBOLS };
-}
-
-function generateGrid() {
-  const luck = me.chance / 100;
-  appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-
-  if (Math.random() < luck * 0.65 || me.force500k) {
-    const target = me.force500k ? SYMBOLS : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-    const count = me.force500k ? 14 : (8 + Math.floor(Math.random() * 4));
-    let placed = 0;
-    while (placed < count) {
-      const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
-      if (appState.grid[c][r].type === 'normal') {
-        appState.grid[c][r] = { type: 'normal', id: target.id, icon: target.icon, mult: target.mult };
-        placed++;
-      }
-    }
-  }
-
-  const wildColsCount = me.force500k ? 3 : (me.forceWild || Math.random() < (0.14 + luck * 0.14) ? 1 : 0);
-  if (wildColsCount > 0) {
-    const availableCols = new Array(0, 2, 4, 1, 3, 5);
-    for (let i = 0; i < wildColsCount; i++) {
-      const col = availableCols[i];
-      const mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
-      for (let r = 0; r < ROWS; r++) {
-        appState.grid[col][r] = { type: 'wild_col', mult, rowIdx: r };
-      }
-    }
-  }
-
-  me.forceWild = false;
-  me.force500k = false;
-}
-
-function renderGrid(animateDrop = false, explodingCoords = new Set()) {
-  const gridEl = elById('slot-grid');
-  gridEl.innerHTML = '';
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const cell = appState.grid[c][r];
-      const el = document.createElement('div');
-      el.className = 'cell-6x5';
-      if (animateDrop) {
-        el.classList.add('cell-drop');
-        el.style.animationDelay = `${c * 0.04 + r * 0.015}s`;
-      }
-      if (explodingCoords.has(`${c},${r}`)) el.classList.add('cell-explode');
-
-      if (cell.type === 'wild_col') {
-        el.classList.add('wild-col-cell');
-        if (r === 0) {
-          el.innerHTML = `<div class="wild-badge-top">WILD</div><div class="wild-mult-big">${cell.mult}x</div>`;
-        } else if (r === ROWS - 1) {
-          el.innerHTML = `<div class="wild-badge-top">WILD</div>`;
-        } else {
-          el.innerHTML = `<div class="wild-icon-main">${r === 2 ? '⚡' : '⚔️'}</div>`;
+  const SoundFX = (() => {
+    let ctx = null, enabled = true;
+    function init() {
+      try {
+        if (!ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) ctx = new AC();
         }
-      } else if (cell.type === 'orb') {
-        el.classList.add('orb-cell');
-        el.innerHTML = `<div>🌕</div><div class="orb-val">${cell.mult}x</div>`;
-      } else if (cell.type === 'scatter') {
-        el.classList.add('scatter-cell');
-        el.innerHTML = `<div>🏛️</div><div class="scat-tag">SCATTER</div>`;
-      } else {
-        el.textContent = cell.icon;
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+      } catch (e) {}
+    }
+    function toggle() { enabled = !enabled; init(); return enabled; }
+
+    function playTick(c = 0) {
+      if (!enabled) return; init(); if (!ctx) return;
+      const now = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(170 + c * 25, now);
+      o.frequency.exponentialRampToValueAtTime(55, now + 0.06);
+      g.gain.setValueAtTime(0.14, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.07);
+    }
+
+    function playCascade(combo = 1) {
+      if (!enabled) return; init(); if (!ctx) return;
+      const now = ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      const shift = Math.pow(1.07, Math.min(combo, 10));
+      notes.forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f * shift, now + i * 0.045);
+        g.gain.setValueAtTime(0.001, now + i * 0.045);
+        g.gain.linearRampToValueAtTime(0.16, now + i * 0.045 + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.24);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(now + i * 0.045); o.stop(now + i * 0.045 + 0.25);
+      });
+    }
+
+    function playPhonkWild() {
+      if (!enabled) return; init(); if (!ctx) return;
+      const now = ctx.currentTime;
+      const shaper = ctx.createWaveShaper();
+      const curve = new Float32Array(256);
+      for (let i = 0; i < 256; i++) {
+        const x = (i * 2) / 256 - 1;
+        curve[i] = Math.tanh(x * 5.0);
       }
-      gridEl.appendChild(el);
+      shaper.curve = curve;
+      shaper.connect(ctx.destination);
+
+      const melody = [
+        { t: 0.00, f: 587.33, d: 0.13 },
+        { t: 0.14, f: 587.33, d: 0.13 },
+        { t: 0.28, f: 698.46, d: 0.13 },
+        { t: 0.42, f: 587.33, d: 0.13 },
+        { t: 0.56, f: 880.00, d: 0.15 },
+        { t: 0.72, f: 783.99, d: 0.15 },
+        { t: 0.88, f: 698.46, d: 0.22 },
+        { t: 1.12, f: 587.33, d: 0.13 },
+        { t: 1.26, f: 698.46, d: 0.13 },
+        { t: 1.40, f: 880.00, d: 0.15 },
+        { t: 1.56, f: 1046.50, d: 0.28 }
+      ];
+
+      [1.0, 1.48].forEach(ratio => {
+        melody.forEach(n => {
+          const st = now + n.t, o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
+          o.type = 'square';
+          o.frequency.setValueAtTime(n.f * ratio, st);
+          flt.type = 'bandpass';
+          flt.frequency.setValueAtTime(1200, st);
+          flt.Q.setValueAtTime(2.8, st);
+          g.gain.setValueAtTime(0.24, st);
+          g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
+          o.connect(flt); flt.connect(g); g.connect(shaper);
+          o.start(st); o.stop(st + n.d + 0.02);
+        });
+      });
+
+      [0.00, 0.42, 0.56, 1.12, 1.40].forEach(off => {
+        const b = ctx.createOscillator(), bg = ctx.createGain();
+        b.type = 'sine';
+        b.frequency.setValueAtTime(155, now + off);
+        b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
+        bg.gain.setValueAtTime(0.75, now + off);
+        bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
+        b.connect(bg); bg.connect(shaper);
+        b.start(now + off); b.stop(now + off + 0.4);
+      });
+
+      const noiseLen = Math.floor(ctx.sampleRate * 1.9);
+      const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
+      const data = noiseBuf.getChannelData(0);
+      for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
+
+      for (let h = 0; h < 24; h++) {
+        const t = now + h * 0.075;
+        const src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), hg = ctx.createGain();
+        src.buffer = noiseBuf;
+        hp.type = 'highpass';
+        hp.frequency.setValueAtTime(7500, t);
+        const isClap = (h === 4 || h === 12 || h === 20);
+        hg.gain.setValueAtTime(isClap ? 0.32 : 0.09, t);
+        hg.gain.exponentialRampToValueAtTime(0.001, t + (isClap ? 0.14 : 0.035));
+        src.connect(hp); hp.connect(hg); hg.connect(ctx.destination);
+        src.start(t); src.stop(t + 0.15);
+      }
+    }
+
+    function playBigWin() {
+      if (!enabled) return; init(); if (!ctx) return;
+      const now = ctx.currentTime;
+      [261.63, 329.63, 392.00, 523.25, 659.25, 783.99].forEach((f, i) => {
+        const o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(f, now + i * 0.08);
+        flt.type = 'lowpass'; flt.frequency.setValueAtTime(2400, now + i * 0.08);
+        g.gain.setValueAtTime(0.001, now + i * 0.08);
+        g.gain.linearRampToValueAtTime(0.14, now + i * 0.08 + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 1.1);
+        o.connect(flt); flt.connect(g); g.connect(ctx.destination);
+        o.start(now + i * 0.08); o.stop(now + i * 0.08 + 1.15);
+      });
+    }
+    return { init, toggle, playTick, playCascade, playPhonkWild, playBigWin };
+  })();
+
+  // Разблокировка звука на iOS Safari при первом тапе
+  document.body.addEventListener('touchstart', () => SoundFX.init(), { once: true });
+  document.body.addEventListener('click', () => SoundFX.init(), { once: true });
+
+  const AVATARS = ['👑','🦁','🐺','🐉','💎','🎩','🦊','🐯','🦅','🔥','🃏','💰'];
+  const BETS = [10, 25, 50, 100, 250, 500, 1000, 2500];
+  const COLS = 6, ROWS = 5;
+  const ADMIN_PASS = '7777';
+
+  const SYMBOLS = [
+    { id: 'crown', icon: '👑', mult: 3.5, weight: 7 },
+    { id: 'cup', icon: '🏆', mult: 2.2, weight: 10 },
+    { id: 'bell', icon: '🔔', mult: 1.6, weight: 12 },
+    { id: 'clover', icon: '🍀', mult: 1.2, weight: 15 },
+    { id: 'cherry', icon: '🍒', mult: 0.8, weight: 18 }
+  ];
+  const WILD_MULTS = [2, 3, 5, 10, 15, 20, 25, 50, 100];
+  const ORB_MULTS = [2, 3, 5, 10, 15, 25, 50, 100];
+
+  let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
+  try {
+    savedId = localStorage.getItem('rg_player_id') || savedId;
+    localStorage.setItem('rg_player_id', savedId);
+  } catch (e) {}
+
+  let me = {
+    id: savedId,
+    name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)),
+    avatar: '👑',
+    balance: 1000,
+    chance: 35,
+    isAdmin: false,
+    forceWild: false,
+    force500k: false,
+    lastSeen: Date.now()
+  };
+
+  let playersCache = {};
+  let appState = {
+    betIndex: 2,
+    isSpinning: false,
+    turbo: false,
+    autoSpins: 0,
+    freeSpins: 0,
+    bonusMult: 1,
+    grid: []
+  };
+
+  const elById = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, appState.turbo ? ms * 0.45 : ms));
+  const fmt = n => Math.round(n).toString();
+
+  async function fbRequest(path, method = 'GET', body = null) {
+    try {
+      const opts = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body !== null) opts.body = JSON.stringify(body);
+      const res = await fetch(FIREBASE_URL + path + '.json', opts);
+      if (!res.ok) throw new Error(res.status);
+      elById('net-status').innerHTML = '<span class="dot online"></span>В сети (Firebase)';
+      return await res.json();
+    } catch (err) {
+      elById('net-status').innerHTML = '<span class="dot offline"></span>Локальный режим (Firebase недоступен)';
+      return null;
     }
   }
-}
 
-function spawnFloatingWin(amount) {
-  const rect = elById('slot-grid').getBoundingClientRect(), el = document.createElement('div');
-  el.className = 'float-win'; el.textContent = `+${fmt(amount)}`;
-  el.style.left = `${rect.left + rect.width * (0.35 + Math.random() * 0.3)}px`;
-  el.style.top = `${rect.top + rect.height * 0.45}px`;
-  document.body.appendChild(el); setTimeout(() => el.remove(), 1100);
-}
-
-function triggerWildHyperEffects() {
-  const card = elById('game-screen');
-  const cabinet = elById('slot-cabinet');
-
-  card.classList.remove('cabinet-shake');
-  void card.offsetWidth;
-  card.classList.add('cabinet-shake');
-
-  const flash = document.createElement('div');
-  flash.className = 'wild-flash-screen';
-  document.body.appendChild(flash);
-  setTimeout(() => flash.remove(), 700);
-
-  const wave = document.createElement('div');
-  wave.className = 'shockwave-ring';
-  document.body.appendChild(wave);
-  setTimeout(() => wave.remove(), 800);
-
-  cabinet.classList.add('wild-hyper');
-  setTimeout(() => cabinet.classList.remove('wild-hyper'), 1800);
-
-  const icons = new Array('⚡', '⚔️', '🔥', '💥', '✨');
-  for (let i = 0; i < 18; i++) {
-    setTimeout(() => {
-      const s = document.createElement('div');
-      s.className = 'lightning-bolt-fx';
-      s.textContent = icons[i % icons.length];
-      s.style.left = `${12 + Math.random() * 76}vw`;
-      s.style.top = `${22 + Math.random() * 52}vh`;
-      document.body.appendChild(s);
-      setTimeout(() => s.remove(), 950);
-    }, i * 35);
+  function pushMyState() {
+    me.lastSeen = Date.now();
+    playersCache[me.id] = Object.assign({}, me);
+    updateHUD();
+    if (me.isAdmin) renderAdminTable();
+    fbRequest('/players/' + me.id, 'PUT', me);
   }
-}
 
-async function showBigWinOverlay(amount) {
-  const overlay = elById('bigwin-overlay'), titleEl = elById('bigwin-title'), amountEl = elById('bigwin-amount');
-  titleEl.textContent = amount >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑';
-  overlay.classList.remove('hidden'); SoundFX.playBigWin();
-  for (let i = 0; i < 40; i++) {
-    const coin = document.createElement('div'); coin.className = 'coin-particle';
-    coin.textContent = i % 3 === 0 ? '💎' : '🪙';
-    coin.style.left = `${Math.random() * 96}vw`; coin.style.animationDuration = `${1.2 + Math.random() * 1.4}s`;
-    document.body.appendChild(coin); setTimeout(() => coin.remove(), 2700);
+  async function pollServer() {
+    if (elById('game-screen').classList.contains('hidden')) return;
+    const db = await fbRequest('/players', 'GET');
+    if (db && typeof db === 'object') {
+      playersCache = db;
+      const remoteMe = db[me.id];
+      if (remoteMe) {
+        let needAck = false;
+        if (typeof remoteMe.balance === 'number' && remoteMe.balance !== me.balance && !appState.isSpinning) {
+          me.balance = remoteMe.balance;
+          updateHUD();
+        }
+        if (typeof remoteMe.chance === 'number') me.chance = remoteMe.chance;
+        if (remoteMe.forceWild) { me.forceWild = true; needAck = true; }
+        if (remoteMe.force500k) { me.force500k = true; needAck = true; }
+        if (needAck) {
+          fbRequest('/players/' + me.id, 'PATCH', { forceWild: false, force500k: false });
+        }
+      }
+    }
+    me.lastSeen = Date.now();
+    playersCache[me.id] = Object.assign({}, me);
+    fbRequest('/players/' + me.id, 'PATCH', {
+      lastSeen: me.lastSeen,
+      name: me.name,
+      avatar: me.avatar,
+      isAdmin: me.isAdmin
+    });
+    if (me.isAdmin) renderAdminTable();
   }
-  for (let s = 1; s <= 25; s++) {
-    amountEl.textContent = `${fmt((amount / 25) * s)} 💰`;
-    await new Promise(r => setTimeout(r, 40));
-  }
-  await new Promise(r => setTimeout(r, 900));
-  overlay.classList.add('hidden');
-}
 
-async function startSpin(isFreeSpin = false) {
-  if (appState.isSpinning) return;
-  const bet = BETS[appState.betIndex];
-  if (!isFreeSpin) {
-    if (me.balance < bet) { setBanner('❌ Недостаточно средств!'); stopAuto(); return; }
-    me.balance -= bet;
-    await pushMyState();
-  }
-  appState.isSpinning = true; toggleControls(false);
-  generateGrid(); renderGrid(true);
-  for (let c = 0; c < COLS; c++) setTimeout(() => SoundFX.playTick(c), c * (appState.turbo ? 20 : 45));
+  // Отрисовка аватаров
+  const avGrid = elById('avatar-grid');
+  avGrid.innerHTML = '';
+  AVATARS.forEach((av, idx) => {
+    const el = document.createElement('div');
+    el.className = 'avatar-opt' + (idx === 0 ? ' selected' : '');
+    el.textContent = av;
+    el.onclick = () => {
+      document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+      me.avatar = av;
+    };
+    avGrid.appendChild(el);
+  });
 
-  let hasWild = false, wildMultSum = 0;
-  for (let c = 0; c < COLS; c++) {
-    if (appState.grid[c].type === 'wild_col') { hasWild = true; wildMultSum += appState.grid[c].mult; }
-  }
-  if (hasWild) {
-    SoundFX.playPhonkWild();
-    triggerWildHyperEffects();
-    setBanner(`⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x${wildMultSum}!`);
-  } else {
-    setBanner(isFreeSpin ? `⚡ FREE SPINS (${appState.freeSpins})...` : '🎰 Вращение...');
-  }
-  await sleep(520);
+  let secretClicks = 0;
+  elById('secret-title').onclick = () => {
+    if (++secretClicks >= 5) {
+      me.isAdmin = !me.isAdmin; secretClicks = 0;
+      alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен');
+    }
+  };
 
-  let cascadeStep = 0, spinBaseWin = 0, spinOrbMult = 0;
-  while (true) {
-    const counts = {}, coordsById = {}; let wildCols = 0;
+  elById('start-btn').onclick = () => {
+    SoundFX.init();
+    const nameVal = elById('player-name-input').value.trim();
+    const passVal = elById('admin-pass-input').value.trim();
+    if (nameVal) me.name = nameVal;
+    if (passVal === ADMIN_PASS || me.name.toLowerCase() === 'admin') me.isAdmin = true;
+
+    elById('hud-name').textContent = me.name;
+    elById('hud-avatar').textContent = me.avatar;
+    if (me.isAdmin) {
+      elById('admin-badge').classList.remove('hidden');
+      elById('admin-panel').classList.remove('hidden');
+    } else {
+      elById('admin-badge').classList.add('hidden');
+      elById('admin-panel').classList.add('hidden');
+    }
+
+    elById('setup-screen').classList.add('hidden');
+    elById('game-screen').classList.remove('hidden');
+
+    appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+    renderGrid(true);
+    pushMyState();
+    pollServer();
+  };
+
+  elById('profile-btn').onclick = () => {
+    elById('game-screen').classList.add('hidden');
+    elById('setup-screen').classList.remove('hidden');
+  };
+
+  setInterval(pollServer, 2500);
+
+  function pickCell(allowSpecial = true) {
+    if (allowSpecial) {
+      const r = Math.random();
+      if (r < 0.035) return { type: 'scatter', icon: '🏛️' };
+      if (r < 0.075) return { type: 'orb', icon: '🌕', mult: ORB_MULTS[Math.floor(Math.random() * ORB_MULTS.length)] };
+    }
+    const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
+    let rnd = Math.random() * totalW;
+    for (const sym of SYMBOLS) {
+      if (rnd < sym.weight) return { type: 'normal', id: sym.id, icon: sym.icon, mult: sym.mult };
+      rnd -= sym.weight;
+    }
+    return { type: 'normal', id: SYMBOLS[0].id, icon: SYMBOLS[0].icon, mult: SYMBOLS[0].mult };
+  }
+
+  function generateGrid() {
+    const luck = me.chance / 100;
+    appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+
+    if (Math.random() < luck * 0.65 || me.force500k) {
+      const target = me.force500k ? SYMBOLS[0] : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+      const count = me.force500k ? 14 : (8 + Math.floor(Math.random() * 4));
+      let placed = 0;
+      while (placed < count) {
+        const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
+        if (appState.grid[c][r].type === 'normal') {
+          appState.grid[c][r] = { type: 'normal', id: target.id, icon: target.icon, mult: target.mult };
+          placed++;
+        }
+      }
+    }
+
+    const wildColsCount = me.force500k ? 3 : (me.forceWild || Math.random() < (0.14 + luck * 0.14) ? 1 : 0);
+    if (wildColsCount > 0) {
+      const availableCols = [0, 2, 4, 1, 3, 5];
+      for (let i = 0; i < wildColsCount; i++) {
+        const col = availableCols[i];
+        const mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
+        for (let r = 0; r < ROWS; r++) {
+          appState.grid[col][r] = { type: 'wild_col', mult: mult, rowIdx: r };
+        }
+      }
+    }
+
+    me.forceWild = false;
+    me.force500k = false;
+  }
+
+  function renderGrid(animateDrop = false, explodingCoords = new Set()) {
+    const gridEl = elById('slot-grid');
+    gridEl.innerHTML = '';
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const cell = appState.grid[c][r];
+        const el = document.createElement('div');
+        el.className = 'cell-6x5';
+        if (animateDrop) {
+          el.classList.add('cell-drop');
+          el.style.animationDelay = (c * 0.04 + r * 0.015) + 's';
+        }
+        if (explodingCoords.has(c + ',' + r)) el.classList.add('cell-explode');
+
+        if (cell.type === 'wild_col') {
+          el.classList.add('wild-col-cell');
+          if (r === 0) {
+            el.innerHTML = '<div class="wild-badge-top">WILD</div><div class="wild-mult-big">' + cell.mult + 'x</div>';
+          } else if (r === ROWS - 1) {
+            el.innerHTML = '<div class="wild-badge-top">WILD</div>';
+          } else {
+            el.innerHTML = '<div class="wild-icon-main">' + (r === 2 ? '⚡' : '⚔️') + '</div>';
+          }
+        } else if (cell.type === 'orb') {
+          el.classList.add('orb-cell');
+          el.innerHTML = '<div>🌕</div><div class="orb-val">' + cell.mult + 'x</div>';
+        } else if (cell.type === 'scatter') {
+          el.classList.add('scatter-cell');
+          el.innerHTML = '<div>🏛️</div><div class="scat-tag">SCATTER</div>';
+        } else {
+          el.textContent = cell.icon;
+        }
+        gridEl.appendChild(el);
+      }
+    }
+  }
+
+  function spawnFloatingWin(amount) {
+    const rect = elById('slot-grid').getBoundingClientRect(), el = document.createElement('div');
+    el.className = 'float-win'; el.textContent = '+' + fmt(amount);
+    el.style.left = (rect.left + rect.width * (0.35 + Math.random() * 0.3)) + 'px';
+    el.style.top = (rect.top + rect.height * 0.45) + 'px';
+    document.body.appendChild(el); setTimeout(() => el.remove(), 1100);
+  }
+
+  function triggerWildHyperEffects() {
+    const card = elById('game-screen');
+    const cabinet = elById('slot-cabinet');
+
+    card.classList.remove('cabinet-shake');
+    void card.offsetWidth;
+    card.classList.add('cabinet-shake');
+
+    const flash = document.createElement('div');
+    flash.className = 'wild-flash-screen';
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 700);
+
+    const wave = document.createElement('div');
+    wave.className = 'shockwave-ring';
+    document.body.appendChild(wave);
+    setTimeout(() => wave.remove(), 800);
+
+    cabinet.classList.add('wild-hyper');
+    setTimeout(() => cabinet.classList.remove('wild-hyper'), 1800);
+
+    const icons = ['⚡', '⚔️', '🔥', '💥', '✨'];
+    for (let i = 0; i < 18; i++) {
+      setTimeout(() => {
+        const s = document.createElement('div');
+        s.className = 'lightning-bolt-fx';
+        s.textContent = icons[i % icons.length];
+        s.style.left = (12 + Math.random() * 76) + 'vw';
+        s.style.top = (22 + Math.random() * 52) + 'vh';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 950);
+      }, i * 35);
+    }
+  }
+
+  async function showBigWinOverlay(amount) {
+    const overlay = elById('bigwin-overlay'), titleEl = elById('bigwin-title'), amountEl = elById('bigwin-amount');
+    titleEl.textContent = amount >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑';
+    overlay.classList.remove('hidden'); SoundFX.playBigWin();
+    for (let i = 0; i < 40; i++) {
+      const coin = document.createElement('div'); coin.className = 'coin-particle';
+      coin.textContent = i % 3 === 0 ? '💎' : '🪙';
+      coin.style.left = (Math.random() * 96) + 'vw'; coin.style.animationDuration = (1.2 + Math.random() * 1.4) + 's';
+      document.body.appendChild(coin); setTimeout(() => coin.remove(), 2700);
+    }
+    for (let s = 1; s <= 25; s++) {
+      amountEl.textContent = fmt((amount / 25) * s) + ' 💰';
+      await new Promise(r => setTimeout(r, 40));
+    }
+    await new Promise(r => setTimeout(r, 900));
+    overlay.classList.add('hidden');
+  }
+
+  async function startSpin(isFreeSpin = false) {
+    if (appState.isSpinning) return;
+    const bet = BETS[appState.betIndex];
+    if (!isFreeSpin) {
+      if (me.balance < bet) { setBanner('❌ Недостаточно средств!'); stopAuto(); return; }
+      me.balance -= bet;
+      pushMyState();
+    }
+    appState.isSpinning = true; toggleControls(false);
+    generateGrid(); renderGrid(true);
+    for (let c = 0; c < COLS; c++) setTimeout(() => SoundFX.playTick(c), c * (appState.turbo ? 20 : 45));
+
+    let hasWild = false, wildMultSum = 0;
     for (let c = 0; c < COLS; c++) {
-      if (appState.grid[c].type === 'wild_col') wildCols++;
+      if (appState.grid[c][0].type === 'wild_col') { hasWild = true; wildMultSum += appState.grid[c][0].mult; }
+    }
+    if (hasWild) {
+      SoundFX.playPhonkWild();
+      triggerWildHyperEffects();
+      setBanner('⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x' + wildMultSum + '!');
+    } else {
+      setBanner(isFreeSpin ? '⚡ FREE SPINS (' + appState.freeSpins + ')...' : '🎰 Вращение...');
+    }
+    await sleep(520);
+
+    let cascadeStep = 0, spinBaseWin = 0, spinOrbMult = 0;
+    while (true) {
+      const counts = {}, coordsById = {}; let wildCols = 0;
+      for (let c = 0; c < COLS; c++) {
+        if (appState.grid[c][0].type === 'wild_col') wildCols++;
+        for (let r = 0; r < ROWS; r++) {
+          const cell = appState.grid[c][r];
+          if (cell.type === 'normal') {
+            counts[cell.id] = (counts[cell.id] || 0) + 1;
+            if (!coordsById[cell.id]) coordsById[cell.id] = [];
+            coordsById[cell.id].push(c + ',' + r);
+          }
+        }
+      }
+      const exploding = new Set(); let stepWin = 0;
+      for (const sym of SYMBOLS) {
+        const totalMatched = (counts[sym.id] || 0) + wildCols;
+        if ((counts[sym.id] || 0) > 0 && totalMatched >= 8) {
+          coordsById[sym.id].forEach(coord => exploding.add(coord));
+          stepWin += bet * sym.mult * (1 + (totalMatched - 8) * 0.25);
+        }
+      }
+      if (exploding.size === 0) break;
+      cascadeStep++; spinBaseWin += stepWin;
+      SoundFX.playCascade(cascadeStep); renderGrid(false, exploding); spawnFloatingWin(stepWin);
+      setBanner('💥 КАСКАД #' + cascadeStep + ': +' + fmt(stepWin) + ' 💰');
+      await sleep(420);
+
+      for (let c = 0; c < COLS; c++) {
+        if (appState.grid[c][0].type === 'wild_col') continue;
+        const rem = [];
+        for (let r = ROWS - 1; r >= 0; r--) if (!exploding.has(c + ',' + r)) rem.unshift(appState.grid[c][r]);
+        while (rem.length < ROWS) rem.unshift(pickCell(true));
+        appState.grid[c] = rem;
+      }
+      renderGrid(true); await sleep(350);
+    }
+
+    let scatterCount = 0;
+    for (let c = 0; c < COLS; c++) {
       for (let r = 0; r < ROWS; r++) {
         const cell = appState.grid[c][r];
-        if (cell.type === 'normal') {
-          counts[cell.id] = (counts[cell.id] || 0) + 1;
-          if (!coordsById[cell.id]) coordsById[cell.id] = new Array();
-          coordsById[cell.id].push(`${c},${r}`);
-        }
+        if (cell.type === 'orb') spinOrbMult += cell.mult;
+        if (cell.type === 'scatter') scatterCount++;
       }
     }
-    const exploding = new Set(); let stepWin = 0;
-    for (const sym of SYMBOLS) {
-      const totalMatched = (counts[sym.id] || 0) + wildCols;
-      if ((counts[sym.id] || 0) > 0 && totalMatched >= 8) {
-        coordsById[sym.id].forEach(coord => exploding.add(coord));
-        stepWin += bet * sym.mult * (1 + (totalMatched - 8) * 0.25);
+
+    let totalMult = Math.max(1, wildMultSum + spinOrbMult);
+    if (isFreeSpin) {
+      if (spinBaseWin > 0 && (wildMultSum + spinOrbMult) > 0) appState.bonusMult += (wildMultSum + spinOrbMult);
+      totalMult = appState.bonusMult;
+    }
+    elById('total-mult').textContent = 'x' + totalMult;
+
+    let totalWin = Math.round(spinBaseWin * totalMult);
+    if (wildMultSum >= 60 && totalWin > 0 && totalWin < 500000 && spinBaseWin >= bet * 40) totalWin = 500000;
+
+    if (totalWin > 0) {
+      me.balance += totalWin;
+      pushMyState();
+      elById('balance-box').classList.add('balance-pop');
+      setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
+      setBanner('💥 КАСКАД #' + Math.max(1, cascadeStep) + ': +' + fmt(totalWin) + ' 💰');
+      if (totalWin >= bet * 15 || totalWin >= 100000) await showBigWinOverlay(totalWin);
+    } else {
+      pushMyState();
+      setBanner('Нажмите SPIN или ⚔️ WILD в админке!');
+    }
+
+    if (scatterCount >= 4 && appState.freeSpins === 0) {
+      appState.freeSpins = 10; appState.bonusMult = 1;
+      setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!');
+      SoundFX.playBigWin(); await sleep(1000);
+    }
+
+    appState.isSpinning = false; toggleControls(true);
+    if (appState.freeSpins > 0) {
+      appState.freeSpins--;
+      setTimeout(() => startSpin(true), 550);
+    } else if (appState.autoSpins > 0) {
+      appState.autoSpins--; updateAutoBtn();
+      if (appState.autoSpins > 0) setTimeout(() => startSpin(false), 500);
+    }
+  }
+
+  function updateHUD() {
+    const bet = BETS[appState.betIndex];
+    elById('bet-val').textContent = fmt(bet);
+    elById('buy-cost').textContent = fmt(bet * 100);
+    elById('balance-val').textContent = fmt(me.balance);
+  }
+  function setBanner(t) { elById('status-banner').textContent = t; }
+  function toggleControls(en) {
+    ['spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn'].forEach(id => elById(id).disabled = !en);
+  }
+
+  elById('bet-up').onclick = () => { if (appState.betIndex < BETS.length - 1) { appState.betIndex++; updateHUD(); } };
+  elById('bet-down').onclick = () => { if (appState.betIndex > 0) { appState.betIndex--; updateHUD(); } };
+  elById('bet-max').onclick = () => { appState.betIndex = BETS.length - 1; updateHUD(); };
+  elById('spin-btn').onclick = () => startSpin(false);
+  elById('buy-bonus-btn').onclick = () => {
+    const cost = BETS[appState.betIndex] * 100;
+    if (me.balance < cost) return setBanner('❌ Недостаточно средств для BUY BONUS!');
+    me.balance -= cost; appState.freeSpins = 10; appState.bonusMult = 1;
+    pushMyState();
+    SoundFX.playPhonkWild(); triggerWildHyperEffects(); startSpin(true);
+  };
+  elById('turbo-btn').onclick = function() { appState.turbo = !appState.turbo; this.classList.toggle('active-toggle', appState.turbo); };
+  elById('sound-toggle-btn').onclick = function() { const on = SoundFX.toggle(); this.textContent = on ? '🔊' : '🔇'; this.classList.toggle('active-toggle', on); };
+
+  elById('auto-btn').onclick = () => appState.autoSpins > 0 ? stopAuto() : elById('auto-modal').classList.remove('hidden');
+  elById('close-auto-modal').onclick = () => elById('auto-modal').classList.add('hidden');
+  document.querySelectorAll('.auto-opt').forEach(b => b.onclick = () => {
+    appState.autoSpins = parseInt(b.dataset.spins, 10); elById('auto-modal').classList.add('hidden'); updateAutoBtn(); startSpin(false);
+  });
+  function stopAuto() { appState.autoSpins = 0; updateAutoBtn(); }
+  function updateAutoBtn() {
+    const b = elById('auto-btn');
+    if (appState.autoSpins > 0) { b.textContent = '⏹ ' + appState.autoSpins; b.classList.add('btn-auto-stop'); }
+    else { b.textContent = '🔄 АВТО'; b.classList.remove('btn-auto-stop'); }
+  }
+
+  elById('clear-old-btn').onclick = async () => {
+    const now = Date.now();
+    for (const id of Object.keys(playersCache)) {
+      if (id !== me.id && now - (playersCache[id].lastSeen || 0) > 25000) {
+        delete playersCache[id];
+        await fbRequest('/players/' + id, 'DELETE');
       }
     }
-    if (exploding.size === 0) break;
-    cascadeStep++; spinBaseWin += stepWin;
-    SoundFX.playCascade(cascadeStep); renderGrid(false, exploding); spawnFloatingWin(stepWin);
-    setBanner(`💥 КАСКАД #${cascadeStep}: +${fmt(stepWin)} 💰`);
-    await sleep(420);
+    renderAdminTable();
+    setBanner('🗑️ Старые игроки удалены из базы!');
+  };
 
-    for (let c = 0; c < COLS; c++) {
-      if (appState.grid[c].type === 'wild_col') continue;
-      const rem = new Array();
-      for (let r = ROWS - 1; r >= 0; r--) if (!exploding.has(`${c},${r}`)) rem.unshift(appState.grid[c][r]);
-      while (rem.length < ROWS) rem.unshift(pickCell(true));
-      appState.grid[c] = rem;
+  function renderAdminTable() {
+    const tbody = elById('admin-tbody'), now = Date.now();
+    if (tbody.contains(document.activeElement)) return;
+    tbody.innerHTML = '';
+
+    Object.values(playersCache).forEach(p => {
+      const isOnline = (now - (p.lastSeen || 0)) < 12000;
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + (p.avatar || '👑') + ' <b>' + p.name + '</b> ' + (p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : '') + '</td>' +
+        '<td><span class="dot ' + (isOnline ? 'online' : 'offline') + '"></span>' + (isOnline ? 'В игре' : 'Офлайн') + '</td>' +
+        '<td><input type="number" class="admin-input" data-bal="' + p.id + '" value="' + Math.round(p.balance) + '"></td>' +
+        '<td><input type="number" class="admin-input" data-ch="' + p.id + '" min="0" max="100" value="' + p.chance + '"></td>' +
+        '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
+          '<button class="btn btn-ok-admin" data-ok="' + p.id + '">OK</button>' +
+          '<button class="btn btn-wild-admin" data-wild="' + p.id + '">⚔️ WILD</button>' +
+          '<button class="btn btn-bigwin-admin" data-500k="' + p.id + '">🔥 500K</button>' +
+        '</td>';
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('[data-ok]').forEach(btn => btn.onclick = async () => {
+      const id = btn.dataset.ok, p = playersCache[id];
+      if (!p) return;
+      const balEl = tbody.querySelector('[data-bal="' + id + '"]');
+      const chEl = tbody.querySelector('[data-ch="' + id + '"]');
+      const newBal = Math.max(0, parseInt(balEl.value, 10) || 0);
+      const newCh = Math.min(100, Math.max(0, parseInt(chEl.value, 10) || 0));
+      p.balance = newBal; p.chance = newCh;
+      if (id === me.id) { me.balance = newBal; me.chance = newCh; updateHUD(); }
+      await fbRequest('/players/' + id, 'PATCH', { balance: newBal, chance: newCh });
+      setBanner('✅ Игроку ' + p.name + ' обновлены баланс и шанс!');
+    });
+
+    tbody.querySelectorAll('[data-wild]').forEach(btn => btn.onclick = async () => {
+      const id = btn.dataset.wild, p = playersCache[id];
+      if (!p) return;
+      p.forceWild = true;
+      if (id === me.id) me.forceWild = true;
+      await fbRequest('/players/' + id, 'PATCH', { forceWild: true });
+      setBanner('⚔️ Игроку ' + p.name + ' отправлен PHONK WILD!');
+    });
+
+    tbody.querySelectorAll('[data-500k]').forEach(btn => btn.onclick = async () => {
+      const id = btn.dataset.500k, p = playersCache[id];
+      if (!p) return;
+      p.force500k = true; p.forceWild = true;
+      if (id === me.id) { me.force500k = true; me.forceWild = true; }
+      await fbRequest('/players/' + id, 'PATCH', { force500k: true, forceWild: true });
+      setBanner('🔥 Игроку ' + p.name + ' отправлен занос 500K!');
+    });
+  }
+
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !elById('game-screen').classList.contains('hidden')) {
+      e.preventDefault(); if (!appState.isSpinning) startSpin(false);
     }
-    renderGrid(true); await sleep(350);
-  }
-
-  let scatterCount = 0;
-  for (let c = 0; c < COLS; c++) {
-    for (let r = 0; r < ROWS; r++) {
-      const cell = appState.grid[c][r];
-      if (cell.type === 'orb') spinOrbMult += cell.mult;
-      if (cell.type === 'scatter') scatterCount++;
-    }
-  }
-
-  let totalMult = Math.max(1, wildMultSum + spinOrbMult);
-  if (isFreeSpin) {
-    if (spinBaseWin > 0 && (wildMultSum + spinOrbMult) > 0) appState.bonusMult += (wildMultSum + spinOrbMult);
-    totalMult = appState.bonusMult;
-  }
-  elById('total-mult').textContent = `x${totalMult}`;
-
-  let totalWin = Math.round(spinBaseWin * totalMult);
-  if (wildMultSum >= 60 && totalWin > 0 && totalWin < 500000 && spinBaseWin >= bet * 40) totalWin = 500000;
-
-  if (totalWin > 0) {
-    me.balance += totalWin;
-    await pushMyState();
-    elById('balance-box').classList.add('balance-pop');
-    setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
-    setBanner(`💥 КАСКАД #${Math.max(1, cascadeStep)}: +${fmt(totalWin)} 💰`);
-    if (totalWin >= bet * 15 || totalWin >= 100000) await showBigWinOverlay(totalWin);
-  } else {
-    await pushMyState();
-    setBanner('Нажмите SPIN или ⚔️ WILD в админке!');
-  }
-
-  if (scatterCount >= 4 && appState.freeSpins === 0) {
-    appState.freeSpins = 10; appState.bonusMult = 1;
-    setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!');
-    SoundFX.playBigWin(); await sleep(1000);
-  }
-
-  appState.isSpinning = false; toggleControls(true);
-  if (appState.freeSpins > 0) {
-    appState.freeSpins--;
-    setTimeout(() => startSpin(true), 550);
-  } else if (appState.autoSpins > 0) {
-    appState.autoSpins--; updateAutoBtn();
-    if (appState.autoSpins > 0) setTimeout(() => startSpin(false), 500);
-  }
-}
-
-function updateHUD() {
-  const bet = BETS[appState.betIndex];
-  elById('bet-val').textContent = fmt(bet);
-  elById('buy-cost').textContent = fmt(bet * 100);
-  elById('balance-val').textContent = fmt(me.balance);
-}
-function setBanner(t) { elById('status-banner').textContent = t; }
-function toggleControls(en) {
-  new Array('spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn').forEach(id => elById(id).disabled = !en);
-}
-
-elById('bet-up').onclick = () => { if (appState.betIndex < BETS.length - 1) { appState.betIndex++; updateHUD(); } };
-elById('bet-down').onclick = () => { if (appState.betIndex > 0) { appState.betIndex--; updateHUD(); } };
-elById('bet-max').onclick = () => { appState.betIndex = BETS.length - 1; updateHUD(); };
-elById('spin-btn').onclick = () => startSpin(false);
-elById('buy-bonus-btn').onclick = async () => {
-  const cost = BETS[appState.betIndex] * 100;
-  if (me.balance < cost) return setBanner('❌ Недостаточно средств для BUY BONUS!');
-  me.balance -= cost; appState.freeSpins = 10; appState.bonusMult = 1;
-  await pushMyState();
-  SoundFX.playPhonkWild(); triggerWildHyperEffects(); startSpin(true);
-};
-elById('turbo-btn').onclick = function() { appState.turbo = !appState.turbo; this.classList.toggle('active-toggle', appState.turbo); };
-elById('sound-toggle-btn').onclick = function() { const on = SoundFX.toggle(); this.textContent = on ? '🔊' : '🔇'; this.classList.toggle('active-toggle', on); };
-
-elById('auto-btn').onclick = () => appState.autoSpins > 0 ? stopAuto() : elById('auto-modal').classList.remove('hidden');
-elById('close-auto-modal').onclick = () => elById('auto-modal').classList.add('hidden');
-document.querySelectorAll('.auto-opt').forEach(b => b.onclick = () => {
-  appState.autoSpins = parseInt(b.dataset.spins, 10); elById('auto-modal').classList.add('hidden'); updateAutoBtn(); startSpin(false);
-});
-function stopAuto() { appState.autoSpins = 0; updateAutoBtn(); }
-function updateAutoBtn() {
-  const b = elById('auto-btn');
-  if (appState.autoSpins > 0) { b.textContent = `⏹ ${appState.autoSpins}`; b.classList.add('btn-auto-stop'); }
-  else { b.textContent = '🔄 АВТО'; b.classList.remove('btn-auto-stop'); }
-}
-
-elById('clear-old-btn').onclick = async () => {
-  const now = Date.now();
-  for (const id of Object.keys(playersCache)) {
-    if (id !== me.id && now - (playersCache[id].lastSeen || 0) > 25000) {
-      delete playersCache[id];
-      await fbRequest(`/players/${id}`, 'DELETE');
-    }
-  }
-  renderAdminTable();
-  setBanner('🗑️ Старые игроки удалены из базы!');
-};
-
-function renderAdminTable() {
-  const tbody = elById('admin-tbody'), now = Date.now();
-  if (tbody.contains(document.activeElement)) return;
-  tbody.innerHTML = '';
-
-  Object.values(playersCache).forEach(p => {
-    const isOnline = (now - (p.lastSeen || 0)) < 12000;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${p.avatar || '👑'} <b>${p.name}</b> ${p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : ''}</td>
-      <td><span class="dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'В игре' : 'Офлайн'}</td>
-      <td><input type="number" class="admin-input" data-bal="${p.id}" value="${Math.round(p.balance)}"></td>
-      <td><input type="number" class="admin-input" data-ch="${p.id}" min="0" max="100" value="${p.chance}"></td>
-      <td style="display:flex;gap:4px;flex-wrap:wrap;">
-        <button class="btn btn-ok-admin" data-ok="${p.id}">OK</button>
-        <button class="btn btn-wild-admin" data-wild="${p.id}">⚔️ WILD</button>
-        <button class="btn btn-bigwin-admin" data-500k="${p.id}">🔥 500K</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
   });
-
-  tbody.querySelectorAll('[data-ok]').forEach(btn => btn.onclick = async () => {
-    const id = btn.dataset.ok, p = playersCache[id];
-    if (!p) return;
-    const balEl = tbody.querySelector(`[data-bal="${id}"]`);
-    const chEl = tbody.querySelector(`[data-ch="${id}"]`);
-    const newBal = Math.max(0, parseInt(balEl.value, 10) || 0);
-    const newCh = Math.min(100, Math.max(0, parseInt(chEl.value, 10) || 0));
-    p.balance = newBal; p.chance = newCh;
-    if (id === me.id) { me.balance = newBal; me.chance = newCh; updateHUD(); }
-    await fbRequest(`/players/${id}`, 'PATCH', { balance: newBal, chance: newCh });
-    setBanner(`✅ Игроку ${p.name} обновлены баланс и шанс!`);
-  });
-
-  tbody.querySelectorAll('[data-wild]').forEach(btn => btn.onclick = async () => {
-    const id = btn.dataset.wild, p = playersCache[id];
-    if (!p) return;
-    p.forceWild = true;
-    if (id === me.id) me.forceWild = true;
-    await fbRequest(`/players/${id}`, 'PATCH', { forceWild: true });
-    setBanner(`⚔️ Игроку ${p.name} отправлен PHONK WILD!`);
-  });
-
-  tbody.querySelectorAll('[data-500k]').forEach(btn => btn.onclick = async () => {
-    const id = btn.dataset.500k, p = playersCache[id];
-    if (!p) return;
-    p.force500k = true; p.forceWild = true;
-    if (id === me.id) { me.force500k = true; me.forceWild = true; }
-    await fbRequest(`/players/${id}`, 'PATCH', { force500k: true, forceWild: true });
-    setBanner(`🔥 Игроку ${p.name} отправлен занос 500K!`);
-  });
-}
-
-window.addEventListener('keydown', e => {
-  if (e.code === 'Space' && !elById('game-screen').classList.contains('hidden')) {
-    e.preventDefault(); if (!appState.isSpinning) startSpin(false);
-  }
 });
 </script>
 </body>
