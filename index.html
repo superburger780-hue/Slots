@@ -45,7 +45,6 @@ input:focus{border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
 .cell-6x5{aspect-ratio:1/1;max-height:76px;background:linear-gradient(180deg,#171007 0%,#24180a 100%);border:1px solid #3a2a0d;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;user-select:none;position:relative}
 @media(max-width:520px){.cell-6x5{font-size:26px;border-radius:6px}.grid-6x5{gap:4px;padding:5px}}
 
-/* ГИПЕР-ЭФФЕКТЫ EXPANDING WILD */
 .wild-col-cell{
   background:linear-gradient(180deg,#ffffff 0%,#fff08a 18%,#ff9100 50%,#802000 82%,#ffd700 100%)!important;
   border:2px solid #fff!important;
@@ -143,7 +142,7 @@ th{color:var(--g)}
     <div class="avatar-opt" onclick="pickAv(this,'💰')">💰</div>
   </div>
   <input id="player-name-input" type="text" placeholder="Ваше имя" maxlength="16">
-  <input id="admin-pass-input" type="password" placeholder="Секретный пароль админа">
+  <input id="admin-pass-input" class="hidden" type="password" placeholder="Секретный пароль админа">
   <button id="start-btn" class="btn" style="width:100%;padding:13px;font-size:15px;" onclick="enterGame()">ВОЙТИ В ИГРУ</button>
 </div>
 
@@ -245,7 +244,7 @@ function playTick(c) {
 function playCascade(combo) {
   if (!sndOn) return; initAudio(); if (!audioCtx) return;
   const now = audioCtx.currentTime, shift = Math.pow(1.07, Math.min(combo, 10));
-  const notes = Array.of(523.25, 659.25, 783.99, 1046.50);
+  const notes = [523.25, 659.25, 783.99, 1046.50];
   notes.forEach((f, i) => {
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = 'sine'; o.frequency.setValueAtTime(f * shift, now + i * 0.045);
@@ -259,13 +258,13 @@ function playPhonkWild() {
   const now = audioCtx.currentTime, shaper = audioCtx.createWaveShaper(), curve = new Float32Array(256);
   for (let i = 0; i < 256; i++) curve[i] = Math.tanh(((i * 2) / 256 - 1) * 5.0);
   shaper.curve = curve; shaper.connect(audioCtx.destination);
-  const melody = Array.of(
+  const melody = [
     { t: 0.00, f: 587.33, d: 0.13 }, { t: 0.14, f: 587.33, d: 0.13 }, { t: 0.28, f: 698.46, d: 0.13 },
     { t: 0.42, f: 587.33, d: 0.13 }, { t: 0.56, f: 880.00, d: 0.15 }, { t: 0.72, f: 783.99, d: 0.15 },
     { t: 0.88, f: 698.46, d: 0.22 }, { t: 1.12, f: 587.33, d: 0.13 }, { t: 1.26, f: 698.46, d: 0.13 },
     { t: 1.40, f: 880.00, d: 0.15 }, { t: 1.56, f: 1046.50, d: 0.28 }
-  );
-  Array.of(1.0, 1.48).forEach(ratio => {
+  ];
+  [1.0, 1.48].forEach(ratio => {
     melody.forEach(n => {
       const st = now + n.t, o = audioCtx.createOscillator(), flt = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
       o.type = 'square'; o.frequency.setValueAtTime(n.f * ratio, st);
@@ -274,7 +273,7 @@ function playPhonkWild() {
       o.connect(flt); flt.connect(g); g.connect(shaper); o.start(st); o.stop(st + n.d + 0.02);
     });
   });
-  Array.of(0.00, 0.42, 0.56, 1.12, 1.40).forEach(off => {
+  [0.00, 0.42, 0.56, 1.12, 1.40].forEach(off => {
     const b = audioCtx.createOscillator(), bg = audioCtx.createGain();
     b.type = 'sine'; b.frequency.setValueAtTime(155, now + off); b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
     bg.gain.setValueAtTime(0.75, now + off); bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
@@ -293,7 +292,7 @@ function playPhonkWild() {
 function playBigWin() {
   if (!sndOn) return; initAudio(); if (!audioCtx) return;
   const now = audioCtx.currentTime;
-  Array.of(261.63, 329.63, 392.00, 523.25, 659.25, 783.99).forEach((f, i) => {
+  [261.63, 329.63, 392.00, 523.25, 659.25, 783.99].forEach((f, i) => {
     const o = audioCtx.createOscillator(), flt = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
     o.type = 'sawtooth'; o.frequency.setValueAtTime(f, now + i * 0.08);
     flt.type = 'lowpass'; flt.frequency.setValueAtTime(2400, now + i * 0.08);
@@ -303,33 +302,41 @@ function playBigWin() {
   });
 }
 
-const BETS = Array.of(10, 25, 50, 100, 250, 500, 1000, 2500);
+const BETS = [10, 25, 50, 100, 250, 500, 1000, 2500];
 const COLS = 6, ROWS = 5, ADMIN_PASS = '7777';
-const SYMBOLS = Array.of(
+const SYMBOLS = [
   { id: 'crown', icon: '👑', mult: 1.8, weight: 6 },
   { id: 'cup', icon: '🏆', mult: 1.1, weight: 9 },
   { id: 'bell', icon: '🔔', mult: 0.8, weight: 12 },
   { id: 'clover', icon: '🍀', mult: 0.5, weight: 16 },
   { id: 'cherry', icon: '🍒', mult: 0.35, weight: 22 }
-);
-const WILD_MULTS = Array.of(2, 2, 3, 3, 5, 5, 10, 15, 25, 50);
-const ORB_MULTS = Array.of(2, 2, 3, 5, 10, 15, 25, 50);
+];
+const WILD_MULTS = [2, 2, 3, 3, 5, 5, 10, 15, 25, 50];
+const ORB_MULTS = [2, 2, 3, 5, 10, 15, 25, 50];
 
 let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
 try { savedId = localStorage.getItem('rg_player_id') || savedId; localStorage.setItem('rg_player_id', savedId); } catch (e) {}
 
 let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 22, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
 let playersCache = {};
-let app = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: Array.of() };
+let app = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: [] };
 const sleep = ms => new Promise(r => setTimeout(r, app.turbo ? ms * 0.45 : ms));
 
 function pickAv(el, av) {
   document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
   el.classList.add('selected'); me.avatar = av;
 }
-let secretClicks = 0;
+
+let secretClicks = 0, adminFieldUnlocked = false;
 function tapSecret() {
-  if (++secretClicks >= 5) { me.isAdmin = !me.isAdmin; secretClicks = 0; alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен'); }
+  if (adminFieldUnlocked) return;
+  secretClicks++;
+  if (secretClicks >= 5) {
+    adminFieldUnlocked = true;
+    const passInput = elById('admin-pass-input');
+    passInput.classList.remove('hidden');
+    passInput.focus();
+  }
 }
 
 async function fbReq(path, method, body) {
@@ -374,15 +381,20 @@ async function pollServer() {
 
 function enterGame() {
   initAudio();
-  const n = elById('player-name-input').value.trim(), p = elById('admin-pass-input').value.trim();
+  const n = elById('player-name-input').value.trim();
+  const p = elById('admin-pass-input').value.trim();
   if (n) me.name = n;
-  if (p === ADMIN_PASS || me.name.toLowerCase() === 'admin') me.isAdmin = true;
-  elById('hud-name').textContent = me.name; elById('hud-avatar').textContent = me.avatar;
+  me.isAdmin = (adminFieldUnlocked && p === ADMIN_PASS);
+  elById('hud-name').textContent = me.name;
+  elById('hud-avatar').textContent = me.avatar;
   elById('admin-badge').classList.toggle('hidden', !me.isAdmin);
   elById('admin-panel').classList.toggle('hidden', !me.isAdmin);
-  elById('setup-screen').classList.add('hidden'); elById('game-screen').classList.remove('hidden');
+  elById('setup-screen').classList.add('hidden');
+  elById('game-screen').classList.remove('hidden');
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-  renderGrid(true, null); pushMe(); pollServer();
+  renderGrid(true, null);
+  pushMe();
+  pollServer();
 }
 function openProfile() { elById('game-screen').classList.add('hidden'); elById('setup-screen').classList.remove('hidden'); }
 setInterval(pollServer, 2500);
@@ -406,7 +418,7 @@ function generateGrid() {
   const luck = me.chance / 100;
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
   if (Math.random() < luck * 0.42 || me.force500k) {
-    const t = me.force500k ? SYMBOLS : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    const t = me.force500k ? SYMBOLS[0] : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
     const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 2));
     let pl = 0;
     while (pl < cnt) {
@@ -416,7 +428,7 @@ function generateGrid() {
   }
   const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.05 + luck * 0.08)) ? 1 : 0);
   if (wCnt > 0) {
-    const cols = Array.of(0, 2, 4, 1, 3, 5);
+    const cols = [0, 2, 4, 1, 3, 5];
     for (let i = 0; i < wCnt; i++) {
       const col = cols[i], mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
       for (let r = 0; r < ROWS; r++) app.grid[col][r] = { type: 'wild_col', mult: mult, rowIdx: r };
@@ -471,7 +483,7 @@ function triggerWildFX() {
 
   cab.classList.add('wild-hyper'); setTimeout(() => cab.classList.remove('wild-hyper'), 2200);
 
-  const icons = Array.of('⚡', '⚔️', '🔥', '💥', '✨', '👑');
+  const icons = ['⚡', '⚔️', '🔥', '💥', '✨', '👑'];
   for (let i = 0; i < 26; i++) {
     setTimeout(() => {
       const s = document.createElement('div'); s.className = 'lightning-bolt-fx'; s.textContent = icons[i % 6];
@@ -507,7 +519,7 @@ async function startSpin(isFS) {
 
   let hasW = false, wSum = 0;
   for (let c = 0; c < COLS; c++) {
-    if (app.grid[c].type === 'wild_col') { hasW = true; wSum += app.grid[c].mult; }
+    if (app.grid[c][0].type === 'wild_col') { hasW = true; wSum += app.grid[c][0].mult; }
   }
   if (hasW) {
     playPhonkWild();
@@ -522,12 +534,12 @@ async function startSpin(isFS) {
   while (true) {
     const cnts = {}, coords = {}; let wCols = 0;
     for (let c = 0; c < COLS; c++) {
-      if (app.grid[c].type === 'wild_col') wCols++;
+      if (app.grid[c][0].type === 'wild_col') wCols++;
       for (let r = 0; r < ROWS; r++) {
         const cell = app.grid[c][r];
         if (cell.type === 'normal') {
           cnts[cell.id] = (cnts[cell.id] || 0) + 1;
-          if (!coords[cell.id]) coords[cell.id] = Array.of();
+          if (!coords[cell.id]) coords[cell.id] = [];
           coords[cell.id].push(c + ',' + r);
         }
       }
@@ -547,8 +559,8 @@ async function startSpin(isFS) {
     await sleep(420);
 
     for (let c = 0; c < COLS; c++) {
-      if (app.grid[c].type === 'wild_col') continue;
-      const rem = Array.of();
+      if (app.grid[c][0].type === 'wild_col') continue;
+      const rem = [];
       for (let r = ROWS - 1; r >= 0; r--) if (!expl.has(c + ',' + r)) rem.unshift(app.grid[c][r]);
       while (rem.length < ROWS) rem.unshift(pickCell(true));
       app.grid[c] = rem;
@@ -591,7 +603,7 @@ function updateHUD() {
   elById('bet-val').textContent = fmt(bet); elById('buy-cost').textContent = fmt(bet * 100); elById('balance-val').textContent = fmt(me.balance);
 }
 function setBanner(t) { elById('status-banner').textContent = t; }
-function setBtns(en) { Array.of('spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn').forEach(id => elById(id).disabled = !en); }
+function setBtns(en) { ['spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn'].forEach(id => elById(id).disabled = !en); }
 function chgBet(d) { const ni = app.betIndex + d; if (ni >= 0 && ni < BETS.length) { app.betIndex = ni; updateHUD(); } }
 function maxBet() { app.betIndex = BETS.length - 1; updateHUD(); }
 function toggleTurbo(btn) { app.turbo = !app.turbo; btn.classList.toggle('active-toggle', app.turbo); }
@@ -651,14 +663,16 @@ async function admWild(id) {
   p.forceWild = true;
   if (id === me.id) me.forceWild = true;
   await fbReq('/players/' + id, 'PATCH', { forceWild: true });
-  setBanner('⚔️ Игроку ' + p.name + ' активирован WILD на следующий спин!');
+  setBanner('⚔️ Игроку ' + p.name + ' активирован WILD!');
 }
 
 async function adm500k(id) {
   const p = playersCache[id]; if (!p) return;
   p.force500k = true;
-  if (id ===
-me.id) me.force500k = true;
-await fbReq('/players/' + id, 'PATCH', { force500k: true });
-setBanner('🔥 Игроку ' + p.name + ' активирован MAX WIN 500K на следующий спин!');
+  if (id === me.id) me.force500k = true;
+  await fbReq('/players/' + id, 'PATCH', { force500k: true });
+  setBanner('🔥 Игроку ' + p.name + ' активирован MAX WIN 500K!');
 }
+</script>
+</body>
+</html>
