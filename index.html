@@ -1,6 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ROYAL GOLD 6x5 — MAX WIN</title>
+<style>
+:root{--gl:#fff6cc;--g:#ffd700;--gm:#d4af37;--gd:#7a5c12;--on:#2ecc71}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at 50% 15%,#3b260d 0%,#090502 88%);color:var(--gl);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px;overflow-x:hidden}
+.gold-text{background:linear-gradient(180deg,#fff9d6 0%,#ffd700 48%,#b38000 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.card{background:linear-gradient(160deg,#21160b 0%,#0d0803 100%);border:2px solid var(--gm);border-radius:18px;box-shadow:0 15px 50px rgba(0,0,0,.92),0 0 35px rgba(212,175,55,.25),inset 0 0 20px rgba(0,0,0,.85);padding:16px;width:100%;max-width:880px;position:relative}
+.cabinet-shake{animation:shakeHard .75s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shakeHard{10%,90%{transform:translate3d(-5px,2px,0) rotate(-.7deg) scale(1.01)}20%,80%{transform:translate3d(7px,-3px,0) rotate(.8deg) scale(1.02)}30%,50%,70%{transform:translate3d(-8px,4px,0) rotate(-.9deg) scale(1.02)}40%,60%{transform:translate3d(8px,-3px,0) rotate(.7deg) scale(1.01)}}
+#setup-screen{max-width:440px;text-align:center;padding:24px;animation:modalPop .35s ease-out}
+#secret-title{cursor:pointer;user-select:none;letter-spacing:1px}
+input{width:100%;padding:12px 14px;margin-bottom:10px;background:#0a0603;border:1px solid var(--gd);border-radius:10px;color:var(--gl);font-size:15px;outline:none}
+input:focus{border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
+.avatar-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0 16px}
+.avatar-opt{font-size:26px;padding:8px 0;background:#140c05;border:2px solid #3d2e10;border-radius:10px;cursor:pointer;user-select:none;transition:transform .15s}
+.avatar-opt.selected{border-color:var(--g);background:rgba(255,215,0,.2);box-shadow:0 0 12px rgba(255,215,0,.45);transform:scale(1.06)}
+.btn{background:linear-gradient(180deg,#ffea75 0%,#d4af37 52%,#8f6b10 100%);color:#1c1100;border:1px solid #fff3a8;border-radius:12px;padding:11px 18px;font-size:14px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 5px 18px rgba(212,175,55,.4),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .12s,filter .15s}
+.btn:active:not(:disabled){transform:scale(.94)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:linear-gradient(180deg,#24190c,#140d05);border:1px solid var(--gm);color:var(--g);box-shadow:none;padding:8px 11px;font-size:13px}
+.btn-secondary.active-toggle{background:rgba(255,215,0,.25);border-color:var(--g);box-shadow:0 0 12px rgba(255,215,0,.45)}
+.btn-auto-stop{background:linear-gradient(180deg,#ff5252 0%,#b71c1c 100%);border-color:#ff8a80;color:#fff;animation:pulseRed 1s infinite alternate}
+@keyframes pulseRed{from{box-shadow:0 0 8px rgba(255,82,82,.4)}to{box-shadow:0 0 18px rgba(255,82,82,.9)}}
+.btn-buy{background:linear-gradient(180deg,#ff6b6b 0%,#c92a2a 55%,#7a1111 100%);color:#fff;border-color:#ffa8a8;box-shadow:0 4px 15px rgba(220,40,40,.45)}
+.btn-ok-admin{background:linear-gradient(180deg,#ffea75 0%,#d4af37 100%);color:#1c1100;border:1px solid #fff3a8;padding:5px 9px;font-size:11px;border-radius:7px;font-weight:900}
+.btn-wild-admin{background:linear-gradient(180deg,#38bdf8 0%,#0284c7 100%);color:#fff;border:1px solid #bae6fd;padding:5px 9px;font-size:11px;border-radius:7px;font-weight:900}
+.btn-bigwin-admin{background:linear-gradient(180deg,#ff922b 0%,#d9480f 100%);color:#fff;border:1px solid #ffd8a8;padding:5px 9px;font-size:11px;border-radius:7px;font-weight:900}
+.top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid rgba(212,175,55,.3)}
+.player-info{display:flex;align-items:center;gap:8px}
+.player-avatar{font-size:26px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#2b1d0b,#0a0602);border:2px solid var(--g);border-radius:50%}
+.badge-admin{background:var(--g);color:#000;font-size:10px;font-weight:900;padding:2px 5px;border-radius:4px;margin-left:4px}
+.balance-box{font-size:17px;background:#090603;padding:6px 14px;border-radius:10px;border:1px solid var(--gd);transition:transform .2s,border-color .2s}
+.balance-pop{transform:scale(1.12);border-color:var(--g);box-shadow:0 0 18px rgba(255,215,0,.75)}
+.tumble-hud{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,#160e05,#2b1c09,#160e05);border:1px solid var(--gd);border-radius:10px;padding:7px 14px;margin-bottom:10px;font-size:13px;font-weight:800}
+.mult-pill{background:radial-gradient(circle,#ffea75,#b8860b);color:#1a0f00;padding:3px 10px;border-radius:20px;font-weight:900;font-size:14px;box-shadow:0 0 12px rgba(255,215,0,.5)}
+.slot-cabinet{background:linear-gradient(180deg,#523a10 0%,#211505 50%,#523a10 100%);padding:10px;border-radius:16px;border:3px solid var(--g);box-shadow:0 10px 30px rgba(0,0,0,.85),inset 0 0 15px rgba(255,215,0,.3);transition:box-shadow .3s,border-color .3s}
+.slot-cabinet.wild-hyper{border-color:#fff;box-shadow:0 0 45px #ffd700,0 0 80px rgba(255,140,0,.8),inset 0 0 25px #fff}
+.grid-6x5{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;background:#070402;padding:8px;border-radius:10px;border:2px solid #1f1608;overflow:hidden;position:relative}
+.cell-6x5{aspect-ratio:1/1;max-height:76px;background:linear-gradient(180deg,#171007 0%,#24180a 100%);border:1px solid #3a2a0d;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;user-select:none;position:relative}
+@media(max-width:520px){.cell-6x5{font-size:26px;border-radius:6px}.grid-6x5{gap:4px;padding:5px}}
+.wild-col-cell{background:linear-gradient(180deg,#fff 0%,#ffe66d 22%,#ff8800 55%,#7c2d00 82%,#ffd700 100%)!important;border:2px solid #fff!important;animation:wildExpand .55s cubic-bezier(.18,1.38,.4,1) forwards,wildGlowPulse .7s ease-in-out infinite alternate;z-index:5}
+.wild-col-cell::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,transparent 50%,rgba(255,255,255,.6) 100%);animation:wildBeam .65s ease-out forwards;pointer-events:none}
+@keyframes wildBeam{0%{opacity:1;transform:scaleX(1.6)}100%{opacity:0;transform:scaleX(1)}}
+@keyframes wildExpand{0%{transform:scaleY(.02) scaleX(1.5);filter:brightness(5)}55%{transform:scaleY(1.12) scaleX(.92);filter:brightness(2.2)}100%{transform:scaleY(1) scaleX(1);filter:brightness(1.1)}}
+@keyframes wildGlowPulse{from{box-shadow:inset 0 0 12px rgba(255,255,255,.8),0 0 16px rgba(255,200,0,.85)}to{box-shadow:inset 0 0 26px #fff,0 0 34px #ffae00}}
+.wild-badge-top{font-size:10px;font-weight:900;color:#2b0f00;background:rgba(255,255,255,.95);padding:1px 6px;border-radius:4px}
+.wild-mult-big{font-size:20px;font-weight:900;color:#fff;text-shadow:0 2px 5px #000,0 0 15px #ff3300;animation:bounceScale .4s infinite alternate}
+.wild-icon-main{font-size:32px;filter:drop-shadow(0 0 8px #fff);animation:lightningFlash .45s infinite alternate}
+@keyframes lightningFlash{from{transform:scale(.9) rotate(-8deg)}to{transform:scale(1.2) rotate(8deg)}}
+.wild-flash-screen{position:fixed;inset:0;pointer-events:none;z-index:175;background:radial-gradient(circle,rgba(255,230,100,.65) 0%,rgba(255,140,0,.25) 55%,transparent 100%);animation:screenFlashAnim .65s ease-out forwards}
+@keyframes screenFlashAnim{0%{opacity:1}100%{opacity:0}}
+.shockwave-ring{position:fixed;left:50%;top:45%;width:40px;height:40px;border:5px solid #ffd700;border-radius:50%;box-shadow:0 0 30px #ffd700,inset 0 0 20px #fff;pointer-events:none;z-index:176;transform:translate(-50%,-50%) scale(0);animation:shockwaveExpand .75s cubic-bezier(.12,.8,.25,1) forwards}
+@keyframes shockwaveExpand{0%{transform:translate(-50%,-50%) scale(.2);opacity:1;border-width:8px}100%{transform:translate(-50%,-50%) scale(22);opacity:0;border-width:1px}}
+.cell-drop{animation:dropIn .34s cubic-bezier(.22,1.22,.45,1) forwards}
+@keyframes dropIn{0%{transform:translateY(-150%) scale(.8);opacity:.15}80%{transform:translateY(4%) scale(1.03);opacity:1}100%{transform:translateY(0) scale(1);opacity:1}}
+.cell-explode{animation:explodeOut .4s ease-in forwards;z-index:5}
+@keyframes explodeOut{0%{transform:scale(1)}45%{transform:scale(1.3) rotate(8deg);filter:brightness(3);background:rgba(255,215,0,.75)}100%{transform:scale(0) rotate(-14deg);opacity:0}}
+.orb-cell{background:radial-gradient(circle,#fff3a1 0%,#ff9900 55%,#7a2e00 100%);border:2px solid #fff;box-shadow:0 0 16px #ffae00,inset 0 0 8px #fff;animation:orbPulse .75s infinite alternate}
+.orb-val{font-size:14px;font-weight:900;color:#1a0800}
+@keyframes orbPulse{from{transform:scale(.95)}to{transform:scale(1.07)}}
+.scatter-cell{background:radial-gradient(circle,#38bdf8 0%,#0369a1 70%,#082f49 100%);border:1px solid #bae6fd}
+.scat-tag{font-size:8px;font-weight:900;background:#0284c7;color:#fff;padding:1px 4px;border-radius:3px;margin-top:-2px}
+.float-win{position:fixed;font-weight:900;font-size:22px;color:#fff;text-shadow:0 2px 6px #000,0 0 16px #ffd700;pointer-events:none;z-index:180;animation:floatUp 1.05s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes floatUp{0%{transform:translate(-50%,0) scale(.6);opacity:0}20%{transform:translate(-50%,-12px) scale(1.2);opacity:1}100%{transform:translate(-50%,-70px) scale(1);opacity:0}}
+.status-banner{text-align:center;min-height:28px;margin:10px 0;font-size:15px;font-weight:800;color:var(--g)}
+.controls{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;background:#0d0804;padding:10px 12px;border-radius:12px;border:1px solid #3d2e10}
+.bet-group,.action-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn-spin-main{padding:12px 24px;font-size:16px;border-radius:12px;animation:spinGlow 2s infinite alternate}
+@keyframes spinGlow{from{box-shadow:0 4px 15px rgba(212,175,55,.35)}to{box-shadow:0 4px 24px rgba(255,225,80,.75)}}
+.auto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.bigwin-overlay{position:fixed;inset:0;background:radial-gradient(circle,rgba(60,35,0,.88) 0%,rgba(0,0,0,.92) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;pointer-events:none;padding:16px}
+.bigwin-title{font-size:42px;font-weight:900;text-transform:uppercase;text-align:center;text-shadow:0 0 28px rgba(255,215,0,.95);animation:bounceScale .5s infinite alternate}
+.bigwin-amount{font-size:50px;font-weight:900;color:#fff;text-shadow:0 0 22px #ffd700,0 4px 10px #000;margin-top:8px}
+@keyframes bounceScale{from{transform:scale(.94)}to{transform:scale(1.08)}}
+.lightning-bolt-fx{position:fixed;font-size:44px;z-index:185;pointer-events:none;filter:drop-shadow(0 0 12px #ffd700);animation:sparkBurst .95s ease-out forwards}
+@keyframes sparkBurst{0%{transform:scale(.2) translateY(0) rotate(0deg);opacity:1}100%{transform:scale(1.6) translateY(-110px) rotate(25deg);opacity:0}}
+.coin-particle{position:fixed;top:-40px;font-size:26px;z-index:190;pointer-events:none;animation:coinFall linear forwards}
+@keyframes coinFall{to{transform:translateY(110vh) rotate(720deg)}}
+#admin-panel{margin-top:16px;border-top:2px dashed var(--gd);padding-top:12px}
+.admin-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#0a0603}
+th,td{padding:7px;text-align:left;border-bottom:1px solid #2b200c}
+th{color:var(--g)}
+.dot{height:9px;width:9px;border-radius:50%;display:inline-block;margin-right:5px}
+.online{background:var(--on);box-shadow:0 0 6px var(--on)}
+.offline{background:#777}
+.admin-input{width:68px;padding:4px;margin:0;font-size:13px;text-align:center}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:15px;z-index:150}
+.modal-box{max-width:400px;width:100%;text-align:center;animation:modalPop .25s ease-out}
+@keyframes modalPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="setup-screen" class="card">
+  <h1 id="secret-title" class="gold-text" style="margin-bottom:6px;font-size:26px;">ROYAL GOLD 6×5</h1>
+  <p style="font-size:13px;color:#bfa87a;margin-bottom:12px;">EXPANDING WILD EDITION • Выберите аватар и имя</p>
+  <div class="avatar-grid" id="avatar-grid"></div>
+  <input id="player-name-input" type="text" placeholder="Ваше имя" maxlength="16">
+  <input id="admin-pass-input" type="password" placeholder="Секретный пароль админа">
+  <button id="start-btn" class="btn" style="width:100%;padding:13px;font-size:15px;">ВОЙТИ В ИГРУ</button>
+</div>
+
+<div id="game-screen" class="card hidden">
+  <div class="top-bar">
+    <div class="player-info">
+      <div class="player-avatar" id="hud-avatar">👑</div>
+      <div>
+        <div style="font-weight:800;font-size:15px;"><span id="hud-name">Игрок</span><span id="admin-badge" class="badge-admin hidden">ADMIN</span></div>
+        <div style="font-size:11px;color:var(--on);" id="net-status"><span class="dot online"></span>Подключение...</div>
+      </div>
+    </div>
+    <div class="balance-box" id="balance-box">Баланс: <span id="balance-val" class="gold-text">1000</span> 💰</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button id="sound-toggle-btn" class="btn btn-secondary active-toggle">🔊</button>
+      <button id="profile-btn" class="btn btn-secondary">✏️ ПРОФИЛЬ</button>
+    </div>
+  </div>
+
+  <div class="tumble-hud">
+    <div>⚔️ Меч расширяет весь ряд в WILD × Множитель!</div>
+    <div>Множитель: <span class="mult-pill" id="total-mult">x1</span></div>
+  </div>
+
+  <div class="slot-cabinet" id="slot-cabinet"><div class="grid-6x5" id="slot-grid"></div></div>
+  <div class="status-banner" id="status-banner">Нажмите SPIN для начала игры!</div>
+
+  <div class="controls">
+    <div class="bet-group">
+      <span style="font-size:13px;color:#bfa87a;">Ставка:</span>
+      <button class="btn btn-secondary" id="bet-down">−</button>
+      <span style="font-weight:900;font-size:15px;min-width:44px;text-align:center;" id="bet-val">50</span>
+      <button class="btn btn-secondary" id="bet-up">+</button>
+      <button class="btn btn-secondary" id="bet-max">MAX</button>
+      <button class="btn btn-secondary" id="turbo-btn">⚡</button>
+    </div>
+    <div class="action-group">
+      <button class="btn btn-buy" id="buy-bonus-btn">BUY BONUS (<span id="buy-cost">5000</span>)</button>
+      <button class="btn btn-secondary" id="auto-btn">🔄 АВТО</button>
+      <button class="btn btn-spin-main" id="spin-btn">SPIN</button>
+    </div>
+  </div>
+
+  <div id="admin-panel" class="hidden">
+    <div class="admin-header">
+      <div style="font-weight:900;color:var(--g);font-size:14px;">👑 Панель Администратора (Игроки в сети)</div>
+      <button class="btn btn-secondary" id="clear-old-btn" style="padding:5px 10px;font-size:11px;">🗑️ ОЧИСТИТЬ СТАРЫХ</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Игрок</th><th>Статус</th><th>Баланс</th><th>Шанс (%)</th><th>Управление</th></tr></thead>
+        <tbody id="admin-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="bigwin-overlay" class="bigwin-overlay hidden">
+  <div class="bigwin-title gold-text" id="bigwin-title">BIG WIN!</div>
+  <div class="bigwin-amount" id="bigwin-amount">0 💰</div>
+</div>
+
+<div id="auto-modal" class="modal-backdrop hidden">
+  <div class="card modal-box">
+    <h3 class="gold-text" style="margin-bottom:8px;">АВТОИГРА</h3>
+    <p style="font-size:13px;color:#bfa87a;">Выберите количество спинов</p>
+    <div class="auto-grid">
+      <button class="btn btn-secondary auto-opt" data-spins="10">10</button>
+      <button class="btn btn-secondary auto-opt" data-spins="25">25</button>
+      <button class="btn btn-secondary auto-opt" data-spins="50">50</button>
+      <button class="btn btn-secondary auto-opt" data-spins="100">100</button>
+      <button class="btn btn-secondary auto-opt" data-spins="250">250</button>
+      <button class="btn btn-secondary auto-opt" data-spins="999">∞</button>
+    </div>
+    <button class="btn btn-secondary" id="close-auto-modal" style="width:100%;">ОТМЕНА</button>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const FIREBASE_URL = "https://firebaseio.com";
+  const elById = id => document.getElementById(id);
+  const fmt = n => Math.round(n).toString();
 
   const SoundFX = (() => {
     let ctx = null, enabled = true;
@@ -14,175 +200,104 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (e) {}
     }
     function toggle() { enabled = !enabled; init(); return enabled; }
-
     function playTick(c = 0) {
       if (!enabled) return; init(); if (!ctx) return;
       const now = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'triangle';
-      o.frequency.setValueAtTime(170 + c * 25, now);
+      o.type = 'triangle'; o.frequency.setValueAtTime(170 + c * 25, now);
       o.frequency.exponentialRampToValueAtTime(55, now + 0.06);
-      g.gain.setValueAtTime(0.14, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now); o.stop(now + 0.07);
+      g.gain.setValueAtTime(0.14, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+      o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.07);
     }
-
     function playCascade(combo = 1) {
       if (!enabled) return; init(); if (!ctx) return;
-      const now = ctx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.50];
-      const shift = Math.pow(1.07, Math.min(combo, 10));
-      notes.forEach((f, i) => {
+      const now = ctx.currentTime, shift = Math.pow(1.07, Math.min(combo, 10));
+      new Array(523.25, 659.25, 783.99, 1046.50).forEach((f, i) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'sine';
-        o.frequency.setValueAtTime(f * shift, now + i * 0.045);
+        o.type = 'sine'; o.frequency.setValueAtTime(f * shift, now + i * 0.045);
         g.gain.setValueAtTime(0.001, now + i * 0.045);
         g.gain.linearRampToValueAtTime(0.16, now + i * 0.045 + 0.015);
         g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.045 + 0.24);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(now + i * 0.045); o.stop(now + i * 0.045 + 0.25);
+        o.connect(g); g.connect(ctx.destination); o.start(now + i * 0.045); o.stop(now + i * 0.045 + 0.25);
       });
     }
-
     function playPhonkWild() {
       if (!enabled) return; init(); if (!ctx) return;
-      const now = ctx.currentTime;
-      const shaper = ctx.createWaveShaper();
-      const curve = new Float32Array(256);
-      for (let i = 0; i < 256; i++) {
-        const x = (i * 2) / 256 - 1;
-        curve[i] = Math.tanh(x * 5.0);
-      }
-      shaper.curve = curve;
-      shaper.connect(ctx.destination);
-
-      const melody = [
-        { t: 0.00, f: 587.33, d: 0.13 },
-        { t: 0.14, f: 587.33, d: 0.13 },
-        { t: 0.28, f: 698.46, d: 0.13 },
-        { t: 0.42, f: 587.33, d: 0.13 },
-        { t: 0.56, f: 880.00, d: 0.15 },
-        { t: 0.72, f: 783.99, d: 0.15 },
-        { t: 0.88, f: 698.46, d: 0.22 },
-        { t: 1.12, f: 587.33, d: 0.13 },
-        { t: 1.26, f: 698.46, d: 0.13 },
-        { t: 1.40, f: 880.00, d: 0.15 },
+      const now = ctx.currentTime, shaper = ctx.createWaveShaper(), curve = new Float32Array(256);
+      for (let i = 0; i < 256; i++) curve[i] = Math.tanh(((i * 2) / 256 - 1) * 5.0);
+      shaper.curve = curve; shaper.connect(ctx.destination);
+      const melody = new Array(
+        { t: 0.00, f: 587.33, d: 0.13 }, { t: 0.14, f: 587.33, d: 0.13 },
+        { t: 0.28, f: 698.46, d: 0.13 }, { t: 0.42, f: 587.33, d: 0.13 },
+        { t: 0.56, f: 880.00, d: 0.15 }, { t: 0.72, f: 783.99, d: 0.15 },
+        { t: 0.88, f: 698.46, d: 0.22 }, { t: 1.12, f: 587.33, d: 0.13 },
+        { t: 1.26, f: 698.46, d: 0.13 }, { t: 1.40, f: 880.00, d: 0.15 },
         { t: 1.56, f: 1046.50, d: 0.28 }
-      ];
-
-      [1.0, 1.48].forEach(ratio => {
+      );
+      new Array(1.0, 1.48).forEach(ratio => {
         melody.forEach(n => {
           const st = now + n.t, o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
-          o.type = 'square';
-          o.frequency.setValueAtTime(n.f * ratio, st);
-          flt.type = 'bandpass';
-          flt.frequency.setValueAtTime(1200, st);
-          flt.Q.setValueAtTime(2.8, st);
-          g.gain.setValueAtTime(0.24, st);
-          g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
-          o.connect(flt); flt.connect(g); g.connect(shaper);
-          o.start(st); o.stop(st + n.d + 0.02);
+          o.type = 'square'; o.frequency.setValueAtTime(n.f * ratio, st);
+          flt.type = 'bandpass'; flt.frequency.setValueAtTime(1200, st); flt.Q.setValueAtTime(2.8, st);
+          g.gain.setValueAtTime(0.24, st); g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
+          o.connect(flt); flt.connect(g); g.connect(shaper); o.start(st); o.stop(st + n.d + 0.02);
         });
       });
-
-      [0.00, 0.42, 0.56, 1.12, 1.40].forEach(off => {
+      new Array(0.00, 0.42, 0.56, 1.12, 1.40).forEach(off => {
         const b = ctx.createOscillator(), bg = ctx.createGain();
-        b.type = 'sine';
-        b.frequency.setValueAtTime(155, now + off);
+        b.type = 'sine'; b.frequency.setValueAtTime(155, now + off);
         b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
-        bg.gain.setValueAtTime(0.75, now + off);
-        bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
-        b.connect(bg); bg.connect(shaper);
-        b.start(now + off); b.stop(now + off + 0.4);
+        bg.gain.setValueAtTime(0.75, now + off); bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
+        b.connect(bg); bg.connect(shaper); b.start(now + off); b.stop(now + off + 0.4);
       });
-
-      const noiseLen = Math.floor(ctx.sampleRate * 1.9);
-      const noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate);
-      const data = noiseBuf.getChannelData(0);
+      const noiseLen = Math.floor(ctx.sampleRate * 1.9), noiseBuf = ctx.createBuffer(1, noiseLen, ctx.sampleRate), data = noiseBuf.getChannelData(0);
       for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
-
       for (let h = 0; h < 24; h++) {
-        const t = now + h * 0.075;
-        const src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), hg = ctx.createGain();
-        src.buffer = noiseBuf;
-        hp.type = 'highpass';
-        hp.frequency.setValueAtTime(7500, t);
+        const t = now + h * 0.075, src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), hg = ctx.createGain();
+        src.buffer = noiseBuf; hp.type = 'highpass'; hp.frequency.setValueAtTime(7500, t);
         const isClap = (h === 4 || h === 12 || h === 20);
         hg.gain.setValueAtTime(isClap ? 0.32 : 0.09, t);
         hg.gain.exponentialRampToValueAtTime(0.001, t + (isClap ? 0.14 : 0.035));
-        src.connect(hp); hp.connect(hg); hg.connect(ctx.destination);
-        src.start(t); src.stop(t + 0.15);
+        src.connect(hp); hp.connect(hg); hg.connect(ctx.destination); src.start(t); src.stop(t + 0.15);
       }
     }
-
     function playBigWin() {
       if (!enabled) return; init(); if (!ctx) return;
       const now = ctx.currentTime;
-      [261.63, 329.63, 392.00, 523.25, 659.25, 783.99].forEach((f, i) => {
+      new Array(261.63, 329.63, 392.00, 523.25, 659.25, 783.99).forEach((f, i) => {
         const o = ctx.createOscillator(), flt = ctx.createBiquadFilter(), g = ctx.createGain();
         o.type = 'sawtooth'; o.frequency.setValueAtTime(f, now + i * 0.08);
         flt.type = 'lowpass'; flt.frequency.setValueAtTime(2400, now + i * 0.08);
-        g.gain.setValueAtTime(0.001, now + i * 0.08);
-        g.gain.linearRampToValueAtTime(0.14, now + i * 0.08 + 0.05);
+        g.gain.setValueAtTime(0.001, now + i * 0.08); g.gain.linearRampToValueAtTime(0.14, now + i * 0.08 + 0.05);
         g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 1.1);
-        o.connect(flt); flt.connect(g); g.connect(ctx.destination);
-        o.start(now + i * 0.08); o.stop(now + i * 0.08 + 1.15);
+        o.connect(flt); flt.connect(g); g.connect(ctx.destination); o.start(now + i * 0.08); o.stop(now + i * 0.08 + 1.15);
       });
     }
     return { init, toggle, playTick, playCascade, playPhonkWild, playBigWin };
   })();
 
-  // Разблокировка звука на iOS Safari при первом тапе
   document.body.addEventListener('touchstart', () => SoundFX.init(), { once: true });
   document.body.addEventListener('click', () => SoundFX.init(), { once: true });
 
-  const AVATARS = ['👑','🦁','🐺','🐉','💎','🎩','🦊','🐯','🦅','🔥','🃏','💰'];
-  const BETS = [10, 25, 50, 100, 250, 500, 1000, 2500];
-  const COLS = 6, ROWS = 5;
-  const ADMIN_PASS = '7777';
-
-  const SYMBOLS = [
+  const AVATARS = new Array('👑','🦁','🐺','🐉','💎','🎩','🦊','🐯','🦅','🔥','🃏','💰');
+  const BETS = new Array(10, 25, 50, 100, 250, 500, 1000, 2500);
+  const COLS = 6, ROWS = 5, ADMIN_PASS = '7777';
+  const SYMBOLS = new Array(
     { id: 'crown', icon: '👑', mult: 3.5, weight: 7 },
     { id: 'cup', icon: '🏆', mult: 2.2, weight: 10 },
     { id: 'bell', icon: '🔔', mult: 1.6, weight: 12 },
     { id: 'clover', icon: '🍀', mult: 1.2, weight: 15 },
     { id: 'cherry', icon: '🍒', mult: 0.8, weight: 18 }
-  ];
-  const WILD_MULTS = [2, 3, 5, 10, 15, 20, 25, 50, 100];
-  const ORB_MULTS = [2, 3, 5, 10, 15, 25, 50, 100];
+  );
+  const WILD_MULTS = new Array(2, 3, 5, 10, 15, 20, 25, 50, 100);
+  const ORB_MULTS = new Array(2, 3, 5, 10, 15, 25, 50, 100);
 
   let savedId = 'p_' + Math.random().toString(36).slice(2, 8);
-  try {
-    savedId = localStorage.getItem('rg_player_id') || savedId;
-    localStorage.setItem('rg_player_id', savedId);
-  } catch (e) {}
+  try { savedId = localStorage.getItem('rg_player_id') || savedId; localStorage.setItem('rg_player_id', savedId); } catch (e) {}
 
-  let me = {
-    id: savedId,
-    name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)),
-    avatar: '👑',
-    balance: 1000,
-    chance: 35,
-    isAdmin: false,
-    forceWild: false,
-    force500k: false,
-    lastSeen: Date.now()
-  };
-
+  let me = { id: savedId, name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)), avatar: '👑', balance: 1000, chance: 35, isAdmin: false, forceWild: false, force500k: false, lastSeen: Date.now() };
   let playersCache = {};
-  let appState = {
-    betIndex: 2,
-    isSpinning: false,
-    turbo: false,
-    autoSpins: 0,
-    freeSpins: 0,
-    bonusMult: 1,
-    grid: []
-  };
-
-  const elById = id => document.getElementById(id);
+  let appState = { betIndex: 2, isSpinning: false, turbo: false, autoSpins: 0, freeSpins: 0, bonusMult: 1, grid: new Array() };
   const sleep = ms => new Promise(r => setTimeout(r, appState.turbo ? ms * 0.45 : ms));
-  const fmt = n => Math.round(n).toString();
 
   async function fbRequest(path, method = 'GET', body = null) {
     try {
@@ -193,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
       elById('net-status').innerHTML = '<span class="dot online"></span>В сети (Firebase)';
       return await res.json();
     } catch (err) {
-      elById('net-status').innerHTML = '<span class="dot offline"></span>Локальный режим (Firebase недоступен)';
+      elById('net-status').innerHTML = '<span class="dot offline"></span>Локальный режим';
       return null;
     }
   }
@@ -214,83 +329,48 @@ document.addEventListener('DOMContentLoaded', () => {
       const remoteMe = db[me.id];
       if (remoteMe) {
         let needAck = false;
-        if (typeof remoteMe.balance === 'number' && remoteMe.balance !== me.balance && !appState.isSpinning) {
-          me.balance = remoteMe.balance;
-          updateHUD();
-        }
+        if (typeof remoteMe.balance === 'number' && remoteMe.balance !== me.balance && !appState.isSpinning) { me.balance = remoteMe.balance; updateHUD(); }
         if (typeof remoteMe.chance === 'number') me.chance = remoteMe.chance;
         if (remoteMe.forceWild) { me.forceWild = true; needAck = true; }
         if (remoteMe.force500k) { me.force500k = true; needAck = true; }
-        if (needAck) {
-          fbRequest('/players/' + me.id, 'PATCH', { forceWild: false, force500k: false });
-        }
+        if (needAck) fbRequest('/players/' + me.id, 'PATCH', { forceWild: false, force500k: false });
       }
     }
     me.lastSeen = Date.now();
     playersCache[me.id] = Object.assign({}, me);
-    fbRequest('/players/' + me.id, 'PATCH', {
-      lastSeen: me.lastSeen,
-      name: me.name,
-      avatar: me.avatar,
-      isAdmin: me.isAdmin
-    });
+    fbRequest('/players/' + me.id, 'PATCH', { lastSeen: me.lastSeen, name: me.name, avatar: me.avatar, isAdmin: me.isAdmin });
     if (me.isAdmin) renderAdminTable();
   }
 
-  // Отрисовка аватаров
   const avGrid = elById('avatar-grid');
-  avGrid.innerHTML = '';
   AVATARS.forEach((av, idx) => {
     const el = document.createElement('div');
     el.className = 'avatar-opt' + (idx === 0 ? ' selected' : '');
     el.textContent = av;
-    el.onclick = () => {
-      document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-      me.avatar = av;
-    };
+    el.onclick = () => { document.querySelectorAll('.avatar-opt').forEach(x => x.classList.remove('selected')); el.classList.add('selected'); me.avatar = av; };
     avGrid.appendChild(el);
   });
 
   let secretClicks = 0;
   elById('secret-title').onclick = () => {
-    if (++secretClicks >= 5) {
-      me.isAdmin = !me.isAdmin; secretClicks = 0;
-      alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен');
-    }
+    if (++secretClicks >= 5) { me.isAdmin = !me.isAdmin; secretClicks = 0; alert(me.isAdmin ? '👑 Админ-доступ включён!' : '🔒 Админ-доступ выключен'); }
   };
 
   elById('start-btn').onclick = () => {
     SoundFX.init();
-    const nameVal = elById('player-name-input').value.trim();
-    const passVal = elById('admin-pass-input').value.trim();
+    const nameVal = elById('player-name-input').value.trim(), passVal = elById('admin-pass-input').value.trim();
     if (nameVal) me.name = nameVal;
     if (passVal === ADMIN_PASS || me.name.toLowerCase() === 'admin') me.isAdmin = true;
-
-    elById('hud-name').textContent = me.name;
-    elById('hud-avatar').textContent = me.avatar;
-    if (me.isAdmin) {
-      elById('admin-badge').classList.remove('hidden');
-      elById('admin-panel').classList.remove('hidden');
-    } else {
-      elById('admin-badge').classList.add('hidden');
-      elById('admin-panel').classList.add('hidden');
-    }
-
+    elById('hud-name').textContent = me.name; elById('hud-avatar').textContent = me.avatar;
+    elById('admin-badge').classList.toggle('hidden', !me.isAdmin);
+    elById('admin-panel').classList.toggle('hidden', !me.isAdmin);
     elById('setup-screen').classList.add('hidden');
     elById('game-screen').classList.remove('hidden');
-
     appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-    renderGrid(true);
-    pushMyState();
-    pollServer();
+    renderGrid(true); pushMyState(); pollServer();
   };
 
-  elById('profile-btn').onclick = () => {
-    elById('game-screen').classList.add('hidden');
-    elById('setup-screen').classList.remove('hidden');
-  };
-
+  elById('profile-btn').onclick = () => { elById('game-screen').classList.add('hidden'); elById('setup-screen').classList.remove('hidden'); };
   setInterval(pollServer, 2500);
 
   function pickCell(allowSpecial = true) {
@@ -305,71 +385,49 @@ document.addEventListener('DOMContentLoaded', () => {
       if (rnd < sym.weight) return { type: 'normal', id: sym.id, icon: sym.icon, mult: sym.mult };
       rnd -= sym.weight;
     }
-    return { type: 'normal', id: SYMBOLS[0].id, icon: SYMBOLS[0].icon, mult: SYMBOLS[0].mult };
+    return { type: 'normal', id: SYMBOLS.id, icon: SYMBOLS.icon, mult: SYMBOLS.mult };
   }
 
   function generateGrid() {
     const luck = me.chance / 100;
     appState.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-
     if (Math.random() < luck * 0.65 || me.force500k) {
-      const target = me.force500k ? SYMBOLS[0] : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+      const target = me.force500k ? SYMBOLS : SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
       const count = me.force500k ? 14 : (8 + Math.floor(Math.random() * 4));
       let placed = 0;
       while (placed < count) {
         const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS);
-        if (appState.grid[c][r].type === 'normal') {
-          appState.grid[c][r] = { type: 'normal', id: target.id, icon: target.icon, mult: target.mult };
-          placed++;
-        }
+        if (appState.grid[c][r].type === 'normal') { appState.grid[c][r] = { type: 'normal', id: target.id, icon: target.icon, mult: target.mult }; placed++; }
       }
     }
-
     const wildColsCount = me.force500k ? 3 : (me.forceWild || Math.random() < (0.14 + luck * 0.14) ? 1 : 0);
     if (wildColsCount > 0) {
-      const availableCols = [0, 2, 4, 1, 3, 5];
+      const availableCols = new Array(0, 2, 4, 1, 3, 5);
       for (let i = 0; i < wildColsCount; i++) {
-        const col = availableCols[i];
-        const mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
-        for (let r = 0; r < ROWS; r++) {
-          appState.grid[col][r] = { type: 'wild_col', mult: mult, rowIdx: r };
-        }
+        const col = availableCols[i], mult = me.force500k ? (15 + i * 5) : WILD_MULTS[Math.floor(Math.random() * WILD_MULTS.length)];
+        for (let r = 0; r < ROWS; r++) appState.grid[col][r] = { type: 'wild_col', mult: mult, rowIdx: r };
       }
     }
-
-    me.forceWild = false;
-    me.force500k = false;
+    me.forceWild = false; me.force500k = false;
   }
 
   function renderGrid(animateDrop = false, explodingCoords = new Set()) {
-    const gridEl = elById('slot-grid');
-    gridEl.innerHTML = '';
+    const gridEl = elById('slot-grid'); gridEl.innerHTML = '';
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
-        const cell = appState.grid[c][r];
-        const el = document.createElement('div');
+        const cell = appState.grid[c][r], el = document.createElement('div');
         el.className = 'cell-6x5';
-        if (animateDrop) {
-          el.classList.add('cell-drop');
-          el.style.animationDelay = (c * 0.04 + r * 0.015) + 's';
-        }
+        if (animateDrop) { el.classList.add('cell-drop'); el.style.animationDelay = (c * 0.04 + r * 0.015) + 's'; }
         if (explodingCoords.has(c + ',' + r)) el.classList.add('cell-explode');
-
         if (cell.type === 'wild_col') {
           el.classList.add('wild-col-cell');
-          if (r === 0) {
-            el.innerHTML = '<div class="wild-badge-top">WILD</div><div class="wild-mult-big">' + cell.mult + 'x</div>';
-          } else if (r === ROWS - 1) {
-            el.innerHTML = '<div class="wild-badge-top">WILD</div>';
-          } else {
-            el.innerHTML = '<div class="wild-icon-main">' + (r === 2 ? '⚡' : '⚔️') + '</div>';
-          }
+          if (r === 0) el.innerHTML = '<div class="wild-badge-top">WILD</div><div class="wild-mult-big">' + cell.mult + 'x</div>';
+          else if (r === ROWS - 1) el.innerHTML = '<div class="wild-badge-top">WILD</div>';
+          else el.innerHTML = '<div class="wild-icon-main">' + (r === 2 ? '⚡' : '⚔️') + '</div>';
         } else if (cell.type === 'orb') {
-          el.classList.add('orb-cell');
-          el.innerHTML = '<div>🌕</div><div class="orb-val">' + cell.mult + 'x</div>';
+          el.classList.add('orb-cell'); el.innerHTML = '<div>🌕</div><div class="orb-val">' + cell.mult + 'x</div>';
         } else if (cell.type === 'scatter') {
-          el.classList.add('scatter-cell');
-          el.innerHTML = '<div>🏛️</div><div class="scat-tag">SCATTER</div>';
+          el.classList.add('scatter-cell'); el.innerHTML = '<div>🏛️</div><div class="scat-tag">SCATTER</div>';
         } else {
           el.textContent = cell.icon;
         }
@@ -387,36 +445,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function triggerWildHyperEffects() {
-    const card = elById('game-screen');
-    const cabinet = elById('slot-cabinet');
-
-    card.classList.remove('cabinet-shake');
-    void card.offsetWidth;
-    card.classList.add('cabinet-shake');
-
-    const flash = document.createElement('div');
-    flash.className = 'wild-flash-screen';
-    document.body.appendChild(flash);
-    setTimeout(() => flash.remove(), 700);
-
-    const wave = document.createElement('div');
-    wave.className = 'shockwave-ring';
-    document.body.appendChild(wave);
-    setTimeout(() => wave.remove(), 800);
-
-    cabinet.classList.add('wild-hyper');
-    setTimeout(() => cabinet.classList.remove('wild-hyper'), 1800);
-
-    const icons = ['⚡', '⚔️', '🔥', '💥', '✨'];
+    const card = elById('game-screen'), cabinet = elById('slot-cabinet');
+    card.classList.remove('cabinet-shake'); void card.offsetWidth; card.classList.add('cabinet-shake');
+    const flash = document.createElement('div'); flash.className = 'wild-flash-screen'; document.body.appendChild(flash); setTimeout(() => flash.remove(), 700);
+    const wave = document.createElement('div'); wave.className = 'shockwave-ring'; document.body.appendChild(wave); setTimeout(() => wave.remove(), 800);
+    cabinet.classList.add('wild-hyper'); setTimeout(() => cabinet.classList.remove('wild-hyper'), 1800);
+    const icons = new Array('⚡', '⚔️', '🔥', '💥', '✨');
     for (let i = 0; i < 18; i++) {
       setTimeout(() => {
-        const s = document.createElement('div');
-        s.className = 'lightning-bolt-fx';
-        s.textContent = icons[i % icons.length];
-        s.style.left = (12 + Math.random() * 76) + 'vw';
-        s.style.top = (22 + Math.random() * 52) + 'vh';
-        document.body.appendChild(s);
-        setTimeout(() => s.remove(), 950);
+        const s = document.createElement('div'); s.className = 'lightning-bolt-fx'; s.textContent = icons[i % icons.length];
+        s.style.left = (12 + Math.random() * 76) + 'vw'; s.style.top = (22 + Math.random() * 52) + 'vh';
+        document.body.appendChild(s); setTimeout(() => s.remove(), 950);
       }, i * 35);
     }
   }
@@ -426,17 +465,12 @@ document.addEventListener('DOMContentLoaded', () => {
     titleEl.textContent = amount >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑';
     overlay.classList.remove('hidden'); SoundFX.playBigWin();
     for (let i = 0; i < 40; i++) {
-      const coin = document.createElement('div'); coin.className = 'coin-particle';
-      coin.textContent = i % 3 === 0 ? '💎' : '🪙';
+      const coin = document.createElement('div'); coin.className = 'coin-particle'; coin.textContent = i % 3 === 0 ? '💎' : '🪙';
       coin.style.left = (Math.random() * 96) + 'vw'; coin.style.animationDuration = (1.2 + Math.random() * 1.4) + 's';
       document.body.appendChild(coin); setTimeout(() => coin.remove(), 2700);
     }
-    for (let s = 1; s <= 25; s++) {
-      amountEl.textContent = fmt((amount / 25) * s) + ' 💰';
-      await new Promise(r => setTimeout(r, 40));
-    }
-    await new Promise(r => setTimeout(r, 900));
-    overlay.classList.add('hidden');
+    for (let s = 1; s <= 25; s++) { amountEl.textContent = fmt((amount / 25) * s) + ' 💰'; await new Promise(r => setTimeout(r, 40)); }
+    await new Promise(r => setTimeout(r, 900)); overlay.classList.add('hidden');
   }
 
   async function startSpin(isFreeSpin = false) {
@@ -444,36 +478,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const bet = BETS[appState.betIndex];
     if (!isFreeSpin) {
       if (me.balance < bet) { setBanner('❌ Недостаточно средств!'); stopAuto(); return; }
-      me.balance -= bet;
-      pushMyState();
+      me.balance -= bet; pushMyState();
     }
     appState.isSpinning = true; toggleControls(false);
     generateGrid(); renderGrid(true);
     for (let c = 0; c < COLS; c++) setTimeout(() => SoundFX.playTick(c), c * (appState.turbo ? 20 : 45));
 
     let hasWild = false, wildMultSum = 0;
-    for (let c = 0; c < COLS; c++) {
-      if (appState.grid[c][0].type === 'wild_col') { hasWild = true; wildMultSum += appState.grid[c][0].mult; }
-    }
-    if (hasWild) {
-      SoundFX.playPhonkWild();
-      triggerWildHyperEffects();
-      setBanner('⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x' + wildMultSum + '!');
-    } else {
-      setBanner(isFreeSpin ? '⚡ FREE SPINS (' + appState.freeSpins + ')...' : '🎰 Вращение...');
-    }
+    for (let c = 0; c < COLS; c++) { if (appState.grid[c].type === 'wild_col') { hasWild = true; wildMultSum += appState.grid[c].mult; } }
+    if (hasWild) { SoundFX.playPhonkWild(); triggerWildHyperEffects(); setBanner('⚡ PHONK WILD РАСШИРИЛСЯ! Множитель x' + wildMultSum + '!'); }
+    else setBanner(isFreeSpin ? '⚡ FREE SPINS (' + appState.freeSpins + ')...' : '🎰 Вращение...');
     await sleep(520);
 
     let cascadeStep = 0, spinBaseWin = 0, spinOrbMult = 0;
     while (true) {
       const counts = {}, coordsById = {}; let wildCols = 0;
       for (let c = 0; c < COLS; c++) {
-        if (appState.grid[c][0].type === 'wild_col') wildCols++;
+        if (appState.grid[c].type === 'wild_col') wildCols++;
         for (let r = 0; r < ROWS; r++) {
           const cell = appState.grid[c][r];
           if (cell.type === 'normal') {
             counts[cell.id] = (counts[cell.id] || 0) + 1;
-            if (!coordsById[cell.id]) coordsById[cell.id] = [];
+            if (!coordsById[cell.id]) coordsById[cell.id] = new Array();
             coordsById[cell.id].push(c + ',' + r);
           }
         }
@@ -493,8 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
       await sleep(420);
 
       for (let c = 0; c < COLS; c++) {
-        if (appState.grid[c][0].type === 'wild_col') continue;
-        const rem = [];
+        if (appState.grid[c].type === 'wild_col') continue;
+        const rem = new Array();
         for (let r = ROWS - 1; r >= 0; r--) if (!exploding.has(c + ',' + r)) rem.unshift(appState.grid[c][r]);
         while (rem.length < ROWS) rem.unshift(pickCell(true));
         appState.grid[c] = rem;
@@ -503,62 +529,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let scatterCount = 0;
-    for (let c = 0; c < COLS; c++) {
-      for (let r = 0; r < ROWS; r++) {
-        const cell = appState.grid[c][r];
-        if (cell.type === 'orb') spinOrbMult += cell.mult;
-        if (cell.type === 'scatter') scatterCount++;
-      }
+    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+      const cell = appState.grid[c][r];
+      if (cell.type === 'orb') spinOrbMult += cell.mult;
+      if (cell.type === 'scatter') scatterCount++;
     }
 
     let totalMult = Math.max(1, wildMultSum + spinOrbMult);
-    if (isFreeSpin) {
-      if (spinBaseWin > 0 && (wildMultSum + spinOrbMult) > 0) appState.bonusMult += (wildMultSum + spinOrbMult);
-      totalMult = appState.bonusMult;
-    }
+    if (isFreeSpin) { if (spinBaseWin > 0 && (wildMultSum + spinOrbMult) > 0) appState.bonusMult += (wildMultSum + spinOrbMult); totalMult = appState.bonusMult; }
     elById('total-mult').textContent = 'x' + totalMult;
 
     let totalWin = Math.round(spinBaseWin * totalMult);
     if (wildMultSum >= 60 && totalWin > 0 && totalWin < 500000 && spinBaseWin >= bet * 40) totalWin = 500000;
 
     if (totalWin > 0) {
-      me.balance += totalWin;
-      pushMyState();
-      elById('balance-box').classList.add('balance-pop');
-      setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
+      me.balance += totalWin; pushMyState();
+      elById('balance-box').classList.add('balance-pop'); setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
       setBanner('💥 КАСКАД #' + Math.max(1, cascadeStep) + ': +' + fmt(totalWin) + ' 💰');
       if (totalWin >= bet * 15 || totalWin >= 100000) await showBigWinOverlay(totalWin);
-    } else {
-      pushMyState();
-      setBanner('Нажмите SPIN или ⚔️ WILD в админке!');
-    }
+    } else { pushMyState(); setBanner('Нажмите SPIN или ⚔️ WILD в админке!'); }
 
     if (scatterCount >= 4 && appState.freeSpins === 0) {
       appState.freeSpins = 10; appState.bonusMult = 1;
-      setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!');
-      SoundFX.playBigWin(); await sleep(1000);
+      setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!'); SoundFX.playBigWin(); await sleep(1000);
     }
 
     appState.isSpinning = false; toggleControls(true);
-    if (appState.freeSpins > 0) {
-      appState.freeSpins--;
-      setTimeout(() => startSpin(true), 550);
-    } else if (appState.autoSpins > 0) {
-      appState.autoSpins--; updateAutoBtn();
-      if (appState.autoSpins > 0) setTimeout(() => startSpin(false), 500);
-    }
+    if (appState.freeSpins > 0) { appState.freeSpins--; setTimeout(() => startSpin(true), 550); }
+    else if (appState.autoSpins > 0) { appState.autoSpins--; updateAutoBtn(); if (appState.autoSpins > 0) setTimeout(() => startSpin(false), 500); }
   }
 
   function updateHUD() {
     const bet = BETS[appState.betIndex];
-    elById('bet-val').textContent = fmt(bet);
-    elById('buy-cost').textContent = fmt(bet * 100);
-    elById('balance-val').textContent = fmt(me.balance);
+    elById('bet-val').textContent = fmt(bet); elById('buy-cost').textContent = fmt(bet * 100); elById('balance-val').textContent = fmt(me.balance);
   }
   function setBanner(t) { elById('status-banner').textContent = t; }
-  function toggleControls(en) {
-    ['spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn'].forEach(id => elById(id).disabled = !en);
-  }
+  function toggleControls(en) { new Array('spin-btn', 'bet-up', 'bet-down', 'bet-max', 'buy-bonus-btn').forEach(id => elById(id).disabled = !en); }
 
   elById('bet-up').onclick = () => { if (appState.betIndex < BETS.length - 1) { appState.betIndex++; updateHUD(); } };
   elById('bet-down').onclick = () => { if (appState.betIndex > 0) { appState.betIndex--; updateHUD(); } };
@@ -567,8 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
   elById('buy-bonus-btn').onclick = () => {
     const cost = BETS[appState.betIndex] * 100;
     if (me.balance < cost) return setBanner('❌ Недостаточно средств для BUY BONUS!');
-    me.balance -= cost; appState.freeSpins = 10; appState.bonusMult = 1;
-    pushMyState();
+    me.balance -= cost; appState.freeSpins = 10; appState.bonusMult = 1; pushMyState();
     SoundFX.playPhonkWild(); triggerWildHyperEffects(); startSpin(true);
   };
   elById('turbo-btn').onclick = function() { appState.turbo = !appState.turbo; this.classList.toggle('active-toggle', appState.turbo); };
@@ -589,72 +594,52 @@ document.addEventListener('DOMContentLoaded', () => {
   elById('clear-old-btn').onclick = async () => {
     const now = Date.now();
     for (const id of Object.keys(playersCache)) {
-      if (id !== me.id && now - (playersCache[id].lastSeen || 0) > 25000) {
-        delete playersCache[id];
-        await fbRequest('/players/' + id, 'DELETE');
-      }
+      if (id !== me.id && now - (playersCache[id].lastSeen || 0) > 25000) { delete playersCache[id]; await fbRequest('/players/' + id, 'DELETE'); }
     }
-    renderAdminTable();
-    setBanner('🗑️ Старые игроки удалены из базы!');
+    renderAdminTable(); setBanner('🗑️ Старые игроки удалены из базы!');
   };
 
   function renderAdminTable() {
     const tbody = elById('admin-tbody'), now = Date.now();
     if (tbody.contains(document.activeElement)) return;
     tbody.innerHTML = '';
-
     Object.values(playersCache).forEach(p => {
-      const isOnline = (now - (p.lastSeen || 0)) < 12000;
-      const tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td>' + (p.avatar || '👑') + ' <b>' + p.name + '</b> ' + (p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : '') + '</td>' +
+      const isOnline = (now - (p.lastSeen || 0)) < 12000, tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + (p.avatar || '👑') + ' <b>' + p.name + '</b> ' + (p.isAdmin ? '<span class="badge-admin">ADMIN</span>' : '') + '</td>' +
         '<td><span class="dot ' + (isOnline ? 'online' : 'offline') + '"></span>' + (isOnline ? 'В игре' : 'Офлайн') + '</td>' +
         '<td><input type="number" class="admin-input" data-bal="' + p.id + '" value="' + Math.round(p.balance) + '"></td>' +
         '<td><input type="number" class="admin-input" data-ch="' + p.id + '" min="0" max="100" value="' + p.chance + '"></td>' +
         '<td style="display:flex;gap:4px;flex-wrap:wrap;">' +
           '<button class="btn btn-ok-admin" data-ok="' + p.id + '">OK</button>' +
           '<button class="btn btn-wild-admin" data-wild="' + p.id + '">⚔️ WILD</button>' +
-          '<button class="btn btn-bigwin-admin" data-500k="' + p.id + '">🔥 500K</button>' +
-        '</td>';
+          '<button class="btn btn-bigwin-admin" data-500k="' + p.id + '">🔥 500K</button></td>';
       tbody.appendChild(tr);
     });
-
     tbody.querySelectorAll('[data-ok]').forEach(btn => btn.onclick = async () => {
-      const id = btn.dataset.ok, p = playersCache[id];
-      if (!p) return;
-      const balEl = tbody.querySelector('[data-bal="' + id + '"]');
-      const chEl = tbody.querySelector('[data-ch="' + id + '"]');
-      const newBal = Math.max(0, parseInt(balEl.value, 10) || 0);
-      const newCh = Math.min(100, Math.max(0, parseInt(chEl.value, 10) || 0));
-      p.balance = newBal; p.chance = newCh;
-      if (id === me.id) { me.balance = newBal; me.chance = newCh; updateHUD(); }
+      const id = btn.dataset.ok, p = playersCache[id]; if (!p) return;
+      const newBal = Math.max(0, parseInt(tbody.querySelector('[data-bal="' + id + '"]').value, 10) || 0);
+      const newCh = Math.min(100, Math.max(0, parseInt(tbody.querySelector('[data-ch="' + id + '"]').value, 10) || 0));
+      p.balance = newBal; p.chance = newCh; if (id === me.id) { me.balance = newBal; me.chance = newCh; updateHUD(); }
       await fbRequest('/players/' + id, 'PATCH', { balance: newBal, chance: newCh });
       setBanner('✅ Игроку ' + p.name + ' обновлены баланс и шанс!');
     });
-
     tbody.querySelectorAll('[data-wild]').forEach(btn => btn.onclick = async () => {
-      const id = btn.dataset.wild, p = playersCache[id];
-      if (!p) return;
-      p.forceWild = true;
-      if (id === me.id) me.forceWild = true;
+      const id = btn.dataset.wild, p = playersCache[id]; if (!p) return;
+      p.forceWild = true; if (id === me.id) me.forceWild = true;
       await fbRequest('/players/' + id, 'PATCH', { forceWild: true });
       setBanner('⚔️ Игроку ' + p.name + ' отправлен PHONK WILD!');
     });
-
     tbody.querySelectorAll('[data-500k]').forEach(btn => btn.onclick = async () => {
-      const id = btn.dataset.500k, p = playersCache[id];
-      if (!p) return;
-      p.force500k = true; p.forceWild = true;
-      if (id === me.id) { me.force500k = true; me.forceWild = true; }
+      const id = btn.dataset.500k, p = playersCache[id]; if (!p) return;
+      p.force500k = true; p.forceWild = true; if (id ===
+      me.id) { me.force500k = true; me.forceWild = true; }
       await fbRequest('/players/' + id, 'PATCH', { force500k: true, forceWild: true });
       setBanner('🔥 Игроку ' + p.name + ' отправлен занос 500K!');
     });
   }
 
   window.addEventListener('keydown', e => {
-    if (e.code === 'Space' && !elById('game-screen').classList.contains('hidden')) {
-      e.preventDefault(); if (!appState.isSpinning) startSpin(false);
-    }
+    if (e.code === 'Space' && !elById('game-screen').classList.contains('hidden')) { e.preventDefault(); if (!appState.isSpinning) startSpin(false); }
   });
 });
 </script>
