@@ -177,15 +177,15 @@ const ROWS = 5;
 const ADMIN_PASS = '7777';
 
 const SYMBOLS = new Array(
-  { id: 'crown', icon: '👑', mult: 1.8, weight: 6 },
-  { id: 'cup', icon: '🏆', mult: 1.1, weight: 9 },
-  { id: 'bell', icon: '🔔', mult: 0.8, weight: 12 },
-  { id: 'clover', icon: '🍀', mult: 0.5, weight: 16 },
-  { id: 'cherry', icon: '🍒', mult: 0.35, weight: 22 }
+  { id: 'crown', icon: '👑', mult: 1.5, weight: 5 },
+  { id: 'cup', icon: '🏆', mult: 0.9, weight: 8 },
+  { id: 'bell', icon: '🔔', mult: 0.65, weight: 12 },
+  { id: 'clover', icon: '🍀', mult: 0.4, weight: 18 },
+  { id: 'cherry', icon: '🍒', mult: 0.25, weight: 26 }
 );
 
-const WILD_MULTS = new Array(2, 2, 3, 3, 5, 5, 10, 15, 25, 50);
-const ORB_MULTS = new Array(2, 2, 3, 5, 10, 15, 25, 50);
+const WILD_MULTS = new Array(2, 2, 2, 3, 3, 5, 5, 10, 15, 25);
+const ORB_MULTS = new Array(2, 2, 2, 3, 5, 10, 15, 25);
 
 function itemAt(arr, idx) {
   return arr.slice(idx, idx + 1).pop();
@@ -202,7 +202,7 @@ let me = {
   name: 'Игрок_' + (100 + Math.floor(Math.random() * 899)),
   avatar: '👑',
   balance: 1000,
-  chance: 22,
+  chance: 10,
   isAdmin: false,
   forceWild: false,
   force500k: false,
@@ -316,8 +316,8 @@ setInterval(pollServer, 2500);
 function pickCell(allowSpec) {
   if (allowSpec) {
     const r = Math.random();
-    if (r < 0.022) return { type: 'scatter', icon: '🏛️' };
-    if (r < 0.048) return { type: 'orb', icon: '🌕', mult: itemAt(ORB_MULTS, Math.floor(Math.random() * ORB_MULTS.length)) };
+    if (r < 0.012) return { type: 'scatter', icon: '🏛️' };
+    if (r < 0.025) return { type: 'orb', icon: '🌕', mult: itemAt(ORB_MULTS, Math.floor(Math.random() * ORB_MULTS.length)) };
   }
   const totalW = SYMBOLS.reduce((s, x) => s + x.weight, 0);
   let rnd = Math.random() * totalW;
@@ -326,15 +326,15 @@ function pickCell(allowSpec) {
     if (rnd < sym.weight) return { type: 'normal', id: sym.id, icon: sym.icon, mult: sym.mult };
     rnd -= sym.weight;
   }
-  return { type: 'normal', id: 'cherry', icon: '🍒', mult: 0.35 };
+  return { type: 'normal', id: 'cherry', icon: '🍒', mult: 0.25 };
 }
 
 function generateGrid() {
   const luck = me.chance / 100;
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-  if (Math.random() < luck * 0.42 || me.force500k) {
+  if (Math.random() < luck * 0.18 || me.force500k) {
     const t = me.force500k ? itemAt(SYMBOLS, 0) : itemAt(SYMBOLS, Math.floor(Math.random() * SYMBOLS.length));
-    const cnt = me.force500k ? 14 : (8 + Math.floor(Math.random() * 2));
+    const cnt = me.force500k ? 14 : 8;
     let pl = 0;
     while (pl < cnt) {
       const c = Math.floor(Math.random() * COLS);
@@ -346,7 +346,7 @@ function generateGrid() {
       }
     }
   }
-  const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.05 + luck * 0.08)) ? 1 : 0);
+  const wCnt = me.force500k ? 3 : ((me.forceWild || Math.random() < (0.02 + luck * 0.03)) ? 1 : 0);
   if (wCnt > 0) {
     const cols = new Array(0, 2, 4, 1, 3, 5);
     for (let i = 0; i < wCnt; i++) {
