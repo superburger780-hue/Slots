@@ -3,6 +3,9 @@ const elById = id => document.getElementById(id);
 const fmt = n => Math.round(n).toString();
 
 let audioCtx = null, sndOn = true;
+const wildAudio = new Audio('wild.mp3');
+wildAudio.volume = 0.85;
+let wildTimer = null;
 
 function initAudio() {
   try {
@@ -17,6 +20,11 @@ function initAudio() {
 function toggleSnd(btn) {
   sndOn = !sndOn;
   initAudio();
+  if (!sndOn) {
+    clearTimeout(wildTimer);
+    wildAudio.pause();
+    wildAudio.currentTime = 0;
+  }
   btn.textContent = sndOn ? '🔊' : '🔇';
   btn.classList.toggle('active-toggle', sndOn);
 }
@@ -63,88 +71,16 @@ function playCascade(combo) {
 
 function playPhonkWild() {
   if (!sndOn) return;
-  initAudio();
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
-  const shaper = audioCtx.createWaveShaper();
-  const curve = new Float32Array(256);
-  for (let i = 0; i < 256; i++) {
-    curve[i] = Math.tanh(((i * 2) / 256 - 1) * 5.0);
-  }
-  shaper.curve = curve;
-  shaper.connect(audioCtx.destination);
-
-  const melody = new Array(
-    { t: 0.00, f: 587.33, d: 0.13 },
-    { t: 0.14, f: 587.33, d: 0.13 },
-    { t: 0.28, f: 698.46, d: 0.13 },
-    { t: 0.42, f: 587.33, d: 0.13 },
-    { t: 0.56, f: 880.00, d: 0.15 },
-    { t: 0.72, f: 783.99, d: 0.15 },
-    { t: 0.88, f: 698.46, d: 0.22 },
-    { t: 1.12, f: 587.33, d: 0.13 },
-    { t: 1.26, f: 698.46, d: 0.13 },
-    { t: 1.40, f: 880.00, d: 0.15 },
-    { t: 1.56, f: 1046.50, d: 0.28 }
-  );
-
-  new Array(1.0, 1.48).forEach(ratio => {
-    melody.forEach(n => {
-      const st = now + n.t;
-      const o = audioCtx.createOscillator();
-      const flt = audioCtx.createBiquadFilter();
-      const g = audioCtx.createGain();
-      o.type = 'square';
-      o.frequency.setValueAtTime(n.f * ratio, st);
-      flt.type = 'bandpass';
-      flt.frequency.setValueAtTime(1200, st);
-      flt.Q.setValueAtTime(2.8, st);
-      g.gain.setValueAtTime(0.24, st);
-      g.gain.exponentialRampToValueAtTime(0.001, st + n.d);
-      o.connect(flt);
-      flt.connect(g);
-      g.connect(shaper);
-      o.start(st);
-      o.stop(st + n.d + 0.02);
-    });
-  });
-
-  new Array(0.00, 0.42, 0.56, 1.12, 1.40).forEach(off => {
-    const b = audioCtx.createOscillator();
-    const bg = audioCtx.createGain();
-    b.type = 'sine';
-    b.frequency.setValueAtTime(155, now + off);
-    b.frequency.exponentialRampToValueAtTime(34, now + off + 0.36);
-    bg.gain.setValueAtTime(0.75, now + off);
-    bg.gain.exponentialRampToValueAtTime(0.001, now + off + 0.38);
-    b.connect(bg);
-    bg.connect(shaper);
-    b.start(now + off);
-    b.stop(now + off + 0.4);
-  });
-
-  const noiseLen = Math.floor(audioCtx.sampleRate * 1.9);
-  const noiseBuf = audioCtx.createBuffer(1, noiseLen, audioCtx.sampleRate);
-  const data = noiseBuf.getChannelData(0);
-  for (let i = 0; i < noiseLen; i++) data[i] = Math.random() * 2 - 1;
-
-  for (let h = 0; h < 24; h++) {
-    const t = now + h * 0.075;
-    const src = audioCtx.createBufferSource();
-    const hp = audioCtx.createBiquadFilter();
-    const hg = audioCtx.createGain();
-    src.buffer = noiseBuf;
-    hp.type = 'highpass';
-    hp.frequency.setValueAtTime(7500, t);
-    const isClap = (h === 4 || h === 12 || h === 20);
-    hg.gain.setValueAtTime(isClap ? 0.32 : 0.09, t);
-    hg.gain.exponentialRampToValueAtTime(0.001, t + (isClap ? 0.14 : 0.035));
-    src.connect(hp);
-    hp.connect(hg);
-    hg.connect(audioCtx.destination);
-    src.start(t);
-    src.stop(t + 0.15);
-  }
+  try {
+    clearTimeout(wildTimer);
+    wildAudio.pause();
+    wildAudio.currentTime = 0;
+    wildAudio.play();
+    wildTimer = setTimeout(() => {
+      wildAudio.pause();
+      wildAudio.currentTime = 0;
+    }, 6000);
+  } catch (e) {}
 }
 
 function playBigWin() {
@@ -379,7 +315,6 @@ function generateGrid(isFS) {
     }
   }
 
-  // Прогрессивный шанс выпадения WILD столбцов: 1-й -> 25% 2-й -> 50% 3-й -> 100% 4-й
   let wCnt = 0;
   if (me.force500k) {
     wCnt = 3;
@@ -397,7 +332,6 @@ function generateGrid(isFS) {
   }
 
   if (wCnt > 0) {
-    // Расставляем WILD столбцы через один (как на скриншоте: 1-й, 3-й, 5-й барабаны, затем 2-й, 4-й, 6-й)
     const cols = new Array(0, 2, 4, 1, 3, 5);
     for (let i = 0; i < wCnt; i++) {
       const col = itemAt(cols, i);
