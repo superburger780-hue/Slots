@@ -8,6 +8,7 @@ wildAudio.volume = 0.85;
 let wildTimer = null;
 let wildRushEnd = 0;
 let wildRushActive = false;
+let stickyWildCols = new Array();
 
 function initAudio() {
   try {
@@ -71,6 +72,17 @@ function playCascade(combo) {
   });
 }
 
+function stopWildRushHard() {
+  wildRushActive = false;
+  wildRushEnd = 0;
+  stickyWildCols = new Array();
+  clearTimeout(wildTimer);
+  try {
+    wildAudio.pause();
+    wildAudio.currentTime = 0;
+  } catch (e) {}
+}
+
 function startWildMinuteMode() {
   if (wildRushActive) return;
   wildRushActive = true;
@@ -78,9 +90,11 @@ function startWildMinuteMode() {
 
   clearTimeout(wildTimer);
   wildTimer = setTimeout(() => {
-    wildAudio.pause();
-    wildAudio.currentTime = 0;
-  }, 60000);
+    try {
+      wildAudio.pause();
+      wildAudio.currentTime = 0;
+    } catch (e) {}
+  }, 60500);
 
   if (!sndOn) return;
   try {
@@ -304,6 +318,15 @@ function fillAllColumnsWithWild() {
   });
 }
 
+function applyStickyWildsToGrid() {
+  stickyWildCols.forEach(item => {
+    const colArr = itemAt(app.grid, item.col);
+    for (let r = 0; r < ROWS; r++) {
+      colArr.splice(r, 1, { type: 'wild_col', mult: item.mult, rowIdx: r });
+    }
+  });
+}
+
 function generateGrid(isFreeMode, isFinalRushSpin) {
   if (isFinalRushSpin) {
     fillAllColumnsWithWild();
@@ -314,11 +337,14 @@ function generateGrid(isFreeMode, isFinalRushSpin) {
 
   const hasAdminForce = me.forceWild || me.force500k;
 
+  // Во время минуты WILD RUSH уже выпавшие WILD-столбцы остаются на своих местах (не исчезают и новые не добавляются)
   if (wildRushActive && !hasAdminForce) {
     app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+    applyStickyWildsToGrid();
     return;
   }
 
+  // В обычных спинах с шансом 75% вообще ничего не выпадает
   if (!isFreeMode && !hasAdminForce && Math.random() < 0.75) {
     buildDeadGrid();
     return;
@@ -359,9 +385,11 @@ function generateGrid(isFreeMode, isFinalRushSpin) {
 
   if (wCnt > 0) {
     const cols = new Array(0, 2, 4, 1, 3, 5);
+    stickyWildCols = new Array();
     for (let i = 0; i < wCnt; i++) {
       const col = itemAt(cols, i);
       const mult = me.force500k ? (15 + i * 5) : itemAt(WILD_MULTS, Math.floor(Math.random() * WILD_MULTS.length));
+      stickyWildCols.push({ col: col, mult: mult });
       const colArr = itemAt(app.grid, col);
       for (let r = 0; r < ROWS; r++) {
         colArr.splice(r, 1, { type: 'wild_col', mult: mult, rowIdx: r });
@@ -495,6 +523,12 @@ async function showBigWin(amt, customTitle) {
 async function startSpin(isFS) {
   if (app.isSpinning) return;
   const bet = itemAt(BETS, app.betIndex);
+
+  // Защита от зависания таймера: если время вышло больше 5 сек назад без финала, сбрасываем
+  if (wildRushActive && wildRushEnd === 0) {
+    stopWildRushHard();
+  }
+
   const wasRushActive = wildRushActive;
   const isFinalRushSpin = wasRushActive && Date.now() >= wildRushEnd;
 
@@ -528,17 +562,13 @@ async function startSpin(isFS) {
   }
 
   if (isFinalRushSpin) {
-    wildRushActive = false;
-    wildRushEnd = 0;
-    clearTimeout(wildTimer);
-    wildAudio.pause();
-    wildAudio.currentTime = 0;
+    stopWildRushHard();
     triggerWildFX();
     elById('total-mult').textContent = 'x' + wSum;
     setBanner('💥 ФИНАЛЬНЫЙ УДАР! ВСЕ 6 WILD НА ПОЛЕ! +67000 💰');
-    await sleep(650);
+    await sleep(750);
 
-    // Все 6 WILD-столбцов взрываются, и на их место сверху падают новые символы
+    // Все 6 WILD-столбцов взрываются и заменяются новыми символами
     const allExpl = new Set();
     for (let c = 0; c < COLS; c++) {
       for (let r = 0; r < ROWS; r++) {
@@ -576,7 +606,7 @@ async function startSpin(isFS) {
   } else if (wasRushActive) {
     spawnRushSparks();
     const secLeft = Math.max(1, Math.ceil((wildRushEnd - Date.now()) / 1000));
-    setBanner('⚡ WILD RUSH! Эффекты и разгон: ' + secLeft + ' сек до финала...');
+    setBanner('⚡ WILD RUSH (' + wCount + ' WILD на поле): ' + secLeft + ' сек до финала...');
   } else {
     setBanner(isFS ? '⚡ FREE SPINS (' + app.freeSpins + ')...' : '🎰 Вращение...');
   }
@@ -624,8 +654,9 @@ async function startSpin(isFS) {
 
     if (expl.size === 0) break;
 
-    // Если в каскаде участвовали WILD-столбцы, они тоже взрываются и заменяются новыми символами
-    if (wCols > 0) {
+    // Вне минуты WILD RUSH столбцы взрываются и заменяются новыми символами,
+    // а во время минуты WILD RUSH они остаются стоять на поле до конца таймера
+    if (wCols > 0 && !wildRushActive) {
       for (let c = 0; c < COLS; c++) {
         if (itemAt(itemAt(app.grid, c), 0).type === 'wild_col') {
           for (let r = 0; r < ROWS; r++) {
@@ -645,6 +676,7 @@ async function startSpin(isFS) {
 
     for (let c = 0; c < COLS; c++) {
       const colArr = itemAt(app.grid, c);
+      if (wildRushActive && itemAt(colArr, 0).type === 'wild_col') continue;
       const rem = new Array();
       for (let r = ROWS - 1; r >= 0; r--) {
         if (!expl.has(c + ',' + r)) rem.unshift(itemAt(colArr, r));
@@ -705,7 +737,7 @@ async function startSpin(isFS) {
   setBtns(true);
 
   if (wildRushActive) {
-    setTimeout(() => startSpin(false), 320);
+    setTimeout(() => startSpin(false), 350);
   } else if (app.freeSpins > 0) {
     app.freeSpins--;
     setTimeout(() => startSpin(true), 550);
