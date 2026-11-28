@@ -5,7 +5,7 @@ const fmt = n => Math.round(n).toString();
 let audioCtx = null, sndOn = true;
 const wildAudio = new Audio('wild.mp3.mp3');
 wildAudio.volume = 0.85;
-
+let wildTimer = null;
 let wildRushEnd = 0;
 let wildRushActive = false;
 let stickyWildCols = new Array();
@@ -76,6 +76,9 @@ function stopWildRushHard() {
   wildRushActive = false;
   wildRushEnd = 0;
   stickyWildCols = new Array();
+  clearTimeout(wildTimer);
+  const card = elById('game-screen');
+  if (card) card.classList.remove('rush-aura');
   try {
     wildAudio.pause();
     wildAudio.currentTime = 0;
@@ -86,10 +89,19 @@ function startWildMinuteMode() {
   if (wildRushActive) return;
   wildRushActive = true;
   wildRushEnd = Date.now() + 60000;
+  const card = elById('game-screen');
+  if (card) card.classList.add('rush-aura');
+
+  clearTimeout(wildTimer);
+  wildTimer = setTimeout(() => {
+    try {
+      wildAudio.pause();
+      wildAudio.currentTime = 0;
+    } catch (e) {}
+  }, 60500);
 
   if (!sndOn) return;
   try {
-    wildAudio.pause();
     wildAudio.currentTime = 0;
     wildAudio.play();
   } catch (e) {}
@@ -436,53 +448,81 @@ function spawnFloat(amt) {
   setTimeout(() => el.remove(), 1100);
 }
 
+function quakeScreen(strong) {
+  const cls = strong ? 'screen-quake' : 'screen-micro-quake';
+  document.body.classList.remove('screen-quake', 'screen-micro-quake');
+  void document.body.offsetWidth;
+  document.body.classList.add(cls);
+  setTimeout(() => document.body.classList.remove(cls), strong ? 700 : 350);
+}
+
+function spawnLaserBeams(count) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const b = document.createElement('div');
+      b.className = 'laser-beam-fx';
+      b.style.left = (10 + Math.random() * 80) + 'vw';
+      document.body.appendChild(b);
+      setTimeout(() => b.remove(), 750);
+    }, i * 80);
+  }
+}
+
 function triggerWildFX() {
+  quakeScreen(true);
+  spawnLaserBeams(5);
+
   const card = elById('game-screen');
   const cab = elById('slot-cabinet');
   card.classList.remove('cabinet-shake');
   void card.offsetWidth;
   card.classList.add('cabinet-shake');
 
-  for (let w = 0; w < 2; w++) {
+  for (let w = 0; w < 3; w++) {
     setTimeout(() => {
       const fl = document.createElement('div');
       fl.className = 'wild-flash-screen';
       document.body.appendChild(fl);
-      setTimeout(() => fl.remove(), 750);
+      setTimeout(() => fl.remove(), 700);
       const wv = document.createElement('div');
       wv.className = 'shockwave-ring';
       document.body.appendChild(wv);
       setTimeout(() => wv.remove(), 850);
-    }, w * 220);
+    }, w * 180);
   }
 
   cab.classList.add('wild-hyper');
-  setTimeout(() => cab.classList.remove('wild-hyper'), 2200);
+  setTimeout(() => cab.classList.remove('wild-hyper'), 2400);
 
   const icons = new Array('⚡', '⚔️', '🔥', '💥', '✨', '👑');
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 42; i++) {
     setTimeout(() => {
       const s = document.createElement('div');
       s.className = 'lightning-bolt-fx';
       s.textContent = itemAt(icons, i % 6);
-      s.style.left = (8 + Math.random() * 84) + 'vw';
-      s.style.top = (18 + Math.random() * 60) + 'vh';
+      s.style.left = (5 + Math.random() * 90) + 'vw';
+      s.style.top = (15 + Math.random() * 68) + 'vh';
       document.body.appendChild(s);
       setTimeout(() => s.remove(), 1050);
-    }, i * 30);
+    }, i * 22);
   }
 }
 
 function spawnRushSparks() {
-  const icons = new Array('⚡', '🔥', '✨', '⚔️');
-  for (let i = 0; i < 6; i++) {
-    const s = document.createElement('div');
-    s.className = 'lightning-bolt-fx';
-    s.textContent = itemAt(icons, i % 4);
-    s.style.left = (10 + Math.random() * 80) + 'vw';
-    s.style.top = (20 + Math.random() * 55) + 'vh';
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 950);
+  quakeScreen(false);
+  if (Math.random() < 0.45) spawnLaserBeams(2);
+
+  const icons = new Array('⚡', '🔥', '✨', '⚔️', '💥');
+  for (let i = 0; i < 12; i++) {
+    setTimeout(() => {
+      const s = document.createElement('div');
+      s.className = 'lightning-bolt-fx';
+      s.textContent = itemAt(icons, i % 5);
+      s.style.left = (8 + Math.random() * 84) + 'vw';
+      s.style.top = (18 + Math.random() * 60) + 'vh';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 950);
+    }, i * 35);
   }
 }
 
@@ -494,7 +534,7 @@ async function showBigWin(amt, customTitle) {
   ov.classList.remove('hidden');
   playBigWin();
 
-  for (let i = 0; i < 36; i++) {
+  for (let i = 0; i < 45; i++) {
     const c = document.createElement('div');
     c.className = 'coin-particle';
     c.textContent = i % 3 === 0 ? '💎' : '🪙';
@@ -516,8 +556,12 @@ async function startSpin(isFS) {
   if (app.isSpinning) return;
   const bet = itemAt(BETS, app.betIndex);
 
+  if (wildRushActive && wildRushEnd === 0) {
+    stopWildRushHard();
+  }
+
   const wasRushActive = wildRushActive;
-  const isFinalRushSpin = wasRushActive && (Date.now() >= wildRushEnd);
+  const isFinalRushSpin = wasRushActive && Date.now() >= wildRushEnd;
 
   if (!isFS && !wasRushActive) {
     if (me.balance < bet) {
@@ -562,6 +606,7 @@ async function startSpin(isFS) {
       }
     }
     playCascade(1);
+    quakeScreen(true);
     renderGrid(false, allExpl);
     spawnFloat(67000);
     await sleep(420);
@@ -655,6 +700,7 @@ async function startSpin(isFS) {
     casc++;
     baseWin += stepWin;
     playCascade(casc);
+    quakeScreen(false);
     renderGrid(false, expl);
     spawnFloat(stepWin);
     setBanner('💥 КАСКАД #' + casc + ': +' + fmt(stepWin) + ' 💰');
