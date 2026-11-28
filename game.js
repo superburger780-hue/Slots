@@ -297,7 +297,7 @@ function buildDeadGrid() {
 }
 
 function fillAllColumnsWithWild() {
-  const finalMults = new Array(10, 10, 10, 12, 12, 13); // В сумме дают ровно x67
+  const finalMults = new Array(10, 10, 10, 12, 12, 13);
   app.grid = Array.from({ length: COLS }, (_, c) => {
     const m = itemAt(finalMults, c);
     return Array.from({ length: ROWS }, (__, r) => ({ type: 'wild_col', mult: m, rowIdx: r }));
@@ -314,13 +314,11 @@ function generateGrid(isFreeMode, isFinalRushSpin) {
 
   const hasAdminForce = me.forceWild || me.force500k;
 
-  // Во время активной минуты WILD новые WILD-колонки не появляются — идут эффектные спины до финала
   if (wildRushActive && !hasAdminForce) {
     app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
     return;
   }
 
-  // В обычных спинах с шансом 75% вообще ничего не выпадает
   if (!isFreeMode && !hasAdminForce && Math.random() < 0.75) {
     buildDeadGrid();
     return;
@@ -500,7 +498,6 @@ async function startSpin(isFS) {
   const wasRushActive = wildRushActive;
   const isFinalRushSpin = wasRushActive && Date.now() >= wildRushEnd;
 
-  // Списываем ставку только если это обычный спин вне минуты WILD
   if (!isFS && !wasRushActive) {
     if (me.balance < bet) {
       setBanner('❌ Недостаточно средств!');
@@ -540,6 +537,23 @@ async function startSpin(isFS) {
     elById('total-mult').textContent = 'x' + wSum;
     setBanner('💥 ФИНАЛЬНЫЙ УДАР! ВСЕ 6 WILD НА ПОЛЕ! +67000 💰');
     await sleep(650);
+
+    // Все 6 WILD-столбцов взрываются, и на их место сверху падают новые символы
+    const allExpl = new Set();
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        allExpl.add(c + ',' + r);
+      }
+    }
+    playCascade(1);
+    renderGrid(false, allExpl);
+    spawnFloat(67000);
+    await sleep(420);
+
+    app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+    renderGrid(true, null);
+    await sleep(350);
+
     me.balance += 67000;
     pushMe();
     elById('balance-box').classList.add('balance-pop');
@@ -609,6 +623,18 @@ async function startSpin(isFS) {
     }
 
     if (expl.size === 0) break;
+
+    // Если в каскаде участвовали WILD-столбцы, они тоже взрываются и заменяются новыми символами
+    if (wCols > 0) {
+      for (let c = 0; c < COLS; c++) {
+        if (itemAt(itemAt(app.grid, c), 0).type === 'wild_col') {
+          for (let r = 0; r < ROWS; r++) {
+            expl.add(c + ',' + r);
+          }
+        }
+      }
+    }
+
     casc++;
     baseWin += stepWin;
     playCascade(casc);
@@ -619,7 +645,6 @@ async function startSpin(isFS) {
 
     for (let c = 0; c < COLS; c++) {
       const colArr = itemAt(app.grid, c);
-      if (itemAt(colArr, 0).type === 'wild_col') continue;
       const rem = new Array();
       for (let r = ROWS - 1; r >= 0; r--) {
         if (!expl.has(c + ',' + r)) rem.unshift(itemAt(colArr, r));
