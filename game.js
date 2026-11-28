@@ -7,6 +7,7 @@ const wildAudio = new Audio('wild.mp3.mp3');
 wildAudio.volume = 0.85;
 let wildTimer = null;
 let wildRushEnd = 0;
+let wildRushActive = false;
 
 function initAudio() {
   try {
@@ -23,7 +24,7 @@ function toggleSnd(btn) {
   initAudio();
   if (!sndOn) {
     wildAudio.pause();
-  } else if (Date.now() < wildRushEnd) {
+  } else if (wildRushActive && Date.now() < wildRushEnd) {
     try { wildAudio.play(); } catch (e) {}
   }
   btn.textContent = sndOn ? '🔊' : '🔇';
@@ -71,22 +72,20 @@ function playCascade(combo) {
 }
 
 function startWildMinuteMode() {
-  const isAlreadyActive = Date.now() < wildRushEnd;
+  if (wildRushActive) return;
+  wildRushActive = true;
   wildRushEnd = Date.now() + 60000;
 
   clearTimeout(wildTimer);
   wildTimer = setTimeout(() => {
     wildAudio.pause();
     wildAudio.currentTime = 0;
-    wildRushEnd = 0;
   }, 60000);
 
   if (!sndOn) return;
   try {
-    if (!isAlreadyActive || wildAudio.paused) {
-      wildAudio.currentTime = 0;
-      wildAudio.play();
-    }
+    wildAudio.currentTime = 0;
+    wildAudio.play();
   } catch (e) {}
 }
 
@@ -297,19 +296,39 @@ function buildDeadGrid() {
   );
 }
 
-function generateGrid(isFreeMode) {
-  const hasAdminForce = me.forceWild || me.force500k;
-  const isWildRush = Date.now() < wildRushEnd;
+function fillAllColumnsWithWild() {
+  const finalMults = new Array(10, 10, 10, 12, 12, 13); // В сумме дают ровно x67
+  app.grid = Array.from({ length: COLS }, (_, c) => {
+    const m = itemAt(finalMults, c);
+    return Array.from({ length: ROWS }, (__, r) => ({ type: 'wild_col', mult: m, rowIdx: r }));
+  });
+}
 
-  // В обычных спинах (вне минуты WILD и фриспинов) с шансом 75% ничего не выпадает
-  if (!isFreeMode && !isWildRush && !hasAdminForce && Math.random() < 0.75) {
+function generateGrid(isFreeMode, isFinalRushSpin) {
+  if (isFinalRushSpin) {
+    fillAllColumnsWithWild();
+    me.forceWild = false;
+    me.force500k = false;
+    return;
+  }
+
+  const hasAdminForce = me.forceWild || me.force500k;
+
+  // Во время активной минуты WILD новые WILD-колонки не появляются — идут эффектные спины до финала
+  if (wildRushActive && !hasAdminForce) {
+    app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
+    return;
+  }
+
+  // В обычных спинах с шансом 75% вообще ничего не выпадает
+  if (!isFreeMode && !hasAdminForce && Math.random() < 0.75) {
     buildDeadGrid();
     return;
   }
 
   const luck = me.chance / 100;
   app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
-  if (Math.random() < (isWildRush ? 0.45 : luck * 0.18) || me.force500k) {
+  if (Math.random() < luck * 0.18 || me.force500k) {
     const t = me.force500k ? itemAt(SYMBOLS, 0) : itemAt(SYMBOLS, Math.floor(Math.random() * SYMBOLS.length));
     const cnt = me.force500k ? 14 : 8;
     let pl = 0;
@@ -324,12 +343,10 @@ function generateGrid(isFreeMode) {
     }
   }
 
-  // Во время минуты WILD шанс на новые мечи повышен до 35%, дальше 25% -> 50% -> 100%
-  const wildTriggerChance = isWildRush ? 0.35 : (0.04 + luck * 0.08);
   let wCnt = 0;
   if (me.force500k) {
     wCnt = 3;
-  } else if (me.forceWild || Math.random() < wildTriggerChance) {
+  } else if (me.forceWild || Math.random() < (0.04 + luck * 0.08)) {
     wCnt = 1;
     if (Math.random() < 0.25) {
       wCnt = 2;
@@ -438,11 +455,24 @@ function triggerWildFX() {
   }
 }
 
-async function showBigWin(amt) {
+function spawnRushSparks() {
+  const icons = new Array('⚡', '🔥', '✨', '⚔️');
+  for (let i = 0; i < 6; i++) {
+    const s = document.createElement('div');
+    s.className = 'lightning-bolt-fx';
+    s.textContent = itemAt(icons, i % 4);
+    s.style.left = (10 + Math.random() * 80) + 'vw';
+    s.style.top = (20 + Math.random() * 55) + 'vh';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 950);
+  }
+}
+
+async function showBigWin(amt, customTitle) {
   const ov = elById('bigwin-overlay');
   const tEl = elById('bigwin-title');
   const aEl = elById('bigwin-amount');
-  tEl.textContent = amt >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑';
+  tEl.textContent = customTitle || (amt >= 100000 ? '🔥 MAX WIN 500K! 🔥' : '👑 BIG WIN! 👑');
   ov.classList.remove('hidden');
   playBigWin();
 
@@ -467,10 +497,11 @@ async function showBigWin(amt) {
 async function startSpin(isFS) {
   if (app.isSpinning) return;
   const bet = itemAt(BETS, app.betIndex);
-  const isRushBeforeSpin = Date.now() < wildRushEnd;
+  const wasRushActive = wildRushActive;
+  const isFinalRushSpin = wasRushActive && Date.now() >= wildRushEnd;
 
-  // Списываем ставку только если это не фриспины и не минута WILD-безумия
-  if (!isFS && !isRushBeforeSpin) {
+  // Списываем ставку только если это обычный спин вне минуты WILD
+  if (!isFS && !wasRushActive) {
     if (me.balance < bet) {
       setBanner('❌ Недостаточно средств!');
       stopAuto();
@@ -482,7 +513,7 @@ async function startSpin(isFS) {
 
   app.isSpinning = true;
   setBtns(false);
-  generateGrid(isFS || isRushBeforeSpin);
+  generateGrid(isFS || wasRushActive, isFinalRushSpin);
   renderGrid(true, null);
 
   for (let c = 0; c < COLS; c++) {
@@ -499,13 +530,39 @@ async function startSpin(isFS) {
     }
   }
 
-  if (wCount > 0) {
+  if (isFinalRushSpin) {
+    wildRushActive = false;
+    wildRushEnd = 0;
+    clearTimeout(wildTimer);
+    wildAudio.pause();
+    wildAudio.currentTime = 0;
+    triggerWildFX();
+    elById('total-mult').textContent = 'x' + wSum;
+    setBanner('💥 ФИНАЛЬНЫЙ УДАР! ВСЕ 6 WILD НА ПОЛЕ! +67000 💰');
+    await sleep(650);
+    me.balance += 67000;
+    pushMe();
+    elById('balance-box').classList.add('balance-pop');
+    setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
+    await showBigWin(67000, '🔥 FULL SCREEN WILD! +67 000! 🔥');
+    app.isSpinning = false;
+    setBtns(true);
+    if (app.autoSpins > 0) {
+      app.autoSpins--;
+      updAutoBtn();
+      if (app.autoSpins > 0) setTimeout(() => startSpin(false), 500);
+    }
+    return;
+  }
+
+  if (wCount > 0 && !wasRushActive) {
     startWildMinuteMode();
     triggerWildFX();
-    setBanner('🔥 WILD RUSH (60 сек)! Выпало ' + wCount + ' WILD • Множитель x' + wSum + '!');
-  } else if (Date.now() < wildRushEnd) {
-    const secLeft = Math.ceil((wildRushEnd - Date.now()) / 1000);
-    setBanner('⚡ WILD RUSH! Бесплатные спины с эффектами: ' + secLeft + ' сек...');
+    setBanner('🔥 WILD RUSH НА 60 СЕК! В КОНЦЕ ВЫПАДУТ ВСЕ 6 WILD (+67 000)!');
+  } else if (wasRushActive) {
+    spawnRushSparks();
+    const secLeft = Math.max(1, Math.ceil((wildRushEnd - Date.now()) / 1000));
+    setBanner('⚡ WILD RUSH! Эффекты и разгон: ' + secLeft + ' сек до финала...');
   } else {
     setBanner(isFS ? '⚡ FREE SPINS (' + app.freeSpins + ')...' : '🎰 Вращение...');
   }
@@ -600,12 +657,12 @@ async function startSpin(isFS) {
     elById('balance-box').classList.add('balance-pop');
     setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
     setBanner('💥 КАСКАД #' + Math.max(1, casc) + ': +' + fmt(totWin) + ' 💰');
-    if (totWin >= bet * 15 || totWin >= 100000) await showBigWin(totWin);
+    if (totWin >= bet * 15 || totWin >= 100000) await showBigWin(totWin, null);
   } else {
     pushMe();
-    if (Date.now() < wildRushEnd) {
-      const secLeft = Math.ceil((wildRushEnd - Date.now()) / 1000);
-      setBanner('⚡ WILD RUSH! Осталось ' + secLeft + ' сек...');
+    if (wildRushActive) {
+      const secLeft = Math.max(1, Math.ceil((wildRushEnd - Date.now()) / 1000));
+      setBanner('⚡ WILD RUSH! Осталось ' + secLeft + ' сек до всех 6 WILD...');
     } else {
       setBanner('Попробуй ещё раз! Собери 8+ символов или ⚔️ WILD');
     }
@@ -622,7 +679,7 @@ async function startSpin(isFS) {
   app.isSpinning = false;
   setBtns(true);
 
-  if (Date.now() < wildRushEnd) {
+  if (wildRushActive) {
     setTimeout(() => startSpin(false), 320);
   } else if (app.freeSpins > 0) {
     app.freeSpins--;
