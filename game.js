@@ -5,7 +5,7 @@ const fmt = n => Math.round(n).toString();
 let audioCtx = null, sndOn = true;
 const wildAudio = new Audio('wild.mp3.mp3');
 wildAudio.volume = 0.85;
-let wildTimer = null;
+
 let wildRushEnd = 0;
 let wildRushActive = false;
 let stickyWildCols = new Array();
@@ -76,7 +76,6 @@ function stopWildRushHard() {
   wildRushActive = false;
   wildRushEnd = 0;
   stickyWildCols = new Array();
-  clearTimeout(wildTimer);
   try {
     wildAudio.pause();
     wildAudio.currentTime = 0;
@@ -88,16 +87,9 @@ function startWildMinuteMode() {
   wildRushActive = true;
   wildRushEnd = Date.now() + 60000;
 
-  clearTimeout(wildTimer);
-  wildTimer = setTimeout(() => {
-    try {
-      wildAudio.pause();
-      wildAudio.currentTime = 0;
-    } catch (e) {}
-  }, 60500);
-
   if (!sndOn) return;
   try {
+    wildAudio.pause();
     wildAudio.currentTime = 0;
     wildAudio.play();
   } catch (e) {}
@@ -263,6 +255,7 @@ function enterGame() {
 }
 
 function openProfile() {
+  stopWildRushHard();
   elById('game-screen').classList.add('hidden');
   elById('setup-screen').classList.remove('hidden');
 }
@@ -337,14 +330,12 @@ function generateGrid(isFreeMode, isFinalRushSpin) {
 
   const hasAdminForce = me.forceWild || me.force500k;
 
-  // Во время минуты WILD RUSH уже выпавшие WILD-столбцы остаются на своих местах (не исчезают и новые не добавляются)
   if (wildRushActive && !hasAdminForce) {
     app.grid = Array.from({ length: COLS }, () => Array.from({ length: ROWS }, () => pickCell(true)));
     applyStickyWildsToGrid();
     return;
   }
 
-  // В обычных спинах с шансом 75% вообще ничего не выпадает
   if (!isFreeMode && !hasAdminForce && Math.random() < 0.75) {
     buildDeadGrid();
     return;
@@ -409,7 +400,8 @@ function renderGrid(anim, expl) {
       const cell = itemAt(itemAt(app.grid, c), r);
       const el = document.createElement('div');
       el.className = 'cell-6x5';
-      if (anim) {
+      const isSticky = wildRushActive && stickyWildCols.some(item => item.col === c);
+      if (anim && !isSticky) {
         el.classList.add('cell-drop');
         el.style.animationDelay = (c * 0.04 + r * 0.015) + 's';
       }
@@ -524,13 +516,8 @@ async function startSpin(isFS) {
   if (app.isSpinning) return;
   const bet = itemAt(BETS, app.betIndex);
 
-  // Защита от зависания таймера: если время вышло больше 5 сек назад без финала, сбрасываем
-  if (wildRushActive && wildRushEnd === 0) {
-    stopWildRushHard();
-  }
-
   const wasRushActive = wildRushActive;
-  const isFinalRushSpin = wasRushActive && Date.now() >= wildRushEnd;
+  const isFinalRushSpin = wasRushActive && (Date.now() >= wildRushEnd);
 
   if (!isFS && !wasRushActive) {
     if (me.balance < bet) {
@@ -565,10 +552,9 @@ async function startSpin(isFS) {
     stopWildRushHard();
     triggerWildFX();
     elById('total-mult').textContent = 'x' + wSum;
-    setBanner('💥 ФИНАЛЬНЫЙ УДАР! ВСЕ 6 WILD НА ПОЛЕ! +67000 💰');
+    setBanner('💥 ФИНАЛ! ВСЕ 6 WILD НА ПОЛЕ! +67000 💰');
     await sleep(750);
 
-    // Все 6 WILD-столбцов взрываются и заменяются новыми символами
     const allExpl = new Set();
     for (let c = 0; c < COLS; c++) {
       for (let r = 0; r < ROWS; r++) {
@@ -589,8 +575,10 @@ async function startSpin(isFS) {
     elById('balance-box').classList.add('balance-pop');
     setTimeout(() => elById('balance-box').classList.remove('balance-pop'), 350);
     await showBigWin(67000, '🔥 FULL SCREEN WILD! +67 000! 🔥');
+
     app.isSpinning = false;
     setBtns(true);
+    setBanner('🔥 Раунд завершён! Выигрыш +67 000 💰 зачислен!');
     if (app.autoSpins > 0) {
       app.autoSpins--;
       updAutoBtn();
@@ -654,8 +642,6 @@ async function startSpin(isFS) {
 
     if (expl.size === 0) break;
 
-    // Вне минуты WILD RUSH столбцы взрываются и заменяются новыми символами,
-    // а во время минуты WILD RUSH они остаются стоять на поле до конца таймера
     if (wCols > 0 && !wildRushActive) {
       for (let c = 0; c < COLS; c++) {
         if (itemAt(itemAt(app.grid, c), 0).type === 'wild_col') {
@@ -725,7 +711,7 @@ async function startSpin(isFS) {
     }
   }
 
-  if (scat >= 4 && app.freeSpins === 0) {
+  if (scat >= 4 && app.freeSpins === 0 && !wildRushActive) {
     app.freeSpins = 10;
     app.bonusMult = 1;
     setBanner('🏛️ 4+ SCATTER! БОНУС 10 FREE SPINS!');
@@ -790,7 +776,6 @@ function buyBonus() {
   app.freeSpins = 10;
   app.bonusMult = 1;
   pushMe();
-  startWildMinuteMode();
   triggerWildFX();
   startSpin(true);
 }
